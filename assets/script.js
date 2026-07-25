@@ -1,3 +1,26 @@
+// ---------- Preloader ----------
+const preloader = document.getElementById('preloader');
+if (preloader) {
+  document.documentElement.classList.add('is-loading');
+  const shownAt = performance.now();
+  const minDisplay = 700; // ms — keeps the mark visible long enough to register even on a fast/cached load
+
+  function hidePreloader() {
+    const elapsed = performance.now() - shownAt;
+    const wait = Math.max(0, minDisplay - elapsed);
+    setTimeout(() => {
+      preloader.classList.add('is-hidden');
+      document.documentElement.classList.remove('is-loading');
+    }, wait);
+  }
+
+  if (document.readyState === 'complete') {
+    hidePreloader();
+  } else {
+    window.addEventListener('load', hidePreloader);
+  }
+}
+
 const navToggle = document.getElementById('navToggle');
 const navClose = document.getElementById('navClose');
 const mobileNav = document.getElementById('mobileNav');
@@ -37,32 +60,55 @@ if ('IntersectionObserver' in window && revealEls.length) {
   revealEls.forEach((el) => el.classList.add('is-visible'));
 }
 
-// ---------- Parallax ----------
+// ---------- Header: transparent-over-hero, solid once scrolled ----------
+const siteHeader = document.querySelector('.site-header');
+function updateHeaderState() {
+  siteHeader.classList.toggle('is-scrolled', window.scrollY > 40);
+}
+window.addEventListener('scroll', updateHeaderState, { passive: true });
+updateHeaderState();
+
+// ---------- Motion: idle float + scroll parallax ----------
+// Unified into one rAF loop per element so float (continuous) and parallax (scroll-linked)
+// compose into a single transform instead of two writers fighting over the same property.
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-const parallaxEls = Array.from(document.querySelectorAll('[data-parallax]'));
+const motionEls = Array.from(document.querySelectorAll('[data-parallax], [data-float]'));
 
-if (!reducedMotion && parallaxEls.length) {
-  let ticking = false;
+if (!reducedMotion && motionEls.length) {
+  const start = performance.now();
 
-  function updateParallax() {
+  function tick(now) {
+    const elapsed = (now - start) / 1000;
     const viewportH = window.innerHeight;
-    parallaxEls.forEach((el) => {
-      const speed = parseFloat(el.getAttribute('data-speed')) || 0.08;
-      const rect = el.getBoundingClientRect();
-      const centerOffset = rect.top + rect.height / 2 - viewportH / 2;
-      el.style.transform = `translateY(${(-centerOffset * speed).toFixed(1)}px)`;
+
+    motionEls.forEach((el) => {
+      let y = 0;
+      let rot = 0;
+
+      if (el.hasAttribute('data-parallax')) {
+        const speed = parseFloat(el.getAttribute('data-speed')) || 0.08;
+        const rect = el.getBoundingClientRect();
+        const centerOffset = rect.top + rect.height / 2 - viewportH / 2;
+        y += -centerOffset * speed;
+      }
+
+      if (el.hasAttribute('data-float')) {
+        const amp = parseFloat(el.getAttribute('data-float-amp')) || 16;
+        const period = parseFloat(el.getAttribute('data-float-period')) || 4.5;
+        const phase = parseFloat(el.getAttribute('data-float-phase')) || 0;
+        y += Math.sin((elapsed / period) * Math.PI * 2 + phase) * amp;
+
+        const rotAmp = parseFloat(el.getAttribute('data-float-rotate'));
+        if (rotAmp) {
+          rot = Math.sin((elapsed / (period * 1.4)) * Math.PI * 2 + phase) * rotAmp;
+        }
+      }
+
+      el.style.transform = `translate3d(0, ${y.toFixed(1)}px, 0)${rot ? ` rotate(${rot.toFixed(2)}deg)` : ''}`;
     });
-    ticking = false;
+
+    requestAnimationFrame(tick);
   }
 
-  function requestTick() {
-    if (!ticking) {
-      requestAnimationFrame(updateParallax);
-      ticking = true;
-    }
-  }
-
-  window.addEventListener('scroll', requestTick, { passive: true });
-  window.addEventListener('resize', requestTick);
-  updateParallax();
+  requestAnimationFrame(tick);
 }

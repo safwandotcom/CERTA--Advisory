@@ -14,6 +14,11 @@
 </head>
 <body>
 
+<div class="preloader" id="preloader" role="status" aria-live="polite">
+  <img class="preloader__mark" src="assets/certa-mark.png" alt="" />
+  <span class="preloader__sr">Loading CERTA&amp; Advisory…</span>
+</div>
+
 <header class="site-header">
   <div class="container site-header__bar">
     <a class="brand" href="#top" aria-label="CERTA&amp; Advisory home">
@@ -60,9 +65,9 @@
 
   <section class="hero">
     <div class="hero__decor" aria-hidden="true">
-      <span class="ring ring--one" data-parallax data-speed="0.06"></span>
-      <span class="ring ring--two" data-parallax data-speed="0.1"></span>
-      <span class="ring ring--three" data-parallax data-speed="-0.08"></span>
+      <span class="ring ring--one" data-parallax data-speed="0.1" data-float data-float-amp="18" data-float-period="9" data-float-phase="0"></span>
+      <span class="ring ring--two" data-parallax data-speed="0.16" data-float data-float-amp="14" data-float-period="7.5" data-float-phase="2"></span>
+      <span class="ring ring--three" data-parallax data-speed="-0.14" data-float data-float-amp="10" data-float-period="6" data-float-phase="1"></span>
     </div>
     <div class="container hero__grid">
       <div>
@@ -95,7 +100,7 @@
         </div>
       </div>
       <div class="hero__mark" data-reveal style="--reveal-delay:200">
-        <img src="assets/certa-mark.png" alt="" data-parallax data-speed="-0.05" data-float />
+        <img src="assets/certa-mark.png" alt="" data-parallax data-speed="-0.16" data-float data-float-amp="26" data-float-period="3.4" data-float-rotate="6" />
       </div>
     </div>
   </section>
@@ -229,13 +234,13 @@
         </div>
 
         <div class="why-us__visual" data-reveal style="--reveal-delay:120">
-          <span class="why-us__blob" data-parallax data-speed="0.04"></span>
-          <span class="why-us__ring-outline" data-parallax data-speed="-0.06"></span>
-          <img class="why-us__mark" src="assets/certa-mark.png" alt="" data-float />
-          <span class="why-us__floater why-us__floater--top" data-parallax data-speed="0.12" data-float>
+          <span class="why-us__blob" data-parallax data-speed="0.06"></span>
+          <span class="why-us__ring-outline" data-parallax data-speed="-0.1" data-float data-float-amp="6" data-float-period="8" data-float-rotate="3"></span>
+          <img class="why-us__mark" src="assets/certa-mark.png" alt="" data-float data-float-amp="16" data-float-period="4" />
+          <span class="why-us__floater why-us__floater--top" data-parallax data-speed="0.16" data-float data-float-amp="10" data-float-period="3.8" data-float-phase="1.5">
             <span class="dot"></span> Fixed scope
           </span>
-          <span class="why-us__floater why-us__floater--bottom" data-parallax data-speed="0.09" data-float>
+          <span class="why-us__floater why-us__floater--bottom" data-parallax data-speed="0.13" data-float data-float-amp="10" data-float-period="4.6" data-float-phase="0.8">
             <span class="dot"></span> ACCA / ICAB
           </span>
         </div>

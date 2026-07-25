@@ -39,6 +39,7 @@
 *, *::before, *::after { box-sizing: border-box; }
 
 html { scroll-behavior: smooth; }
+html.is-loading { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
 }
@@ -99,18 +100,14 @@ html.js [data-reveal].is-visible { opacity: 1; transform: none; }
   }
 }
 
-/* ---------- Parallax (idle float + scroll-linked drift) ---------- */
-[data-parallax] { will-change: transform; }
-
-@keyframes certa-float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-14px); }
-}
-[data-float] { animation: certa-float 6s var(--ease-standard) infinite; }
+/* ---------- Parallax + idle float ---------- */
+/* Both driven by one rAF loop in script.js so they compose on the same element instead
+   of fighting over `transform` (a CSS animation and a JS-set inline transform on the
+   same property would otherwise override each other every frame). */
+[data-parallax], [data-float] { will-change: transform; }
 
 @media (prefers-reduced-motion: reduce) {
-  [data-float] { animation: none; }
-  [data-parallax] { transform: none !important; }
+  [data-parallax], [data-float] { transform: none !important; }
 }
 
 /* ---------- Buttons ---------- */
@@ -148,14 +145,61 @@ html.js [data-reveal].is-visible { opacity: 1; transform: none; }
   .btn:hover { transform: none; }
 }
 
+/* ---------- Preloader ---------- */
+.preloader {
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--z-modal) + 10);
+  background: var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 500ms var(--ease-standard), visibility 0s linear 0s;
+}
+.preloader.is-hidden {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 500ms var(--ease-standard), visibility 0s linear 500ms;
+}
+.preloader__mark {
+  width: 84px;
+  height: 84px;
+  animation: certa-spin 1.1s linear infinite;
+}
+@keyframes certa-spin {
+  to { transform: rotate(360deg); }
+}
+.preloader__sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+@media (prefers-reduced-motion: reduce) {
+  .preloader { transition: opacity 200ms linear; }
+  .preloader__mark { animation: none; }
+}
+
 /* ---------- Header ---------- */
+/* Floats transparently over the full-height hero on load, like defyelement.com's
+   opening screen; gains a solid backdrop once scrolled past the hero (.is-scrolled,
+   toggled by script.js) so it stays legible over ordinary section content. */
 .site-header {
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: var(--z-sticky);
+  background: transparent;
+  border-bottom: 1px solid transparent;
+  transition: background 220ms var(--ease-standard), border-color 220ms var(--ease-standard),
+    backdrop-filter 220ms var(--ease-standard);
+}
+.site-header.is-scrolled {
   background: rgba(255, 255, 255, 0.92);
   backdrop-filter: saturate(180%) blur(8px);
   border-bottom: 1px solid var(--border);
+}
+@media (prefers-reduced-motion: reduce) {
+  .site-header { transition: none; }
 }
 .site-header__bar {
   display: flex;
@@ -202,8 +246,8 @@ html.js [data-reveal].is-visible { opacity: 1; transform: none; }
 .hero {
   position: relative;
   overflow: hidden;
-  min-height: 90vh;
-  min-height: 90svh;
+  min-height: 100vh;
+  min-height: 100svh;
   display: flex;
   align-items: center;
   padding: calc(var(--space-xl) + 56px) 0 var(--space-xl);
@@ -587,7 +631,7 @@ html.js [data-reveal].is-visible { opacity: 1; transform: none; }
 
 /* ---------- Responsive ---------- */
 @media (max-width: 860px) {
-  .hero { min-height: auto; padding: calc(var(--space-xl) + 40px) 0 var(--space-lg); }
+  .hero { min-height: 100svh; padding: calc(var(--space-xl) + 40px) 0 var(--space-lg); }
   .hero__grid { grid-template-columns: 1fr; }
   .hero__mark { order: -1; }
   .hero__mark img { width: min(220px, 60%); }
