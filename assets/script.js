@@ -27,11 +27,13 @@ const mobileNav = document.getElementById('mobileNav');
 
 function openNav() {
   mobileNav.classList.add('is-open');
+  document.documentElement.classList.add('nav-open');
   navToggle.setAttribute('aria-expanded', 'true');
 }
 
 function closeNav() {
   mobileNav.classList.remove('is-open');
+  document.documentElement.classList.remove('nav-open');
   navToggle.setAttribute('aria-expanded', 'false');
 }
 
@@ -76,6 +78,7 @@ const motionEls = Array.from(document.querySelectorAll('[data-parallax], [data-f
 
 if (!reducedMotion && motionEls.length) {
   const start = performance.now();
+  let rafId = null;
 
   function tick(now) {
     const elapsed = (now - start) / 1000;
@@ -107,8 +110,25 @@ if (!reducedMotion && motionEls.length) {
       el.style.transform = `translate3d(0, ${y.toFixed(1)}px, 0)${rot ? ` rotate(${rot.toFixed(2)}deg)` : ''}`;
     });
 
-    requestAnimationFrame(tick);
+    rafId = requestAnimationFrame(tick);
   }
 
-  requestAnimationFrame(tick);
+  // Pause the loop when the tab is backgrounded — pure battery/CPU saving on phones
+  // (a background tab doesn't need its idle-float mark still animating).
+  function startLoop() {
+    if (rafId === null) rafId = requestAnimationFrame(tick);
+  }
+  function stopLoop() {
+    if (rafId !== null) {
+      cancelAnimationFrame(rafId);
+      rafId = null;
+    }
+  }
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) stopLoop();
+    else startLoop();
+  });
+
+  startLoop();
 }
