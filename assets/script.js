@@ -3,7 +3,7 @@ const preloader = document.getElementById('preloader');
 if (preloader) {
   document.documentElement.classList.add('is-loading');
   const shownAt = performance.now();
-  const minDisplay = 700; // ms — keeps the mark visible long enough to register even on a fast/cached load
+  const minDisplay = 1800; // ms — deliberate pause so the spinning mark actually registers, not just a flash
 
   function hidePreloader() {
     const elapsed = performance.now() - shownAt;
