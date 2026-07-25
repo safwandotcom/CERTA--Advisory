@@ -156,25 +156,26 @@ html.js [data-reveal].is-visible { opacity: 1; transform: none; }
   justify-content: center;
   visibility: visible;
   clip-path: circle(150% at 50% 50%);
-  transition: clip-path 900ms var(--ease-standard), visibility 0s linear 0s;
+  transition: clip-path 950ms var(--ease-standard), visibility 0s linear 0s;
 }
-/* The ring mark literally opens the door: the panel's clip-path irises down to nothing
-   from the mark's own position, so the homepage reveals itself through the ring shape
-   rather than behind a flat fade. */
+/* The ring mark literally opens the door: it grows first — a generous, welcoming swell —
+   then the panel's clip-path irises down through it to reveal the homepage, rather than
+   just fading flat. Inner grows on a shorter timer so the "welcome" gesture reads clearly
+   before the iris close takes over. */
 .preloader.is-hidden {
   clip-path: circle(0% at 50% 50%);
   visibility: hidden;
-  transition: clip-path 900ms var(--ease-standard), visibility 0s linear 900ms;
+  transition: clip-path 950ms var(--ease-standard), visibility 0s linear 950ms;
 }
 .preloader__inner {
-  transition: transform 900ms var(--ease-standard);
+  transition: transform 600ms var(--ease-standard);
 }
 .preloader.is-hidden .preloader__inner {
-  transform: scale(1.7);
+  transform: scale(2.6);
 }
 .preloader__mark {
-  width: 84px;
-  height: 84px;
+  width: 100px;
+  height: 100px;
   animation: certa-spin 1.6s linear infinite;
 }
 @keyframes certa-spin {
