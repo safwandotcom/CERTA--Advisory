@@ -1,0 +1,132 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-26T00:00:00Z",
+  "title": "Design System: CERTA& Advisory",
+  "extensions": {
+    "colorMeta": {
+      "certa-green": { "role": "primary", "displayName": "Certa Green", "canonical": "oklch(56% 0.15 154)", "tonalRamp": ["#00351D", "#00522C", "#00753E", "#00904C", "#2FAE6E", "#7CCB9E", "#BEE5D0", "#E4F3EA"] },
+      "certa-green-deep": { "role": "primary-deep", "displayName": "Certa Green Deep", "canonical": "oklch(48% 0.13 154)" },
+      "signal-coral": { "role": "secondary", "displayName": "Signal Coral", "canonical": "oklch(68% 0.17 35)", "tonalRamp": ["#5C160A", "#8A2515", "#B93420", "#D8442B", "#F15A40", "#F58269", "#F9AB99", "#FCD5CB"] },
+      "signal-coral-deep": { "role": "secondary-deep", "displayName": "Signal Coral Deep", "canonical": "oklch(56% 0.17 33)" },
+      "ink": { "role": "neutral", "displayName": "Ink", "canonical": "oklch(23% 0.004 260)" },
+      "ink-muted": { "role": "neutral", "displayName": "Ink Muted", "canonical": "oklch(41% 0.004 260)" },
+      "surface-tint": { "role": "neutral-bg", "displayName": "Surface Tint", "canonical": "oklch(97.5% 0.006 155)" },
+      "certa-green-tint": { "role": "neutral-accent", "displayName": "Certa Green Tint", "canonical": "oklch(94% 0.03 155)" },
+      "border": { "role": "neutral-border", "displayName": "Border", "canonical": "oklch(91% 0.003 155)" },
+      "white": { "role": "neutral-bg", "displayName": "White", "canonical": "oklch(100% 0 0)" }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Hero headline only, one per page." },
+      "headline": { "displayName": "Headline", "purpose": "Section headings." },
+      "title": { "displayName": "Title", "purpose": "Card titles, service names." },
+      "body": { "displayName": "Body", "purpose": "Paragraph copy, 65-75ch measure." },
+      "label": { "displayName": "Label", "purpose": "Buttons, nav, form labels, tags." }
+    },
+    "shadows": [
+      { "name": "hover-lift", "value": "0 8px 20px rgba(35, 31, 32, 0.12)", "purpose": "Buttons and clickable cards on hover only; paired with a 2px upward translate." }
+    ],
+    "motion": [
+      { "name": "ease-standard", "value": "cubic-bezier(0.22, 1, 0.36, 1)", "purpose": "Default ease-out-quint for hover/reveal transitions, 180-220ms." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "860px" },
+      { "name": "lg", "value": "1120px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Main conversion action, e.g. 'Book a discovery call'.",
+      "html": "<button class=\"ds-btn ds-btn-primary\">Book a discovery call</button>",
+      "css": ".ds-btn-primary { background: #00753E; color: #FFFFFF; font-family: Inter, 'Segoe UI', sans-serif; font-weight: 600; font-size: 0.9375rem; letter-spacing: 0.01em; padding: 15px 28px; border: none; border-radius: 10px; cursor: pointer; transition: background 200ms cubic-bezier(0.22,1,0.36,1), transform 200ms cubic-bezier(0.22,1,0.36,1), box-shadow 200ms cubic-bezier(0.22,1,0.36,1); } .ds-btn-primary:hover { background: #231F20; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(35,31,32,0.12); } .ds-btn-primary:focus-visible { outline: 2px solid #00904C; outline-offset: 2px; }"
+    },
+    {
+      "name": "Coral Button",
+      "kind": "button",
+      "refersTo": "button-coral",
+      "description": "Single highest-priority CTA on a page, typically the hero.",
+      "html": "<button class=\"ds-btn ds-btn-coral\">Start the conversation</button>",
+      "css": ".ds-btn-coral { background: #F15A40; color: #231F20; font-family: Inter, 'Segoe UI', sans-serif; font-weight: 600; font-size: 0.9375rem; letter-spacing: 0.01em; padding: 15px 28px; border: none; border-radius: 10px; cursor: pointer; transition: background 200ms cubic-bezier(0.22,1,0.36,1), transform 200ms cubic-bezier(0.22,1,0.36,1), box-shadow 200ms cubic-bezier(0.22,1,0.36,1); } .ds-btn-coral:hover { background: #D8442B; color: #FFFFFF; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(35,31,32,0.12); } .ds-btn-coral:focus-visible { outline: 2px solid #231F20; outline-offset: 2px; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Lower-priority action, e.g. 'See our services'.",
+      "html": "<button class=\"ds-btn ds-btn-secondary\">See our services</button>",
+      "css": ".ds-btn-secondary { background: #FFFFFF; color: #231F20; font-family: Inter, 'Segoe UI', sans-serif; font-weight: 600; font-size: 0.9375rem; letter-spacing: 0.01em; padding: 15px 28px; border: 1px solid #E3E5E4; border-radius: 10px; cursor: pointer; transition: background 200ms cubic-bezier(0.22,1,0.36,1); } .ds-btn-secondary:hover { background: #F6F9F7; } .ds-btn-secondary:focus-visible { outline: 2px solid #00904C; outline-offset: 2px; }"
+    },
+    {
+      "name": "Service Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Feature-level card for a service line on a Surface Tint or White section.",
+      "html": "<div class=\"ds-card\"><div class=\"ds-card-icon\"></div><h3 class=\"ds-card-title\">Accounting &amp; Bookkeeping</h3><p class=\"ds-card-body\">Day-to-day ledgers, reconciliations and reporting handled by a dedicated offshore team.</p></div>",
+      "css": ".ds-card { background: #FFFFFF; border-radius: 16px; padding: 48px 32px; transition: box-shadow 200ms cubic-bezier(0.22,1,0.36,1), transform 200ms cubic-bezier(0.22,1,0.36,1); } .ds-card:hover { box-shadow: 0 8px 20px rgba(35,31,32,0.12); transform: translateY(-2px); } .ds-card-icon { width: 40px; height: 40px; border-radius: 10px; background: #E4F3EA; margin-bottom: 20px; } .ds-card-title { font-family: Poppins, 'Segoe UI', sans-serif; font-weight: 600; font-size: 1.25rem; color: #231F20; margin: 0 0 12px; } .ds-card-body { font-family: Inter, 'Segoe UI', sans-serif; font-weight: 400; font-size: 1.0625rem; line-height: 1.6; color: #55565A; margin: 0; }"
+    },
+    {
+      "name": "Text Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Contact / discovery-call form field.",
+      "html": "<label class=\"ds-field\"><span class=\"ds-label\">Work email</span><input class=\"ds-input\" type=\"email\" placeholder=\"you@company.com\" /></label>",
+      "css": ".ds-label { display: block; font-family: Inter, 'Segoe UI', sans-serif; font-weight: 600; font-size: 0.8125rem; letter-spacing: 0.02em; color: #231F20; margin-bottom: 8px; } .ds-input { width: 100%; box-sizing: border-box; background: #FFFFFF; border: 1px solid #E3E5E4; border-radius: 10px; padding: 14px 16px; font-family: Inter, 'Segoe UI', sans-serif; font-size: 1rem; color: #231F20; transition: border-color 200ms, box-shadow 200ms; } .ds-input::placeholder { color: #55565A; } .ds-input:focus { outline: none; border-color: #00753E; box-shadow: 0 0 0 3px #E4F3EA; }"
+    },
+    {
+      "name": "Credential Chip",
+      "kind": "chip",
+      "refersTo": "credential-chip",
+      "description": "Named software platform or qualification, e.g. 'Xero Certified'. Never a generic trust word on its own.",
+      "html": "<span class=\"ds-chip\">Xero &amp; QuickBooks Certified</span>",
+      "css": ".ds-chip { display: inline-block; background: #F6F9F7; color: #231F20; font-family: Inter, 'Segoe UI', sans-serif; font-weight: 600; font-size: 0.8125rem; letter-spacing: 0.02em; padding: 10px 16px; border-radius: 6px; }"
+    },
+    {
+      "name": "Primary Navigation",
+      "kind": "nav",
+      "refersTo": "nav",
+      "description": "Single-row flat navigation, five links maximum, no dropdowns.",
+      "html": "<nav class=\"ds-nav\"><a class=\"ds-nav-link ds-nav-link-active\" href=\"#\">Services</a><a class=\"ds-nav-link\" href=\"#\">Process</a><a class=\"ds-nav-link\" href=\"#\">Why Bangladesh</a><a class=\"ds-nav-link\" href=\"#\">About</a></nav>",
+      "css": ".ds-nav { display: flex; gap: 32px; } .ds-nav-link { font-family: Inter, 'Segoe UI', sans-serif; font-weight: 600; font-size: 0.9375rem; color: #231F20; text-decoration: none; position: relative; padding-bottom: 6px; } .ds-nav-link::after { content: ''; position: absolute; left: 0; right: 100%; bottom: 0; height: 2px; background: #00753E; transition: right 150ms cubic-bezier(0.22,1,0.36,1); } .ds-nav-link:hover { color: #00753E; } .ds-nav-link:hover::after { right: 0; } .ds-nav-link-active { color: #00753E; } .ds-nav-link-active::after { right: 0; background: #00904C; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Certainty Mark",
+    "overview": "The name is the brief: Certa, certainty. The logo mark is an open ring, a C that never quite closes, completed by a short coral dash standing in for the missing arc, like a checkmark of confidence. Everything in this system extends that one gesture: a calm, mostly-neutral field that lets two decisive brand colors do the convincing, rather than a page shouting for attention. This is a system for a skeptical reader, a finance director or practice owner comparing accounting outsourcing partners with three other tabs open, who is scanning for accounting-specific rigor in fifteen seconds: qualifications, named software platforms, jurisdictional familiarity. The system explicitly rejects the territory of ACE Advisory, RBA Chartered Accountants, and RCI Global: dense nested navigation, navy-and-gray safe corporate palettes with no real brand color presence, cramped and inconsistently-spaced sections, and stock-photo warmth standing in for a point of view. It also rejects reading as a generalist BPO; every claim must be accounting-specific.",
+    "keyCharacteristics": [
+      "Mostly white/near-white canvas; green and coral appear with intent, never as decoration",
+      "Confident, tight typography carries hierarchy, not boxes or icons-in-circles",
+      "Flat by default; depth comes from tonal surfaces and spacing, not drop shadows",
+      "One accent color per decision point: green for structure and trust, coral for the single next action",
+      "Credibility carried by specifics: named software, qualifications, jurisdictions, never bare adjectives"
+    ],
+    "rules": [
+      { "name": "The Contrast-Safe Brand Rule", "body": "Raw Certa Green (#00904C, 4.1:1) and raw Signal Coral (#F15A40, 3.4:1) both fail AA for small text on white. Use Certa Green Deep for small green text/UI, and pair Signal Coral only with Ink text or use it strictly as a large decorative surface.", "section": "colors" },
+      { "name": "The One Action Rule", "body": "Signal Coral marks exactly one action per screen, the primary CTA. If two elements compete for coral, one of them is wrong.", "section": "colors" },
+      { "name": "The Wordmark-Weight Rule", "body": "CERTA& is set bold, Advisory sits in a lighter weight underneath. Echo that same bold/light contrast anywhere the two words appear together.", "section": "typography" },
+      { "name": "The Flat-At-Rest Rule", "body": "Nothing has a shadow in its default state. Shadows are a response to hover/focus, never a resting decoration.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do keep navigation to a single flat row, five links maximum, no nested menus.",
+      "Do use Certa Green Deep (#00753E), not raw Certa Green, for any small text or white-on-green button.",
+      "Do pair Signal Coral with Ink text, never white text, unless the coral element is large/decorative only.",
+      "Do let Surface Tint (#F6F9F7) and White alternate section-by-section as the primary rhythm device.",
+      "Do cap body paragraphs at 65-75ch and keep one clear idea per section.",
+      "Do reserve Signal Coral for exactly one action per screen.",
+      "Do back every credibility claim with a specific: named software, a qualification, a jurisdiction, a number.",
+      "Do use moderately rounded 10px buttons, not full pills."
+    ],
+    "donts": [
+      "Don't use a navy-and-gray safe corporate palette, that is the RBA/ACE/RCI territory this brand explicitly rejects.",
+      "Don't build dense, deeply-nested navigation menus that bury the actual offer.",
+      "Don't use stock-photo hero imagery as a substitute for a point of view.",
+      "Don't add drop shadows to resting cards or buttons, shadows appear only on hover.",
+      "Don't set raw Certa Green (#00904C) or raw Signal Coral (#F15A40) as small body text or button-label color on white.",
+      "Don't use uppercase tracked eyebrow labels above every section heading.",
+      "Don't list or imply HR, EOR, or general BPO services; this is an accounting-only practice.",
+      "Don't use full-pill buttons or casual, startup-register copy."
+    ]
+  }
+}
