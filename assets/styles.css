@@ -154,14 +154,23 @@ html.js [data-reveal].is-visible { opacity: 1; transform: none; }
   display: flex;
   align-items: center;
   justify-content: center;
-  opacity: 1;
   visibility: visible;
-  transition: opacity 500ms var(--ease-standard), visibility 0s linear 0s;
+  clip-path: circle(150% at 50% 50%);
+  transition: clip-path 900ms var(--ease-standard), visibility 0s linear 0s;
 }
+/* The ring mark literally opens the door: the panel's clip-path irises down to nothing
+   from the mark's own position, so the homepage reveals itself through the ring shape
+   rather than behind a flat fade. */
 .preloader.is-hidden {
-  opacity: 0;
+  clip-path: circle(0% at 50% 50%);
   visibility: hidden;
-  transition: opacity 500ms var(--ease-standard), visibility 0s linear 500ms;
+  transition: clip-path 900ms var(--ease-standard), visibility 0s linear 900ms;
+}
+.preloader__inner {
+  transition: transform 900ms var(--ease-standard);
+}
+.preloader.is-hidden .preloader__inner {
+  transform: scale(1.7);
 }
 .preloader__mark {
   width: 84px;
@@ -174,7 +183,10 @@ html.js [data-reveal].is-visible { opacity: 1; transform: none; }
 .preloader__sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
 @media (prefers-reduced-motion: reduce) {
-  .preloader { transition: opacity 200ms linear; }
+  .preloader { clip-path: none !important; transition: opacity 200ms linear; }
+  .preloader.is-hidden { opacity: 0; }
+  .preloader__inner { transition: none; }
+  .preloader.is-hidden .preloader__inner { transform: none; }
   .preloader__mark { animation: none; }
 }
 
