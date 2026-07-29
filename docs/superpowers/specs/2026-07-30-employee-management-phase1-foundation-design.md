@@ -19,7 +19,7 @@ Out of scope for Phase 1 (later phases): attendance/timesheets, leave requests, 
 
 ## Architecture
 
-A new, standalone Next.js application — its own repository, separate from this marketing-site repo — deployed on Vercel, using Supabase for Postgres, Auth, and file storage. It will live on its own subdomain (e.g. `portal.certaadvisory.com`). The public marketing site (`index.html`) is not modified by this work.
+A Next.js application living in a `portal/` subdirectory of this same git repository (monorepo style), using Supabase for Postgres, Auth, and file storage. It is deployed as its own, separate Vercel project with its root directory set to `portal/`, so it builds and deploys independently of the existing static site — a change to one does not trigger or affect a deploy of the other. It will live on its own subdomain (e.g. `portal.certaadvisory.com`). The public marketing site (`index.html`) is not modified by this work.
 
 ## Authentication
 

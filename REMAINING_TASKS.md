@@ -1,6 +1,6 @@
 # Employee Management System — Remaining Tasks
 
-Status tracker for the internal employee management / office system. This is a **separate application** from the public marketing site (`index.html`) — it needs its own login, backend, and database, and will live on its own subdomain (e.g. `portal.certaadvisory.com`), not inside this repo's static pages.
+Status tracker for the internal employee management / office system. This is a **separate application** from the public marketing site (`index.html`) — it needs its own login, backend, and database, and will live on its own subdomain (e.g. `portal.certaadvisory.com`). It lives in this same git repo, in a `portal/` subfolder, deployed as its own separate Vercel project so it doesn't affect the marketing site's deploy.
 
 Last updated: 2026-07-30. Nothing has been built yet — we are still in the design/spec stage (see brainstorming conversation). This file exists to track what's planned, what's decided, what's open, and in what order we build it.
 
