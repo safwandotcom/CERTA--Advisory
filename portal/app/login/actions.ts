@@ -1,0 +1,37 @@
+'use server'
+
+import { redirect } from 'next/navigation'
+import { createClient } from '@/lib/supabase/server'
+import { employeeIdToEmail } from '@/lib/employeeAuth'
+
+export type LoginState = { error?: string }
+
+export async function loginAction(
+  _prevState: LoginState,
+  formData: FormData
+): Promise<LoginState> {
+  const employeeId = String(formData.get('employeeId') ?? '').trim()
+  const password = String(formData.get('password') ?? '')
+
+  if (!employeeId || !password) {
+    return { error: 'Invalid Employee ID or password' }
+  }
+
+  const supabase = await createClient()
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email: employeeIdToEmail(employeeId),
+    password,
+  })
+
+  if (error || !data.user) {
+    return { error: 'Invalid Employee ID or password' }
+  }
+
+  const { data: employee } = await supabase
+    .from('employees')
+    .select('role')
+    .eq('auth_user_id', data.user.id)
+    .single()
+
+  redirect(employee?.role === 'admin' ? '/admin' : '/dashboard')
+}
