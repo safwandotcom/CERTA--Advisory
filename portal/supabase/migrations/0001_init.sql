@@ -20,6 +20,19 @@ create table employee_documents (
   uploaded_at timestamptz not null default now()
 );
 
+create or replace function public.is_admin()
+returns boolean
+language sql
+security definer
+set search_path = public
+stable
+as $$
+  select exists (
+    select 1 from employees e
+    where e.auth_user_id = auth.uid() and e.role = 'admin'
+  );
+$$;
+
 alter table employees enable row level security;
 alter table employee_documents enable row level security;
 
@@ -27,15 +40,15 @@ alter table employee_documents enable row level security;
 create policy "employees_select_self_or_admin" on employees
   for select using (
     auth_user_id = auth.uid()
-    or exists (select 1 from employees e where e.auth_user_id = auth.uid() and e.role = 'admin')
+    or public.is_admin()
   );
 
 -- Only admins can insert/update/delete employee rows (no self-editing).
 create policy "employees_admin_write" on employees
   for all using (
-    exists (select 1 from employees e where e.auth_user_id = auth.uid() and e.role = 'admin')
+    public.is_admin()
   ) with check (
-    exists (select 1 from employees e where e.auth_user_id = auth.uid() and e.role = 'admin')
+    public.is_admin()
   );
 
 -- Employees can read documents that belong to them; admins can read all.
@@ -45,15 +58,15 @@ create policy "documents_select_self_or_admin" on employee_documents
       select 1 from employees e
       where e.id = employee_documents.employee_id and e.auth_user_id = auth.uid()
     )
-    or exists (select 1 from employees e where e.auth_user_id = auth.uid() and e.role = 'admin')
+    or public.is_admin()
   );
 
 -- Only admins can upload/edit/delete document metadata.
 create policy "documents_admin_write" on employee_documents
   for all using (
-    exists (select 1 from employees e where e.auth_user_id = auth.uid() and e.role = 'admin')
+    public.is_admin()
   ) with check (
-    exists (select 1 from employees e where e.auth_user_id = auth.uid() and e.role = 'admin')
+    public.is_admin()
   );
 
 -- Storage bucket for document files, private by default.
@@ -68,15 +81,15 @@ create policy "documents_storage_select" on storage.objects
         where e.auth_user_id = auth.uid()
         and (storage.foldername(name))[1] = e.id::text
       )
-      or exists (select 1 from employees e where e.auth_user_id = auth.uid() and e.role = 'admin')
+      or public.is_admin()
     )
   );
 
 create policy "documents_storage_admin_write" on storage.objects
   for all using (
     bucket_id = 'employee-documents'
-    and exists (select 1 from employees e where e.auth_user_id = auth.uid() and e.role = 'admin')
+    and public.is_admin()
   ) with check (
     bucket_id = 'employee-documents'
-    and exists (select 1 from employees e where e.auth_user_id = auth.uid() and e.role = 'admin')
+    and public.is_admin()
   );
