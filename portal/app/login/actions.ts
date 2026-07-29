@@ -27,11 +27,16 @@ export async function loginAction(
     return { error: 'Invalid Employee ID or password' }
   }
 
-  const { data: employee } = await supabase
+  const { data: employee, error: employeeError } = await supabase
     .from('employees')
     .select('role')
     .eq('auth_user_id', data.user.id)
     .single()
 
-  redirect(employee?.role === 'admin' ? '/admin' : '/dashboard')
+  if (employeeError || !employee || !employee.role) {
+    await supabase.auth.signOut()
+    return { error: 'Invalid Employee ID or password' }
+  }
+
+  redirect(employee.role === 'admin' ? '/admin' : '/dashboard')
 }
