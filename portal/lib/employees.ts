@@ -5,10 +5,11 @@ export type NewEmployeeInput = {
   employeeId: string
   password: string
   name: string
-  role: 'admin' | 'employee'
+  role: 'admin' | 'manager' | 'employee'
   contactInfo?: string
   position?: string
   department?: string
+  departmentId?: string
   joinDate?: string
 }
 
@@ -38,6 +39,7 @@ export async function createEmployeeRecord(
       contact_info: input.contactInfo ?? null,
       position: input.position ?? null,
       department: input.department ?? null,
+      department_id: input.departmentId ?? null,
       join_date: input.joinDate ?? null,
       status: 'active',
     })
