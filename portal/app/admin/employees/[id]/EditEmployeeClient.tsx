@@ -16,6 +16,8 @@ type Employee = {
   name: string
   position: string | null
   department: string | null
+  contact_info: string | null
+  join_date: string | null
   status: 'active' | 'inactive'
 }
 
@@ -67,6 +69,23 @@ export default function EditEmployeeClient({ id }: { id: string }) {
           id="department"
           name="department"
           defaultValue={employee.department ?? ''}
+          className="border p-2"
+        />
+
+        <label htmlFor="contactInfo">Contact info</label>
+        <input
+          id="contactInfo"
+          name="contactInfo"
+          defaultValue={employee.contact_info ?? ''}
+          className="border p-2"
+        />
+
+        <label htmlFor="joinDate">Join date</label>
+        <input
+          id="joinDate"
+          name="joinDate"
+          type="date"
+          defaultValue={employee.join_date ?? ''}
           className="border p-2"
         />
 

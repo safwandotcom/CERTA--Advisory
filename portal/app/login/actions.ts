@@ -29,11 +29,18 @@ export async function loginAction(
 
   const { data: employee, error: employeeError } = await supabase
     .from('employees')
-    .select('role')
+    .select('role, status')
     .eq('auth_user_id', data.user.id)
     .single()
 
   if (employeeError || !employee || !employee.role) {
+    await supabase.auth.signOut()
+    return { error: 'Invalid Employee ID or password' }
+  }
+
+  // Deactivated accounts must not be able to sign in. Same generic error as a
+  // bad password — don't reveal that the account exists but is inactive.
+  if (employee.status !== 'active') {
     await supabase.auth.signOut()
     return { error: 'Invalid Employee ID or password' }
   }

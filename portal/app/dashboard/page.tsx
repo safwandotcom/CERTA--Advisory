@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { signOutAction } from '@/app/actions'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -27,7 +28,14 @@ export default async function DashboardPage() {
 
   return (
     <main className="mx-auto max-w-2xl p-6">
-      <h1 className="text-xl font-semibold">{employee?.name}</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-xl font-semibold">{employee?.name}</h1>
+        <form action={signOutAction}>
+          <button type="submit" className="border px-3 py-1">
+            Sign out
+          </button>
+        </form>
+      </div>
       <dl className="mt-4 grid grid-cols-2 gap-2">
         <dt>Employee ID</dt>
         <dd>{employee?.employee_id}</dd>
@@ -35,6 +43,10 @@ export default async function DashboardPage() {
         <dd>{employee?.position ?? '—'}</dd>
         <dt>Department</dt>
         <dd>{employee?.department ?? '—'}</dd>
+        <dt>Contact info</dt>
+        <dd>{employee?.contact_info ?? '—'}</dd>
+        <dt>Join date</dt>
+        <dd>{employee?.join_date ?? '—'}</dd>
         <dt>Status</dt>
         <dd>{employee?.status}</dd>
       </dl>

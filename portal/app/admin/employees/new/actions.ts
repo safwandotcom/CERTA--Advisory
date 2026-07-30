@@ -21,6 +21,8 @@ export async function createEmployeeAction(
   const name = String(formData.get('name') ?? '').trim()
   const password = String(formData.get('password') ?? '')
   const role = formData.get('role') === 'admin' ? 'admin' : 'employee'
+  const contactInfo = String(formData.get('contactInfo') ?? '').trim()
+  const joinDate = String(formData.get('joinDate') ?? '').trim()
 
   if (!employeeId || !name || !password) {
     return { error: 'Employee ID, full name, and initial password are all required' }
@@ -28,7 +30,15 @@ export async function createEmployeeAction(
 
   try {
     const adminClient = createAdminClient()
-    await createEmployeeRecord(adminClient, { employeeId, name, password, role })
+    await createEmployeeRecord(adminClient, {
+      employeeId,
+      name,
+      password,
+      role,
+      // Empty strings must not reach the DB — join_date is a date column.
+      contactInfo: contactInfo || undefined,
+      joinDate: joinDate || undefined,
+    })
   } catch (err) {
     return { error: err instanceof Error ? err.message : 'Failed to create employee' }
   }

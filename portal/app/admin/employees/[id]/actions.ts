@@ -25,6 +25,8 @@ export async function updateEmployeeAction(
       name: String(formData.get('name') ?? ''),
       position: String(formData.get('position') ?? '') || null,
       department: String(formData.get('department') ?? '') || null,
+      contact_info: String(formData.get('contactInfo') ?? '') || null,
+      join_date: String(formData.get('joinDate') ?? '') || null,
       status: formData.get('status') === 'inactive' ? 'inactive' : 'active',
     })
     .eq('id', employeeRowId)

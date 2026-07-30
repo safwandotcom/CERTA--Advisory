@@ -21,6 +21,12 @@ export default function NewEmployeePage() {
         <label htmlFor="password">Initial password</label>
         <input id="password" name="password" type="password" required className="border p-2" />
 
+        <label htmlFor="contactInfo">Contact info</label>
+        <input id="contactInfo" name="contactInfo" className="border p-2" />
+
+        <label htmlFor="joinDate">Join date</label>
+        <input id="joinDate" name="joinDate" type="date" className="border p-2" />
+
         <label htmlFor="role">Role</label>
         <select id="role" name="role" className="border p-2">
           <option value="employee">Employee</option>
