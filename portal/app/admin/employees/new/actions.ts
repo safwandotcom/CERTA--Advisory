@@ -3,7 +3,7 @@
 import { redirect } from 'next/navigation'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createEmployeeRecord } from '@/lib/employees'
-import { requireAdmin, requireSuperAdmin } from '@/lib/auth'
+import { requireAdmin, requireSuperAdmin, NOT_AUTHORIZED } from '@/lib/auth'
 import { parseManagedDepartmentIds, setManagedDepartments } from '@/lib/departments'
 
 export type CreateEmployeeState = { error?: string }
@@ -12,7 +12,11 @@ export async function createEmployeeAction(
   _prevState: CreateEmployeeState,
   formData: FormData
 ): Promise<CreateEmployeeState> {
-  await requireAdmin()
+  try {
+    await requireAdmin()
+  } catch {
+    return { error: NOT_AUTHORIZED }
+  }
 
   const employeeId = String(formData.get('employeeId') ?? '').trim()
   const name = String(formData.get('name') ?? '').trim()
