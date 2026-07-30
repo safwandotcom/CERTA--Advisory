@@ -117,7 +117,7 @@ create table tasks (
 
 create table task_status_history (
   id uuid primary key default gen_random_uuid(),
-  task_id uuid not null references tasks(id) on delete cascade,
+  task_id uuid not null references tasks(id) on delete restrict,
   old_status text,
   new_status text not null,
   changed_by uuid not null references employees(id),
@@ -147,9 +147,31 @@ create trigger tasks_validate_assignment
   before insert or update of assigned_to, department_id on tasks
   for each row execute function public.validate_task_assignment();
 
+-- Bump updated_at when a task's status changes. This must run BEFORE so the
+-- mutation to NEW takes effect in the stored row.
+create or replace function public.touch_task_updated_at()
+returns trigger
+language plpgsql
+as $$
+begin
+  if new.status is distinct from old.status then
+    new.updated_at = now();
+  end if;
+  return new;
+end;
+$$;
+
+create trigger tasks_touch_updated_at
+  before update on tasks
+  for each row execute function public.touch_task_updated_at();
+
 -- Automatic, un-bypassable status audit trail. Runs as the table owner
 -- (security definer), so it can insert into task_status_history even
--- though no role is granted an INSERT policy on it below.
+-- though no role is granted an INSERT policy on it below. Must run AFTER:
+-- task_status_history.task_id has a FK to tasks(id), and at BEFORE-trigger
+-- time the tasks row hasn't been written to the heap yet, so an INSERT here
+-- would fail the FK check on every new task. By AFTER-trigger time the
+-- parent row exists and the FK is satisfied.
 create or replace function public.record_task_status_history()
 returns trigger
 language plpgsql
@@ -164,17 +186,16 @@ begin
   if tg_op = 'INSERT' then
     insert into task_status_history (task_id, old_status, new_status, changed_by)
     values (new.id, null, new.status, coalesce(actor, new.assigned_by));
-  elsif tg_op = 'UPDATE' and new.status is distinct from old.status then
-    new.updated_at = now();
+  elsif new.status is distinct from old.status then
     insert into task_status_history (task_id, old_status, new_status, changed_by)
     values (new.id, old.status, new.status, coalesce(actor, new.assigned_by));
   end if;
-  return new;
+  return null;
 end;
 $$;
 
 create trigger tasks_record_status_history
-  before insert or update on tasks
+  after insert or update on tasks
   for each row execute function public.record_task_status_history();
 
 alter table tasks enable row level security;
@@ -226,7 +247,7 @@ create table monthly_reports (
   id uuid primary key default gen_random_uuid(),
   department_id uuid not null references departments(id),
   manager_id uuid not null references employees(id),
-  period_month date not null,
+  period_month date not null check (period_month = date_trunc('month', period_month)::date),
   stats jsonb not null,
   submitted_at timestamptz not null default now(),
   unique (department_id, period_month)
@@ -243,3 +264,12 @@ create policy "monthly_reports_manager_insert" on monthly_reports
   for insert with check (
     public.is_manager_of(department_id)
   );
+
+create policy "monthly_reports_admin_write" on monthly_reports
+  for all using (public.is_admin()) with check (public.is_admin());
+
+-- ── Indexes ──────────────────────────────────────────────────────────────
+create index tasks_assigned_to_idx on tasks (assigned_to);
+create index tasks_department_id_idx on tasks (department_id);
+create index task_status_history_task_id_idx on task_status_history (task_id);
+create index employees_department_id_idx on employees (department_id);
