@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Users, LogOut, Menu, X } from 'lucide-react'
+import { LayoutDashboard, Users, Building2, LogOut, Menu, X } from 'lucide-react'
 import { signOutAction } from '@/app/actions'
 
 type NavItem = {
@@ -28,7 +28,13 @@ const ADMIN_NAV: NavItem[] = [
     href: '/admin',
     label: 'Employees',
     icon: Users,
-    isActive: (pathname) => pathname.startsWith('/admin'),
+    isActive: (pathname) => pathname === '/admin' || pathname.startsWith('/admin/employees'),
+  },
+  {
+    href: '/admin/departments',
+    label: 'Departments',
+    icon: Building2,
+    isActive: (pathname) => pathname.startsWith('/admin/departments'),
   },
 ]
 
