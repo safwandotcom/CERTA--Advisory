@@ -11,7 +11,7 @@ export default async function DashboardPage() {
 
   const { data: employee } = await supabase
     .from('employees')
-    .select('*')
+    .select('*, departments(name)')
     .eq('auth_user_id', user!.id)
     .single()
 
@@ -31,7 +31,7 @@ export default async function DashboardPage() {
   const fields: { label: string; value: React.ReactNode }[] = [
     { label: 'Employee ID', value: employee?.employee_id },
     { label: 'Position', value: employee?.position ?? '—' },
-    { label: 'Department', value: employee?.department ?? '—' },
+    { label: 'Department', value: employee?.departments?.name ?? '—' },
     { label: 'Contact info', value: employee?.contact_info ?? '—' },
     { label: 'Join date', value: employee?.join_date ?? '—' },
     {

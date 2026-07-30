@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { requireAdmin, NOT_AUTHORIZED } from '@/lib/auth'
+import { listDepartments, listManagedDepartmentIds } from '@/lib/departments'
 
 export async function GET(
   _request: Request,
@@ -23,5 +24,13 @@ export async function GET(
     .select('*')
     .eq('employee_id', id)
 
-  return NextResponse.json({ employee, documents: documents ?? [] })
+  const departments = await listDepartments(supabase)
+  const managedDepartmentIds = employee?.role === 'manager' ? await listManagedDepartmentIds(supabase, id) : []
+
+  return NextResponse.json({
+    employee,
+    documents: documents ?? [],
+    departments,
+    managedDepartmentIds,
+  })
 }

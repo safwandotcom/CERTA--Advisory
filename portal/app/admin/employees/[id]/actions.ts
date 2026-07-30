@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requireAdmin, NOT_AUTHORIZED } from '@/lib/auth'
+import { parseManagedDepartmentIds, setManagedDepartments } from '@/lib/departments'
 
 export type ActionState = { error?: string; success?: string }
 
@@ -19,12 +20,19 @@ export async function updateEmployeeAction(
   }
 
   const supabase = await createClient()
+
+  const { data: currentEmployee } = await supabase
+    .from('employees')
+    .select('role')
+    .eq('id', employeeRowId)
+    .single()
+
   const { error } = await supabase
     .from('employees')
     .update({
       name: String(formData.get('name') ?? ''),
       position: String(formData.get('position') ?? '') || null,
-      department: String(formData.get('department') ?? '') || null,
+      department_id: String(formData.get('departmentId') ?? '') || null,
       contact_info: String(formData.get('contactInfo') ?? '') || null,
       join_date: String(formData.get('joinDate') ?? '') || null,
       status: formData.get('status') === 'inactive' ? 'inactive' : 'active',
@@ -32,6 +40,12 @@ export async function updateEmployeeAction(
     .eq('id', employeeRowId)
 
   if (error) return { error: error.message }
+
+  if (currentEmployee?.role === 'manager') {
+    const managedDepartmentIds = parseManagedDepartmentIds(formData)
+    const adminClient = createAdminClient()
+    await setManagedDepartments(adminClient, employeeRowId, managedDepartmentIds)
+  }
 
   revalidatePath(`/admin/employees/${employeeRowId}`)
   return { success: 'Saved' }

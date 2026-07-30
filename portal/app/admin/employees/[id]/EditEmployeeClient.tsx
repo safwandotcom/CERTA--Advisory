@@ -11,6 +11,7 @@ import {
   type ActionState,
 } from './actions'
 import { PageHeader } from '@/components/PageHeader'
+import type { Department } from '@/lib/departments'
 import {
   card,
   input,
@@ -27,10 +28,11 @@ type Employee = {
   employee_id: string
   name: string
   position: string | null
-  department: string | null
+  department_id: string | null
   contact_info: string | null
   join_date: string | null
   status: 'active' | 'inactive'
+  role: 'superadmin' | 'admin' | 'manager' | 'employee'
 }
 
 type Document = { id: string; label: string; file_path: string }
@@ -74,6 +76,8 @@ function SkeletonCard() {
 export default function EditEmployeeClient({ id }: { id: string }) {
   const [employee, setEmployee] = useState<Employee | null>(null)
   const [documents, setDocuments] = useState<Document[]>([])
+  const [departments, setDepartments] = useState<Department[]>([])
+  const [managedDepartmentIds, setManagedDepartmentIds] = useState<string[]>([])
   const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
@@ -82,6 +86,8 @@ export default function EditEmployeeClient({ id }: { id: string }) {
       .then((data) => {
         setEmployee(data.employee)
         setDocuments(data.documents)
+        setDepartments(data.departments)
+        setManagedDepartmentIds(data.managedDepartmentIds)
         setLoaded(true)
       })
   }, [id])
@@ -148,15 +154,22 @@ export default function EditEmployeeClient({ id }: { id: string }) {
             </div>
 
             <div>
-              <label htmlFor="department" className={labelClass}>
+              <label htmlFor="departmentId" className={labelClass}>
                 Department
               </label>
-              <input
-                id="department"
-                name="department"
-                defaultValue={employee.department ?? ''}
+              <select
+                id="departmentId"
+                name="departmentId"
+                defaultValue={employee.department_id ?? ''}
                 className={input}
-              />
+              >
+                <option value="">Select a department</option>
+                {departments.map((dept) => (
+                  <option key={dept.id} value={dept.id}>
+                    {dept.name}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div>
@@ -194,6 +207,25 @@ export default function EditEmployeeClient({ id }: { id: string }) {
               />
             </div>
           </div>
+
+          {employee.role === 'manager' && (
+            <div className="mt-5 border-t border-border pt-5 sm:col-span-2">
+              <p className={labelClass}>Departments managed</p>
+              <div className="flex flex-col gap-2">
+                {departments.map((dept) => (
+                  <label key={dept.id} className="flex items-center gap-2 text-[0.9375rem] text-ink">
+                    <input
+                      type="checkbox"
+                      name="managedDepartmentIds"
+                      value={dept.id}
+                      defaultChecked={managedDepartmentIds.includes(dept.id)}
+                    />
+                    {dept.name}
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
 
           <FormMessage state={updateState} />
 
