@@ -1,10 +1,19 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { requireAdmin, NOT_AUTHORIZED } from '@/lib/auth'
 
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  // Only the admin edit page consumes this route — the employee dashboard
+  // queries Supabase directly — so admin-only is the correct scope here.
+  try {
+    await requireAdmin()
+  } catch {
+    return NextResponse.json({ error: NOT_AUTHORIZED }, { status: 403 })
+  }
+
   const { id } = await params
   const supabase = await createClient()
 

@@ -27,12 +27,16 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
   const path = request.nextUrl.pathname
+  const isApi = path.startsWith('/api/')
 
-  if (!user && (path.startsWith('/dashboard') || path.startsWith('/admin'))) {
-    return NextResponse.redirect(new URL('/login', request.url))
+  if (!user && (path.startsWith('/dashboard') || path.startsWith('/admin') || isApi)) {
+    // API callers get a status code, not an HTML login page.
+    return isApi
+      ? NextResponse.json({ error: 'Not authorized' }, { status: 401 })
+      : NextResponse.redirect(new URL('/login', request.url))
   }
 
-  if (user && path.startsWith('/admin')) {
+  if (user && (path.startsWith('/admin') || isApi)) {
     const { data: employee } = await supabase
       .from('employees')
       .select('role')
@@ -40,13 +44,20 @@ export async function middleware(request: NextRequest) {
       .single()
 
     if (employee?.role !== 'admin') {
-      return NextResponse.redirect(new URL('/dashboard', request.url))
+      return isApi
+        ? NextResponse.json({ error: 'Not authorized' }, { status: 403 })
+        : NextResponse.redirect(new URL('/dashboard', request.url))
     }
   }
 
   return response
 }
 
+// Defence in depth only — the real authorization boundary for admin Server
+// Actions and route handlers is requireAdmin() in lib/auth.ts, since actions are
+// reachable by direct POST and several use the RLS-bypassing service-role key.
+// '/admin/:path*' already covers /admin/employees/** and the Server Actions
+// POSTed to those page URLs.
 export const config = {
-  matcher: ['/dashboard/:path*', '/admin/:path*'],
+  matcher: ['/dashboard/:path*', '/admin/:path*', '/api/employees/:path*'],
 }

@@ -3,6 +3,7 @@
 import { redirect } from 'next/navigation'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createEmployeeRecord } from '@/lib/employees'
+import { requireAdmin, NOT_AUTHORIZED } from '@/lib/auth'
 
 export type CreateEmployeeState = { error?: string }
 
@@ -10,6 +11,12 @@ export async function createEmployeeAction(
   _prevState: CreateEmployeeState,
   formData: FormData
 ): Promise<CreateEmployeeState> {
+  try {
+    await requireAdmin()
+  } catch {
+    return { error: NOT_AUTHORIZED }
+  }
+
   const employeeId = String(formData.get('employeeId') ?? '').trim()
   const name = String(formData.get('name') ?? '').trim()
   const password = String(formData.get('password') ?? '')

@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { requireAdmin, NOT_AUTHORIZED } from '@/lib/auth'
 
 export type ActionState = { error?: string; success?: string }
 
@@ -11,6 +12,12 @@ export async function updateEmployeeAction(
   _prevState: ActionState,
   formData: FormData
 ): Promise<ActionState> {
+  try {
+    await requireAdmin()
+  } catch {
+    return { error: NOT_AUTHORIZED }
+  }
+
   const supabase = await createClient()
   const { error } = await supabase
     .from('employees')
@@ -33,6 +40,12 @@ export async function uploadDocumentAction(
   _prevState: ActionState,
   formData: FormData
 ): Promise<ActionState> {
+  try {
+    await requireAdmin()
+  } catch {
+    return { error: NOT_AUTHORIZED }
+  }
+
   const file = formData.get('file') as File
   const label = String(formData.get('label') ?? '')
 
@@ -66,6 +79,12 @@ export async function resetPasswordAction(
   _prevState: ActionState,
   formData: FormData
 ): Promise<ActionState> {
+  try {
+    await requireAdmin()
+  } catch {
+    return { error: NOT_AUTHORIZED }
+  }
+
   const newPassword = String(formData.get('newPassword') ?? '')
 
   if (!newPassword) {
