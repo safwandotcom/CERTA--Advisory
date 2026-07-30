@@ -1,4 +1,9 @@
 import { defineConfig } from '@playwright/test'
+import { config } from 'dotenv'
+
+// The Next dev server loads .env.local itself, but the Playwright test process
+// does not — and specs call createAdminClient() directly, which needs these.
+config({ path: '.env.local' })
 
 export default defineConfig({
   testDir: './e2e',
