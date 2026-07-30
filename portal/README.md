@@ -1,36 +1,52 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# CERTA& Portal
 
-## Getting Started
+Employee portal for CERTA& Advisory. Staff sign in with an Employee ID and
+password to view their own profile and documents; admins can create and edit
+employee records, upload documents, and reset passwords.
 
-First, run the development server:
+Built with Next.js (App Router) and Supabase (Postgres + Auth + Storage).
+Authorization is enforced by Postgres Row-Level Security, with `requireAdmin()`
+checks in admin Server Actions and route handlers, plus a route guard in
+`middleware.ts`.
+
+## Running locally
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The app runs at http://localhost:3000.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Environment
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Copy `.env.example` to `.env.local` and fill in the values:
 
-## Learn More
+- `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` — the browser/server client.
+- `SUPABASE_SERVICE_ROLE_KEY` — service-role key. Bypasses RLS; server-side only, never expose it to the client.
 
-To learn more about Next.js, take a look at the following resources:
+`SEED_ADMIN_*` are only needed locally for the seed script and the e2e suite —
+they are not required in Vercel.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Bootstrapping the first admin
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+There is no public sign-up. Create the first admin account with:
 
-## Deploy on Vercel
+```bash
+npm run seed:admin
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+It reads `SEED_ADMIN_EMPLOYEE_ID`, `SEED_ADMIN_PASSWORD`, and optionally
+`SEED_ADMIN_NAME` (defaults to "Admin") from `.env.local`. Every other account
+is created from the admin UI.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Tests
+
+```bash
+npm test          # unit tests (vitest)
+npm run test:e2e  # end-to-end tests (playwright)
+npm run lint
+```
+
+The e2e suite needs a live Supabase project and a seeded admin;
+`e2e/route-protection.spec.ts` is the exception and runs without either.

@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import { signOutAction } from '@/app/actions'
 
 export default async function AdminDashboardPage() {
   const supabase = await createClient()
@@ -12,9 +13,16 @@ export default async function AdminDashboardPage() {
     <main className="mx-auto max-w-3xl p-6">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-semibold">Employees</h1>
-        <Link href="/admin/employees/new" className="border px-3 py-1">
-          + New employee
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link href="/admin/employees/new" className="border px-3 py-1">
+            + New employee
+          </Link>
+          <form action={signOutAction}>
+            <button type="submit" className="border px-3 py-1">
+              Sign out
+            </button>
+          </form>
+        </div>
       </div>
       <table className="mt-4 w-full text-left">
         <thead>
