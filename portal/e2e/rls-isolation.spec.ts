@@ -52,6 +52,7 @@ test('an employee is redirected away from /admin in the UI', async ({ page }) =>
   await page.getByLabel('Employee ID').fill(employeeId)
   await page.getByLabel('Password').fill('password-ui-123')
   await page.getByRole('button', { name: /sign in/i }).click()
+  await expect(page).toHaveURL(/\/dashboard/)
 
   await page.goto('/admin')
   await expect(page).toHaveURL(/\/dashboard/)

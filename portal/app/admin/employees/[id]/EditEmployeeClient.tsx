@@ -2,12 +2,24 @@
 
 import { useActionState } from 'react'
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
+import { ArrowLeft, AlertCircle, CheckCircle2, FileText, Upload, KeyRound } from 'lucide-react'
 import {
   updateEmployeeAction,
   uploadDocumentAction,
   resetPasswordAction,
   type ActionState,
 } from './actions'
+import { PageHeader } from '@/components/PageHeader'
+import {
+  card,
+  input,
+  label as labelClass,
+  buttonPrimary,
+  buttonCoral,
+  errorText,
+  successText,
+} from '@/lib/ui'
 
 type Employee = {
   id: string
@@ -25,9 +37,44 @@ type Document = { id: string; label: string; file_path: string }
 
 const initialState: ActionState = {}
 
+function FormMessage({ state }: { state: ActionState }) {
+  if (state.error) {
+    return (
+      <p role="alert" className={`${errorText} mt-4`}>
+        <AlertCircle size={16} strokeWidth={2} className="shrink-0" />
+        {state.error}
+      </p>
+    )
+  }
+  if (state.success) {
+    return (
+      <p className={`${successText} mt-4`}>
+        <CheckCircle2 size={16} strokeWidth={2} className="shrink-0" />
+        {state.success}
+      </p>
+    )
+  }
+  return null
+}
+
+function SkeletonCard() {
+  return (
+    <div className={`${card} animate-pulse`}>
+      <div className="h-4 w-32 rounded bg-border" />
+      <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2">
+        <div className="h-10 rounded-[10px] bg-border" />
+        <div className="h-10 rounded-[10px] bg-border" />
+        <div className="h-10 rounded-[10px] bg-border" />
+        <div className="h-10 rounded-[10px] bg-border" />
+      </div>
+    </div>
+  )
+}
+
 export default function EditEmployeeClient({ id }: { id: string }) {
   const [employee, setEmployee] = useState<Employee | null>(null)
   const [documents, setDocuments] = useState<Document[]>([])
+  const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
     fetch(`/api/employees/${id}`)
@@ -35,6 +82,7 @@ export default function EditEmployeeClient({ id }: { id: string }) {
       .then((data) => {
         setEmployee(data.employee)
         setDocuments(data.documents)
+        setLoaded(true)
       })
   }, [id])
 
@@ -51,85 +99,179 @@ export default function EditEmployeeClient({ id }: { id: string }) {
     initialState
   )
 
-  if (!employee) return <main className="p-6">Loading…</main>
+  if (!loaded || !employee) {
+    return (
+      <>
+        <div className="mb-4 h-4 w-40 animate-pulse rounded bg-border" />
+        <div className="mb-8 h-8 w-56 animate-pulse rounded bg-border" />
+        <div className="flex flex-col gap-6">
+          <SkeletonCard />
+          <SkeletonCard />
+        </div>
+      </>
+    )
+  }
 
   return (
-    <main className="mx-auto max-w-2xl p-6">
-      <h1 className="text-xl font-semibold">{employee.employee_id}</h1>
+    <>
+      <Link
+        href="/admin"
+        className="mb-4 inline-flex items-center gap-1.5 text-[0.8125rem] font-semibold text-ink-muted hover:text-ink"
+      >
+        <ArrowLeft size={15} strokeWidth={2} />
+        Back to employees
+      </Link>
 
-      <form action={updateAction} className="mt-4 flex flex-col gap-3">
-        <label htmlFor="name">Name</label>
-        <input id="name" name="name" defaultValue={employee.name} className="border p-2" />
+      <PageHeader title={employee.name} subtitle={`Employee ID ${employee.employee_id}`} />
 
-        <label htmlFor="position">Position</label>
-        <input id="position" name="position" defaultValue={employee.position ?? ''} className="border p-2" />
+      <div className="flex flex-col gap-6">
+        <form action={updateAction} className={`${card} max-w-2xl`}>
+          <h2 className="font-display text-base font-semibold text-ink">Profile</h2>
+          <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <div>
+              <label htmlFor="name" className={labelClass}>
+                Name
+              </label>
+              <input id="name" name="name" defaultValue={employee.name} className={input} />
+            </div>
 
-        <label htmlFor="department">Department</label>
-        <input
-          id="department"
-          name="department"
-          defaultValue={employee.department ?? ''}
-          className="border p-2"
-        />
+            <div>
+              <label htmlFor="position" className={labelClass}>
+                Position
+              </label>
+              <input
+                id="position"
+                name="position"
+                defaultValue={employee.position ?? ''}
+                className={input}
+              />
+            </div>
 
-        <label htmlFor="contactInfo">Contact info</label>
-        <input
-          id="contactInfo"
-          name="contactInfo"
-          defaultValue={employee.contact_info ?? ''}
-          className="border p-2"
-        />
+            <div>
+              <label htmlFor="department" className={labelClass}>
+                Department
+              </label>
+              <input
+                id="department"
+                name="department"
+                defaultValue={employee.department ?? ''}
+                className={input}
+              />
+            </div>
 
-        <label htmlFor="joinDate">Join date</label>
-        <input
-          id="joinDate"
-          name="joinDate"
-          type="date"
-          defaultValue={employee.join_date ?? ''}
-          className="border p-2"
-        />
+            <div>
+              <label htmlFor="status" className={labelClass}>
+                Status
+              </label>
+              <select id="status" name="status" defaultValue={employee.status} className={input}>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+            </div>
 
-        <label htmlFor="status">Status</label>
-        <select id="status" name="status" defaultValue={employee.status} className="border p-2">
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
-        </select>
+            <div>
+              <label htmlFor="contactInfo" className={labelClass}>
+                Contact info
+              </label>
+              <input
+                id="contactInfo"
+                name="contactInfo"
+                defaultValue={employee.contact_info ?? ''}
+                className={input}
+              />
+            </div>
 
-        {updateState.error && <p role="alert">{updateState.error}</p>}
-        {updateState.success && <p>{updateState.success}</p>}
-        <button type="submit" className="border p-2">
-          Save
-        </button>
-      </form>
+            <div>
+              <label htmlFor="joinDate" className={labelClass}>
+                Join date
+              </label>
+              <input
+                id="joinDate"
+                name="joinDate"
+                type="date"
+                defaultValue={employee.join_date ?? ''}
+                className={input}
+              />
+            </div>
+          </div>
 
-      <h2 className="mt-6 font-semibold">Documents</h2>
-      <ul>
-        {documents.map((doc) => (
-          <li key={doc.id}>{doc.label}</li>
-        ))}
-      </ul>
-      <form action={uploadAction} className="mt-2 flex flex-col gap-3">
-        <label htmlFor="label">Label</label>
-        <input id="label" name="label" required className="border p-2" />
-        <label htmlFor="file">File</label>
-        <input id="file" name="file" type="file" required className="border p-2" />
-        {uploadState.error && <p role="alert">{uploadState.error}</p>}
-        {uploadState.success && <p>{uploadState.success}</p>}
-        <button type="submit" className="border p-2">
-          Upload
-        </button>
-      </form>
+          <FormMessage state={updateState} />
 
-      <h2 className="mt-6 font-semibold">Reset password</h2>
-      <form action={resetAction} className="mt-2 flex flex-col gap-3">
-        <label htmlFor="newPassword">New password</label>
-        <input id="newPassword" name="newPassword" type="password" required className="border p-2" />
-        {resetState.error && <p role="alert">{resetState.error}</p>}
-        {resetState.success && <p>{resetState.success}</p>}
-        <button type="submit" className="border p-2">
-          Reset password
-        </button>
-      </form>
-    </main>
+          <button type="submit" className={`${buttonPrimary} mt-6`}>
+            Save changes
+          </button>
+        </form>
+
+        <div className={`${card} max-w-2xl`}>
+          <h2 className="font-display text-base font-semibold text-ink">Documents</h2>
+
+          {documents.length > 0 ? (
+            <ul className="mt-4 divide-y divide-border">
+              {documents.map((doc) => (
+                <li key={doc.id} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
+                  <FileText size={18} strokeWidth={2} className="shrink-0 text-ink-muted" />
+                  <span className="text-[0.9375rem] text-ink">{doc.label}</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="mt-4 text-[0.9375rem] text-ink-muted">No documents uploaded yet.</p>
+          )}
+
+          <form action={uploadAction} className="mt-5 flex flex-col gap-4 border-t border-border pt-5">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div>
+                <label htmlFor="label" className={labelClass}>
+                  Label
+                </label>
+                <input id="label" name="label" required placeholder="e.g. Signed contract" className={input} />
+              </div>
+              <div>
+                <label htmlFor="file" className={labelClass}>
+                  File
+                </label>
+                <input
+                  id="file"
+                  name="file"
+                  type="file"
+                  required
+                  className={`${input} file:mr-3 file:rounded-[6px] file:border-0 file:bg-white file:px-3 file:py-1.5 file:text-[0.8125rem] file:font-semibold file:text-ink`}
+                />
+              </div>
+            </div>
+
+            <FormMessage state={uploadState} />
+
+            <button type="submit" className={`${buttonPrimary} w-fit`}>
+              <Upload size={16} strokeWidth={2} />
+              Upload
+            </button>
+          </form>
+        </div>
+
+        <div className={`${card} max-w-2xl`}>
+          <h2 className="font-display text-base font-semibold text-ink">Reset password</h2>
+          <p className="mt-1 text-[0.8125rem] text-ink-muted">
+            This is the only way to reset a password — there is no self-service recovery.
+          </p>
+
+          <form action={resetAction} className="mt-4 flex flex-col gap-4 sm:max-w-xs">
+            <div>
+              <label htmlFor="newPassword" className={labelClass}>
+                New password
+              </label>
+              <input id="newPassword" name="newPassword" type="password" required className={input} />
+            </div>
+
+            <FormMessage state={resetState} />
+
+            <button type="submit" className={`${buttonCoral} w-fit`}>
+              <KeyRound size={16} strokeWidth={2} />
+              Reset password
+            </button>
+          </form>
+        </div>
+      </div>
+    </>
   )
 }

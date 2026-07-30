@@ -1,5 +1,7 @@
+import { FileText, Download, Inbox } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
-import { signOutAction } from '@/app/actions'
+import { PageHeader } from '@/components/PageHeader'
+import { card, statusPillClass } from '@/lib/ui'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -26,42 +28,72 @@ export default async function DashboardPage() {
 
   const signedUrlMap = signedUrls || []
 
-  return (
-    <main className="mx-auto max-w-2xl p-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold">{employee?.name}</h1>
-        <form action={signOutAction}>
-          <button type="submit" className="border px-3 py-1">
-            Sign out
-          </button>
-        </form>
-      </div>
-      <dl className="mt-4 grid grid-cols-2 gap-2">
-        <dt>Employee ID</dt>
-        <dd>{employee?.employee_id}</dd>
-        <dt>Position</dt>
-        <dd>{employee?.position ?? '—'}</dd>
-        <dt>Department</dt>
-        <dd>{employee?.department ?? '—'}</dd>
-        <dt>Contact info</dt>
-        <dd>{employee?.contact_info ?? '—'}</dd>
-        <dt>Join date</dt>
-        <dd>{employee?.join_date ?? '—'}</dd>
-        <dt>Status</dt>
-        <dd>{employee?.status}</dd>
-      </dl>
+  const fields: { label: string; value: React.ReactNode }[] = [
+    { label: 'Employee ID', value: employee?.employee_id },
+    { label: 'Position', value: employee?.position ?? '—' },
+    { label: 'Department', value: employee?.department ?? '—' },
+    { label: 'Contact info', value: employee?.contact_info ?? '—' },
+    { label: 'Join date', value: employee?.join_date ?? '—' },
+    {
+      label: 'Status',
+      value: (
+        <span className={statusPillClass(employee?.status === 'active' ? 'active' : 'inactive')}>
+          {employee?.status}
+        </span>
+      ),
+    },
+  ]
 
-      <h2 className="mt-6 font-semibold">Your documents</h2>
-      <ul className="mt-2">
-        {documents?.map((doc, i) => (
-          <li key={doc.id}>
-            <a href={signedUrlMap?.[i]?.signedUrl || '#'} target="_blank" rel="noreferrer">
-              {doc.label}
-            </a>
-          </li>
-        ))}
-        {documents?.length === 0 && <li>No documents yet.</li>}
-      </ul>
-    </main>
+  return (
+    <>
+      <PageHeader title={`Welcome, ${employee?.name?.split(' ')[0] ?? ''}`} subtitle="Your profile and documents" />
+
+      <section className={card}>
+        <h2 className="font-display text-base font-semibold text-ink">{employee?.name}</h2>
+        <dl className="mt-5 grid grid-cols-1 gap-x-8 gap-y-4 sm:grid-cols-2">
+          {fields.map((field) => (
+            <div key={field.label}>
+              <dt className="text-xs font-semibold uppercase tracking-[0.04em] text-ink-muted">
+                {field.label}
+              </dt>
+              <dd className="mt-1 text-[0.9375rem] text-ink">{field.value}</dd>
+            </div>
+          ))}
+        </dl>
+      </section>
+
+      <section className={`${card} mt-6`}>
+        <h2 className="font-display text-base font-semibold text-ink">Your documents</h2>
+
+        {documents && documents.length > 0 ? (
+          <ul className="mt-4 divide-y divide-border">
+            {documents.map((doc, i) => (
+              <li key={doc.id} className="flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0">
+                <div className="flex min-w-0 items-center gap-3">
+                  <FileText size={18} strokeWidth={2} className="shrink-0 text-ink-muted" />
+                  <span className="truncate text-[0.9375rem] text-ink">{doc.label}</span>
+                </div>
+                <a
+                  href={signedUrlMap?.[i]?.signedUrl || '#'}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex shrink-0 items-center gap-1.5 text-[0.8125rem] font-semibold text-certa-green-deep hover:underline"
+                >
+                  <Download size={15} strokeWidth={2} />
+                  Download
+                </a>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <div className="mt-4 flex flex-col items-center gap-2 py-10 text-center">
+            <Inbox size={28} strokeWidth={1.5} className="text-ink-muted" />
+            <p className="text-[0.9375rem] text-ink-muted">
+              No documents yet. Your administrator will upload documents here as they become available.
+            </p>
+          </div>
+        )}
+      </section>
+    </>
   )
 }

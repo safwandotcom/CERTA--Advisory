@@ -5,7 +5,7 @@ test('rejects an invalid Employee ID / password', async ({ page }) => {
   await page.getByLabel('Employee ID').fill('9999999')
   await page.getByLabel('Password').fill('wrong-password')
   await page.getByRole('button', { name: /sign in/i }).click()
-  await expect(page.getByRole('alert')).toHaveText('Invalid Employee ID or password')
+  await expect(page.getByText('Invalid Employee ID or password')).toBeVisible()
 })
 
 test('logs in a seeded admin and redirects to /admin', async ({ page }) => {

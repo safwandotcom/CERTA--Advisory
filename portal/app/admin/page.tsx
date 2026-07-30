@@ -1,6 +1,8 @@
 import Link from 'next/link'
+import { Plus, ChevronRight, Users, UserCheck, ShieldCheck } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
-import { signOutAction } from '@/app/actions'
+import { PageHeader } from '@/components/PageHeader'
+import { card, buttonCoral, statusPillClass, rolePillClass } from '@/lib/ui'
 
 export default async function AdminDashboardPage() {
   const supabase = await createClient()
@@ -9,43 +11,99 @@ export default async function AdminDashboardPage() {
     .select('*')
     .order('employee_id')
 
+  const total = employees?.length ?? 0
+  const active = employees?.filter((e) => e.status === 'active').length ?? 0
+  const admins = employees?.filter((e) => e.role === 'admin').length ?? 0
+
+  const stats = [
+    { label: 'Employees', value: total, icon: Users },
+    { label: 'Active', value: active, icon: UserCheck },
+    { label: 'Admins', value: admins, icon: ShieldCheck },
+  ]
+
   return (
-    <main className="mx-auto max-w-3xl p-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold">Employees</h1>
-        <div className="flex items-center gap-2">
-          <Link href="/admin/employees/new" className="border px-3 py-1">
-            + New employee
+    <>
+      <PageHeader
+        title="Employees"
+        subtitle={`${total} ${total === 1 ? 'person' : 'people'} across the organisation`}
+        actions={
+          <Link href="/admin/employees/new" className={buttonCoral}>
+            <Plus size={16} strokeWidth={2.5} />
+            New employee
           </Link>
-          <form action={signOutAction}>
-            <button type="submit" className="border px-3 py-1">
-              Sign out
-            </button>
-          </form>
-        </div>
+        }
+      />
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        {stats.map((stat) => (
+          <div key={stat.label} className={card}>
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold uppercase tracking-[0.04em] text-ink-muted">
+                {stat.label}
+              </span>
+              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-certa-green-tint text-certa-green-deep">
+                <stat.icon size={16} strokeWidth={2} />
+              </span>
+            </div>
+            <p className="mt-3 font-display text-3xl font-semibold text-ink">{stat.value}</p>
+          </div>
+        ))}
       </div>
-      <table className="mt-4 w-full text-left">
-        <thead>
-          <tr>
-            <th>Employee ID</th>
-            <th>Name</th>
-            <th>Role</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          {employees?.map((emp) => (
-            <tr key={emp.id}>
-              <td>
-                <Link href={`/admin/employees/${emp.id}`}>{emp.employee_id}</Link>
-              </td>
-              <td>{emp.name}</td>
-              <td>{emp.role}</td>
-              <td>{emp.status}</td>
+
+      <section className={`${card} mt-6 overflow-x-auto p-0`}>
+        <table className="w-full min-w-[560px] text-left">
+          <thead>
+            <tr className="border-b border-border">
+              <th className="px-6 py-3 text-xs font-semibold uppercase tracking-[0.04em] text-ink-muted">
+                Employee ID
+              </th>
+              <th className="px-6 py-3 text-xs font-semibold uppercase tracking-[0.04em] text-ink-muted">
+                Name
+              </th>
+              <th className="px-6 py-3 text-xs font-semibold uppercase tracking-[0.04em] text-ink-muted">
+                Role
+              </th>
+              <th className="px-6 py-3 text-xs font-semibold uppercase tracking-[0.04em] text-ink-muted">
+                Status
+              </th>
+              <th className="w-10 px-6 py-3" />
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </main>
+          </thead>
+          <tbody>
+            {employees?.map((emp) => (
+              <tr key={emp.id} className="border-b border-border last:border-0">
+                <td className="p-0">
+                  <Link
+                    href={`/admin/employees/${emp.id}`}
+                    className="block px-6 py-3.5 text-[0.9375rem] font-semibold text-ink hover:text-certa-green-deep"
+                  >
+                    {emp.employee_id}
+                  </Link>
+                </td>
+                <td className="px-6 py-3.5 text-[0.9375rem] text-ink">{emp.name}</td>
+                <td className="px-6 py-3.5">
+                  <span className={rolePillClass(emp.role)}>{emp.role}</span>
+                </td>
+                <td className="px-6 py-3.5">
+                  <span className={statusPillClass(emp.status)}>{emp.status}</span>
+                </td>
+                <td className="px-6 py-3.5 text-right">
+                  <Link href={`/admin/employees/${emp.id}`} aria-label={`View ${emp.name}`}>
+                    <ChevronRight size={16} strokeWidth={2} className="ml-auto text-ink-muted" />
+                  </Link>
+                </td>
+              </tr>
+            ))}
+            {(!employees || employees.length === 0) && (
+              <tr>
+                <td colSpan={5} className="px-6 py-10 text-center text-[0.9375rem] text-ink-muted">
+                  No employees yet. Create the first one to get started.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </section>
+    </>
   )
 }

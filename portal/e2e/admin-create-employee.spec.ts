@@ -5,6 +5,7 @@ test('admin creates a new employee', async ({ page }) => {
   await page.getByLabel('Employee ID').fill(process.env.SEED_ADMIN_EMPLOYEE_ID ?? '1001')
   await page.getByLabel('Password').fill(process.env.SEED_ADMIN_PASSWORD ?? '')
   await page.getByRole('button', { name: /sign in/i }).click()
+  await expect(page).toHaveURL(/\/admin/)
 
   await page.goto('/admin/employees/new')
   const newId = `test-${Date.now()}`

@@ -6,5 +6,7 @@ test('admin sees the full employee list on /admin', async ({ page }) => {
   await page.getByLabel('Password').fill(process.env.SEED_ADMIN_PASSWORD ?? '')
   await page.getByRole('button', { name: /sign in/i }).click()
   await expect(page).toHaveURL(/\/admin/)
-  await expect(page.getByText(process.env.SEED_ADMIN_EMPLOYEE_ID ?? '1001')).toBeVisible()
+  await expect(
+    page.getByRole('link', { name: process.env.SEED_ADMIN_EMPLOYEE_ID ?? '1001', exact: true })
+  ).toBeVisible()
 })
