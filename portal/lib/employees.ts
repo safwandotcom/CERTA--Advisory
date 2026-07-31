@@ -8,7 +8,6 @@ export type NewEmployeeInput = {
   role: 'admin' | 'employee'
   contactInfo?: string
   position?: string
-  department?: string
   joinDate?: string
 }
 
@@ -37,7 +36,6 @@ export async function createEmployeeRecord(
       role: input.role,
       contact_info: input.contactInfo ?? null,
       position: input.position ?? null,
-      department: input.department ?? null,
       join_date: input.joinDate ?? null,
       status: 'active',
     })

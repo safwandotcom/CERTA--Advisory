@@ -31,7 +31,6 @@ export default async function DashboardPage() {
   const fields: { label: string; value: React.ReactNode }[] = [
     { label: 'Employee ID', value: employee?.employee_id },
     { label: 'Position', value: employee?.position ?? '—' },
-    { label: 'Department', value: employee?.department ?? '—' },
     { label: 'Contact info', value: employee?.contact_info ?? '—' },
     { label: 'Join date', value: employee?.join_date ?? '—' },
     {

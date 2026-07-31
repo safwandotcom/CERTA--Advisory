@@ -45,5 +45,5 @@ export async function loginAction(
     return { error: 'Invalid Employee ID or password' }
   }
 
-  redirect(employee.role === 'admin' ? '/admin' : '/dashboard')
+  redirect(employee.role === 'admin' || employee.role === 'superadmin' ? '/admin' : '/dashboard')
 }
