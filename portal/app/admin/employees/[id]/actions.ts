@@ -1,6 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requireAdmin, NOT_AUTHORIZED } from '@/lib/auth'
@@ -115,4 +116,63 @@ export async function resetPasswordAction(
   if (error) return { error: error.message }
 
   return { success: 'Password reset' }
+}
+
+export async function archiveEmployeeAction(
+  targetAuthUserId: string,
+  targetEmployeeId: string,
+  targetRole: string,
+  _prevState: ActionState,
+  formData: FormData
+): Promise<ActionState> {
+  try {
+    await requireAdmin()
+  } catch {
+    return { error: NOT_AUTHORIZED }
+  }
+
+  const password = String(formData.get('confirmPassword') ?? '')
+  if (!password) {
+    return { error: 'Enter your password to confirm' }
+  }
+
+  if (targetRole === 'superadmin') {
+    return { error: 'The superadmin account cannot be archived' }
+  }
+
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user?.email) {
+    return { error: NOT_AUTHORIZED }
+  }
+
+  // Re-verify the CALLER's own password (not the target employee's) before
+  // allowing this destructive action to proceed.
+  const { error: verifyError } = await supabase.auth.signInWithPassword({
+    email: user.email,
+    password,
+  })
+
+  if (verifyError) {
+    return { error: 'Incorrect password' }
+  }
+
+  if (user.id === targetAuthUserId) {
+    return { error: 'You cannot archive your own account' }
+  }
+
+  const adminClient = createAdminClient()
+  const { error } = await adminClient
+    .from('employees')
+    .update({ archived: true, status: 'inactive' })
+    .eq('employee_id', targetEmployeeId)
+    .eq('auth_user_id', targetAuthUserId)
+
+  if (error) return { error: error.message }
+
+  revalidatePath('/admin')
+  redirect('/admin')
 }
