@@ -31,7 +31,11 @@ export async function middleware(request: NextRequest) {
 
   if (
     !user &&
-    (path.startsWith('/dashboard') || path.startsWith('/admin') || path.startsWith('/manager') || isApi)
+    (path.startsWith('/dashboard') ||
+      path.startsWith('/admin') ||
+      path.startsWith('/manager') ||
+      path.startsWith('/projects') ||
+      isApi)
   ) {
     // API callers get a status code, not an HTML login page.
     return isApi
@@ -65,6 +69,18 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  if (user && path.startsWith('/projects')) {
+    const { data: employee } = await supabase
+      .from('employees')
+      .select('role')
+      .eq('auth_user_id', user.id)
+      .single()
+
+    if (!['superadmin', 'admin', 'manager'].includes(employee?.role ?? '')) {
+      return NextResponse.redirect(new URL('/dashboard', request.url))
+    }
+  }
+
   return response
 }
 
@@ -74,5 +90,5 @@ export async function middleware(request: NextRequest) {
 // '/admin/:path*' already covers /admin/employees/** and the Server Actions
 // POSTed to those page URLs.
 export const config = {
-  matcher: ['/dashboard/:path*', '/admin/:path*', '/manager/:path*', '/api/employees/:path*'],
+  matcher: ['/dashboard/:path*', '/admin/:path*', '/manager/:path*', '/projects/:path*', '/api/employees/:path*'],
 }
