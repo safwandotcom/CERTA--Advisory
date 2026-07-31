@@ -3,6 +3,8 @@ import { listDepartments } from '@/lib/departments'
 import { PageHeader } from '@/components/PageHeader'
 import { card, input, buttonPrimary } from '@/lib/ui'
 import { createDepartmentAction, archiveDepartmentAction } from './actions'
+import { EditDepartmentForm } from './EditDepartmentForm'
+import { RemoveDepartmentButton } from './RemoveDepartmentButton'
 
 export default async function DepartmentsPage() {
   const supabase = await createClient()
@@ -34,27 +36,32 @@ export default async function DepartmentsPage() {
               <th className="px-6 py-3 text-xs font-semibold uppercase tracking-[0.04em] text-ink-muted">
                 Status
               </th>
-              <th className="w-32 px-6 py-3" />
+              <th className="w-64 px-6 py-3" />
             </tr>
           </thead>
           <tbody>
             {departments.map((dept) => (
               <tr key={dept.id} className="border-b border-border last:border-0">
-                <td className="px-6 py-3.5 text-[0.9375rem] text-ink">{dept.name}</td>
+                <td className="px-6 py-3.5">
+                  <EditDepartmentForm departmentId={dept.id} currentName={dept.name} />
+                </td>
                 <td className="px-6 py-3.5 text-[0.9375rem] text-ink-muted">
                   {dept.archived ? 'Archived' : 'Active'}
                 </td>
-                <td className="px-6 py-3.5 text-right">
-                  {!dept.archived && (
-                    <form action={archiveDepartmentAction.bind(null, dept.id)}>
-                      <button
-                        type="submit"
-                        className="text-[0.8125rem] font-semibold text-ink-muted hover:text-signal-coral-deep"
-                      >
-                        Archive
-                      </button>
-                    </form>
-                  )}
+                <td className="px-6 py-3.5">
+                  <div className="flex items-start justify-end gap-4">
+                    {!dept.archived && (
+                      <form action={archiveDepartmentAction.bind(null, dept.id)}>
+                        <button
+                          type="submit"
+                          className="text-[0.8125rem] font-semibold text-ink-muted hover:text-signal-coral-deep"
+                        >
+                          Archive
+                        </button>
+                      </form>
+                    )}
+                    <RemoveDepartmentButton departmentId={dept.id} departmentName={dept.name} />
+                  </div>
                 </td>
               </tr>
             ))}
