@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { requireManagerOrAdmin } from '@/lib/auth'
 import { listProjects } from '@/lib/projects'
 import { PageHeader } from '@/components/PageHeader'
@@ -10,7 +11,16 @@ export default async function ProjectsPage() {
   await requireManagerOrAdmin()
   const supabase = await createClient()
 
-  const { data: allEmployees } = await supabase
+  // Phase 3's whole point is that a manager can involve any employee from
+  // any department in a project — Phase 2's employees RLS still scopes a
+  // manager's own SELECT to their managed department(s), so the member
+  // picker needs the service-role client here, not the caller's own
+  // session, or a manager could only ever add people from their own
+  // department. This is a plain read of names/IDs for a picker, not a
+  // security-sensitive operation — actual project/task access is enforced
+  // by project_members/tasks RLS elsewhere, unaffected by this query.
+  const adminClient = createAdminClient()
+  const { data: allEmployees } = await adminClient
     .from('employees')
     .select('id, employee_id, name')
     .eq('archived', false)
