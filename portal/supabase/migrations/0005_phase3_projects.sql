@@ -166,6 +166,18 @@ create policy "tasks_manager_unrestricted_update" on tasks
 create policy "tasks_project_member_select" on tasks
   for select using (public.is_admin() or public.is_project_member(project_id));
 
+-- A plain employee has no path to INSERT a task under any policy above
+-- (tasks_manager_unrestricted_insert and Phase 2's tasks_manager_admin_write
+-- are both role-gated to admin/manager) — but the design spec requires
+-- employees to be able to create tasks within projects they already
+-- belong to. Scoped to the caller's own membership, not the assignee's:
+-- the assignee-must-also-be-a-member constraint is enforced by the
+-- assign-task UI only ever offering fellow project members as options,
+-- not by this policy, consistent with how assignment scope is enforced
+-- elsewhere in this migration.
+create policy "tasks_project_member_insert" on tasks
+  for insert with check (public.is_project_member(project_id));
+
 create index projects_status_idx on projects (status);
 create index project_members_employee_id_idx on project_members (employee_id);
 create index tasks_project_id_idx on tasks (project_id);
