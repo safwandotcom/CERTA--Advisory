@@ -15,6 +15,23 @@ function previousMonthStart(): string {
   return prev.toISOString().slice(0, 10)
 }
 
+function monthStart(dateString: string): string {
+  const d = new Date(dateString)
+  return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1)).toISOString().slice(0, 10)
+}
+
+// Every whole month from `start` through `end` (both 'YYYY-MM-01'), inclusive.
+function monthsBetween(start: string, end: string): string[] {
+  const months: string[] = []
+  let cursor = new Date(start + 'T00:00:00.000Z')
+  const last = new Date(end + 'T00:00:00.000Z')
+  while (cursor <= last) {
+    months.push(cursor.toISOString().slice(0, 10))
+    cursor = new Date(Date.UTC(cursor.getUTCFullYear(), cursor.getUTCMonth() + 1, 1))
+  }
+  return months
+}
+
 // A monthly report's stats must only reflect tasks assigned during that
 // period — without this bound, every report re-counts the department's
 // entire task history, and since stats are an immutable JSONB snapshot
@@ -27,42 +44,50 @@ export function periodMonthRange(periodMonth: string): { start: string; end: str
 
 export async function getUnreportedPriorMonths(
   supabase: SupabaseClient,
-  departments: { id: string; name: string }[]
+  departments: { id: string; name: string; created_at: string }[]
 ): Promise<UnreportedMonth[]> {
-  const periodMonth = previousMonthStart()
-  const { start, end } = periodMonthRange(periodMonth)
+  const lastReportableMonth = previousMonthStart()
   const results: UnreportedMonth[] = []
 
   for (const dept of departments) {
-    const { data: existing } = await supabase
+    const firstReportableMonth = monthStart(dept.created_at)
+    // Department didn't exist yet for any fully-elapsed month.
+    if (firstReportableMonth > lastReportableMonth) continue
+
+    const candidateMonths = monthsBetween(firstReportableMonth, lastReportableMonth)
+
+    const { data: existingReports } = await supabase
       .from('monthly_reports')
-      .select('id')
+      .select('period_month')
       .eq('department_id', dept.id)
-      .eq('period_month', periodMonth)
-      .maybeSingle()
+      .in('period_month', candidateMonths)
 
-    if (existing) continue
+    const reportedMonths = new Set((existingReports ?? []).map((r) => r.period_month as string))
+    const unreportedMonths = candidateMonths.filter((m) => !reportedMonths.has(m))
 
-    const { data: tasks } = await supabase
-      .from('tasks')
-      .select('status')
-      .eq('department_id', dept.id)
-      .gte('created_at', start)
-      .lt('created_at', end)
+    for (const periodMonth of unreportedMonths) {
+      const { start, end } = periodMonthRange(periodMonth)
+      const { data: tasks } = await supabase
+        .from('tasks')
+        .select('status')
+        .eq('department_id', dept.id)
+        .gte('created_at', start)
+        .lt('created_at', end)
 
-    const statusCounts: Record<TaskStatus, number> = { NEW: 0, STARTED: 0, PENDING: 0, COMPLETED: 0 }
-    for (const t of tasks ?? []) {
-      statusCounts[t.status as TaskStatus] += 1
+      const statusCounts: Record<TaskStatus, number> = { NEW: 0, STARTED: 0, PENDING: 0, COMPLETED: 0 }
+      for (const t of tasks ?? []) {
+        statusCounts[t.status as TaskStatus] += 1
+      }
+
+      results.push({
+        departmentId: dept.id,
+        departmentName: dept.name,
+        periodMonth,
+        statusCounts,
+        taskCount: tasks?.length ?? 0,
+      })
     }
-
-    results.push({
-      departmentId: dept.id,
-      departmentName: dept.name,
-      periodMonth,
-      statusCounts,
-      taskCount: tasks?.length ?? 0,
-    })
   }
 
-  return results
+  return results.sort((a, b) => a.periodMonth.localeCompare(b.periodMonth))
 }

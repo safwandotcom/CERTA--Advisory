@@ -21,7 +21,7 @@ export default async function AdminDashboardPage({
 
   const total = employees?.length ?? 0
   const active = employees?.filter((e) => e.status === 'active').length ?? 0
-  const admins = employees?.filter((e) => e.role === 'admin').length ?? 0
+  const admins = employees?.filter((e) => e.role === 'admin' || e.role === 'superadmin').length ?? 0
 
   const stats = [
     { label: 'Employees', value: total, icon: Users },

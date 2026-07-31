@@ -20,10 +20,17 @@ export function statusPillClass(status: 'active' | 'inactive'): string {
     : 'inline-flex items-center rounded-full bg-surface-tint px-2.5 py-1 text-xs font-semibold text-ink-muted'
 }
 
-export function rolePillClass(role: 'admin' | 'employee'): string {
-  return role === 'admin'
-    ? 'inline-flex items-center rounded-full border border-border bg-white px-2.5 py-1 text-xs font-semibold text-ink'
-    : 'inline-flex items-center rounded-full border border-border bg-white px-2.5 py-1 text-xs font-medium text-ink-muted'
+export function rolePillClass(role: 'superadmin' | 'admin' | 'manager' | 'employee'): string {
+  switch (role) {
+    case 'superadmin':
+      return 'inline-flex items-center rounded-full border border-signal-coral bg-white px-2.5 py-1 text-xs font-semibold text-signal-coral-deep'
+    case 'admin':
+      return 'inline-flex items-center rounded-full border border-border bg-white px-2.5 py-1 text-xs font-semibold text-ink'
+    case 'manager':
+      return 'inline-flex items-center rounded-full border border-certa-green-deep bg-certa-green-tint px-2.5 py-1 text-xs font-semibold text-certa-green-deep'
+    default:
+      return 'inline-flex items-center rounded-full border border-border bg-white px-2.5 py-1 text-xs font-medium text-ink-muted'
+  }
 }
 
 export const errorText = 'flex items-center gap-1.5 text-[0.8125rem] font-medium text-signal-coral-deep'

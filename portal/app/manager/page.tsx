@@ -19,15 +19,18 @@ export default async function ManagerPage() {
       ? await listManagedDepartmentIds(supabase, caller.id)
       : allDepartments.map((d) => d.id) // admin/superadmin: unscoped, all active departments
 
+  // Intersect with active departments — a manager's assignment to a
+  // department that's since been archived must not keep granting them
+  // visibility into its roster, tasks, or reports.
   const departments = allDepartments.filter((d) => managedIds.includes(d.id))
+  const activeManagedIds = departments.map((d) => d.id)
 
   const { data: roster } = await supabase
-    .from('employees')
+    .from('manager_roster')
     .select('id, employee_id, name, department_id')
-    .in('department_id', managedIds.length > 0 ? managedIds : ['00000000-0000-0000-0000-000000000000'])
-    .eq('archived', false)
+    .in('department_id', activeManagedIds.length > 0 ? activeManagedIds : ['00000000-0000-0000-0000-000000000000'])
 
-  const tasks = await listTasksForDepartments(supabase, managedIds)
+  const tasks = await listTasksForDepartments(supabase, activeManagedIds)
   // Monthly reporting is a manager-only responsibility (admin/superadmin
   // don't submit reports — see the design spec's permission table) — an
   // admin visiting /manager must never see or be able to trigger it.

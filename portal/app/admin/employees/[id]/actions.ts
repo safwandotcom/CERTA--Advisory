@@ -24,16 +24,18 @@ export async function updateEmployeeAction(
 
   const { data: currentEmployee } = await supabase
     .from('employees')
-    .select('role')
+    .select('role, department_id')
     .eq('id', employeeRowId)
     .single()
+
+  const newDepartmentId = String(formData.get('departmentId') ?? '') || null
 
   const { error } = await supabase
     .from('employees')
     .update({
       name: String(formData.get('name') ?? ''),
       position: String(formData.get('position') ?? '') || null,
-      department_id: String(formData.get('departmentId') ?? '') || null,
+      department_id: newDepartmentId,
       contact_info: String(formData.get('contactInfo') ?? '') || null,
       join_date: String(formData.get('joinDate') ?? '') || null,
       status: formData.get('status') === 'inactive' ? 'inactive' : 'active',
@@ -41,6 +43,16 @@ export async function updateEmployeeAction(
     .eq('id', employeeRowId)
 
   if (error) return { error: error.message }
+
+  // Moving an employee to a new department must move their existing tasks
+  // with them — otherwise the old department's manager keeps controlling
+  // tasks for someone no longer in their department, the new manager can't
+  // see them at all, and the old department's monthly reports keep counting
+  // them forever. validate_task_assignment() re-checks this update against
+  // the employee's now-updated department_id, so it stays consistent.
+  if (newDepartmentId && currentEmployee?.department_id && currentEmployee.department_id !== newDepartmentId) {
+    await supabase.from('tasks').update({ department_id: newDepartmentId }).eq('assigned_to', employeeRowId)
+  }
 
   if (currentEmployee?.role === 'manager') {
     const managedDepartmentIds = parseManagedDepartmentIds(formData)
