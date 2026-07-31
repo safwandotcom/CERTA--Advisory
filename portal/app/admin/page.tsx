@@ -20,8 +20,9 @@ export default async function AdminDashboardPage({
     .eq('archived', showArchived)
     .order('employee_id')
 
-  const total = employees?.length ?? 0
-  const active = employees?.filter((e) => e.status === 'active').length ?? 0
+  const staff = employees?.filter((e) => e.role !== 'admin' && e.role !== 'superadmin') ?? []
+  const total = staff.length
+  const active = staff.filter((e) => e.status === 'active').length
   const admins = employees?.filter((e) => e.role === 'admin' || e.role === 'superadmin').length ?? 0
 
   const stats = [
