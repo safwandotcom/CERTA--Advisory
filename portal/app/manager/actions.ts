@@ -2,8 +2,10 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { requireManagerOrAdmin, NOT_AUTHORIZED } from '@/lib/auth'
 import { createTask, updateTaskStatus, type TaskStatus } from '@/lib/tasks'
+import { addProjectMember } from '@/lib/projects'
 import { periodMonthRange } from '@/lib/reports'
 
 export type ActionState = { error?: string; success?: string }
@@ -19,29 +21,51 @@ export async function assignTaskAction(
     return { error: NOT_AUTHORIZED }
   }
 
-  const departmentId = String(formData.get('departmentId') ?? '')
+  const projectId = String(formData.get('projectId') ?? '')
   const assignedTo = String(formData.get('assignedTo') ?? '')
   const title = String(formData.get('title') ?? '').trim()
   const description = String(formData.get('description') ?? '').trim()
   const dueDate = String(formData.get('dueDate') ?? '').trim()
+  const priority = String(formData.get('priority') ?? 'medium') as 'low' | 'medium' | 'high' | 'urgent'
+  const labels = String(formData.get('labels') ?? '')
+    .split(',')
+    .map((l) => l.trim())
+    .filter(Boolean)
 
-  if (!departmentId || !assignedTo || !title) {
-    return { error: 'Department, assignee, and title are all required' }
+  if (!projectId || !assignedTo || !title) {
+    return { error: 'Project, assignee, and title are all required' }
   }
 
-  const supabase = await createClient()
+  // Service-role client, not the RLS-scoped one: the assigning manager is
+  // not necessarily a member of projectId themselves (assignment is
+  // deliberately unrestricted by project membership — see Global
+  // Constraints), so project_members_write's is_project_member(project_id)
+  // check would reject the auto-add-member insert below if it ran under
+  // the caller's own RLS-scoped session. requireManagerOrAdmin() above
+  // already did the real authorization check; this mirrors Task 5's
+  // createProjectAction for the same reason.
+  const supabase = createAdminClient()
+
+  // Assignment is unrestricted by department, but the assignee must be a
+  // project member to see the task in that project's views — add them if
+  // they aren't already, rather than making the assigning manager do a
+  // separate step first.
+  await addProjectMember(supabase, projectId, assignedTo)
+
   const { error } = await createTask(supabase, {
-    departmentId,
+    projectId,
     assignedTo,
     assignedBy: caller.id,
     title,
     description: description || undefined,
     dueDate: dueDate || undefined,
+    priority,
+    labels,
   })
 
   if (error) return { error }
 
-  revalidatePath('/manager')
+  revalidatePath(`/projects/${projectId}`)
   return { success: 'Task assigned' }
 }
 
