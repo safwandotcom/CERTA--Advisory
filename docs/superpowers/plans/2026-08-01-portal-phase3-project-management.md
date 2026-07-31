@@ -175,15 +175,35 @@ create policy "task_comments_insert" on task_comments
     )
   );
 
--- ── Tasks: additional write policy for the new, unrestricted model ───────
+-- ── Tasks: unrestricted assignment for the new model ────────────────────
 -- Coexists with Phase 2's tasks_manager_admin_write (still department-
 -- scoped) until Task 13 removes that one. Permissive policies OR together,
 -- so a manager can write via EITHER the old department-scoped policy or
 -- this new unconditional one — meaning assignment is already unrestricted
 -- as of this migration, even before Task 13 cleans up the old policy.
-create policy "tasks_manager_unrestricted_write" on tasks
-  for all using (public.is_admin() or public.is_manager_or_admin())
+--
+-- Split from SELECT: the design spec scopes task/project *visibility* to
+-- "own projects" for managers, while *assignment* is unrestricted. A
+-- single FOR ALL policy would grant unconditional SELECT too, silently
+-- widening visibility past what the spec intends.
+create policy "tasks_manager_unrestricted_insert" on tasks
+  for insert with check (public.is_admin() or public.is_manager_or_admin());
+
+create policy "tasks_manager_unrestricted_update" on tasks
+  for update using (public.is_admin() or public.is_manager_or_admin())
   with check (public.is_admin() or public.is_manager_or_admin());
+
+create policy "tasks_project_member_select" on tasks
+  for select using (public.is_admin() or public.is_project_member(project_id));
+
+-- A plain employee has no path to INSERT a task under either policy above
+-- (both are role-gated to admin/manager) — but the design spec requires
+-- employees to be able to create tasks within projects they already
+-- belong to. Scoped to the caller's own membership; the constraint that
+-- the assignee must also be a member is enforced by the assign-task UI
+-- only ever offering fellow project members, not by this policy.
+create policy "tasks_project_member_insert" on tasks
+  for insert with check (public.is_project_member(project_id));
 
 create index projects_status_idx on projects (status);
 create index project_members_employee_id_idx on project_members (employee_id);
@@ -629,7 +649,7 @@ export default async function ProjectsLayout({ children }: { children: React.Rea
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { requireManagerOrAdmin, NOT_AUTHORIZED } from '@/lib/auth'
 import { createProject, parseProjectMemberIds } from '@/lib/projects'
 
@@ -646,7 +666,15 @@ export async function createProjectAction(_prevState: ActionState, formData: For
   const name = String(formData.get('name') ?? '').trim()
   if (!name) return { error: 'Project name is required' }
 
-  const supabase = await createClient()
+  // The service-role client is required here, not the RLS-scoped one: a
+  // brand-new project has zero project_members rows yet, so
+  // project_members_write's is_project_member(project_id) check would
+  // reject the creator's own membership insert (chicken-and-egg — you
+  // can't be a member of a project before your own membership row
+  // exists). Authorization is already enforced above by
+  // requireManagerOrAdmin(); this mirrors the same pattern Phase 2 used
+  // for setManagedDepartments().
+  const supabase = createAdminClient()
   const { projectId, error } = await createProject(supabase, {
     name,
     description: String(formData.get('description') ?? '').trim() || undefined,
@@ -1117,7 +1145,15 @@ export async function assignTaskAction(
     return { error: 'Project, assignee, and title are all required' }
   }
 
-  const supabase = await createClient()
+  // Service-role client, not the RLS-scoped one: the assigning manager is
+  // not necessarily a member of projectId themselves (assignment is
+  // deliberately unrestricted by project membership — see Global
+  // Constraints), so project_members_write's is_project_member(project_id)
+  // check would reject the auto-add-member insert below if it ran under
+  // the caller's own RLS-scoped session. requireManagerOrAdmin() above
+  // already did the real authorization check; this mirrors Task 5's
+  // createProjectAction for the same reason.
+  const supabase = createAdminClient()
 
   // Assignment is unrestricted by department, but the assignee must be a
   // project member to see the task in that project's views — add them if
@@ -1143,7 +1179,7 @@ export async function assignTaskAction(
 }
 ```
 
-Add the new imports this requires (`addProjectMember` from `@/lib/projects`) to the top of the file alongside the existing ones.
+Add the new imports this requires (`addProjectMember` from `@/lib/projects`, `createAdminClient` from `@/lib/supabase/admin` — check whether `app/manager/actions.ts` already imports `createAdminClient` for a different action in the same file before adding a duplicate import) to the top of the file alongside the existing ones. The existing `createClient` import can stay if other actions in the same file still use it — only `assignTaskAction` switches to the admin client.
 
 - [ ] **Step 2: Write the assign-task form**
 
