@@ -38,6 +38,15 @@ const ADMIN_NAV: NavItem[] = [
   },
 ]
 
+const MANAGER_NAV: NavItem[] = [
+  {
+    href: '/manager',
+    label: 'My Team',
+    icon: Users,
+    isActive: (pathname) => pathname.startsWith('/manager'),
+  },
+]
+
 function initials(name: string): string {
   const parts = name.trim().split(/\s+/)
   const first = parts[0]?.[0] ?? ''
@@ -51,13 +60,13 @@ function SidebarContent({
   roleLabel,
   onNavigate,
 }: {
-  variant: 'employee' | 'admin'
+  variant: 'employee' | 'admin' | 'manager'
   name: string
   roleLabel: string
   onNavigate?: () => void
 }) {
   const pathname = usePathname()
-  const nav = variant === 'admin' ? ADMIN_NAV : EMPLOYEE_NAV
+  const nav = variant === 'admin' ? ADMIN_NAV : variant === 'manager' ? MANAGER_NAV : EMPLOYEE_NAV
 
   return (
     <>
@@ -123,7 +132,7 @@ export function Sidebar({
   name,
   roleLabel,
 }: {
-  variant: 'employee' | 'admin'
+  variant: 'employee' | 'admin' | 'manager'
   name: string
   roleLabel: string
 }) {

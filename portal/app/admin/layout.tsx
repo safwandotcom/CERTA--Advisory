@@ -20,7 +20,7 @@ export default async function AdminLayout({
     .eq('auth_user_id', user.id)
     .single()
 
-  if (!employee || employee.role !== 'admin') redirect('/dashboard')
+  if (!employee || (employee.role !== 'admin' && employee.role !== 'superadmin')) redirect('/dashboard')
 
   return (
     <div className="flex h-screen">

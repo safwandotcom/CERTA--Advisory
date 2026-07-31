@@ -20,5 +20,12 @@ export default async function Home() {
     .eq('auth_user_id', user.id)
     .single()
 
-  redirect(employee?.role === 'admin' ? '/admin' : '/dashboard')
+  const target =
+    employee?.role === 'superadmin' || employee?.role === 'admin'
+      ? '/admin'
+      : employee?.role === 'manager'
+        ? '/manager'
+        : '/dashboard'
+
+  redirect(target)
 }
