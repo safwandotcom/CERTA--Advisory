@@ -4,11 +4,19 @@ import { createClient } from '@/lib/supabase/server'
 import { PageHeader } from '@/components/PageHeader'
 import { card, buttonCoral, statusPillClass, rolePillClass } from '@/lib/ui'
 
-export default async function AdminDashboardPage() {
+export default async function AdminDashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ archived?: string }>
+}) {
+  const { archived } = await searchParams
+  const showArchived = archived === '1'
+
   const supabase = await createClient()
   const { data: employees } = await supabase
     .from('employees')
     .select('*')
+    .eq('archived', showArchived)
     .order('employee_id')
 
   const total = employees?.length ?? 0
@@ -25,7 +33,11 @@ export default async function AdminDashboardPage() {
     <>
       <PageHeader
         title="Employees"
-        subtitle={`${total} ${total === 1 ? 'person' : 'people'} across the organisation`}
+        subtitle={
+          showArchived
+            ? `${total} archived ${total === 1 ? 'employee' : 'employees'}`
+            : `${total} ${total === 1 ? 'person' : 'people'} across the organisation`
+        }
         actions={
           <Link href="/admin/employees/new" className={buttonCoral}>
             <Plus size={16} strokeWidth={2.5} />
@@ -50,7 +62,16 @@ export default async function AdminDashboardPage() {
         ))}
       </div>
 
-      <section className={`${card} mt-6 overflow-x-auto p-0`}>
+      <div className="mb-3 mt-6 flex justify-end">
+        <Link
+          href={showArchived ? '/admin' : '/admin?archived=1'}
+          className="text-[0.8125rem] font-semibold text-ink-muted hover:text-ink"
+        >
+          {showArchived ? '← Back to active employees' : 'Show archived employees'}
+        </Link>
+      </div>
+
+      <section className={`${card} overflow-x-auto p-0`}>
         <table className="w-full min-w-[560px] text-left">
           <thead>
             <tr className="border-b border-border">
@@ -97,7 +118,9 @@ export default async function AdminDashboardPage() {
             {(!employees || employees.length === 0) && (
               <tr>
                 <td colSpan={5} className="px-6 py-10 text-center text-[0.9375rem] text-ink-muted">
-                  No employees yet. Create the first one to get started.
+                  {showArchived
+                    ? 'No archived employees.'
+                    : 'No employees yet. Create the first one to get started.'}
                 </td>
               </tr>
             )}

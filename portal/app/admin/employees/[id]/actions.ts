@@ -1,9 +1,11 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requireAdmin, NOT_AUTHORIZED } from '@/lib/auth'
+import { parseManagedDepartmentIds, setManagedDepartments } from '@/lib/departments'
 
 export type ActionState = { error?: string; success?: string }
 
@@ -19,11 +21,19 @@ export async function updateEmployeeAction(
   }
 
   const supabase = await createClient()
+
+  const { data: currentEmployee } = await supabase
+    .from('employees')
+    .select('role')
+    .eq('id', employeeRowId)
+    .single()
+
   const { error } = await supabase
     .from('employees')
     .update({
       name: String(formData.get('name') ?? ''),
       position: String(formData.get('position') ?? '') || null,
+      department_id: String(formData.get('departmentId') ?? '') || null,
       contact_info: String(formData.get('contactInfo') ?? '') || null,
       join_date: String(formData.get('joinDate') ?? '') || null,
       status: formData.get('status') === 'inactive' ? 'inactive' : 'active',
@@ -31,6 +41,12 @@ export async function updateEmployeeAction(
     .eq('id', employeeRowId)
 
   if (error) return { error: error.message }
+
+  if (currentEmployee?.role === 'manager') {
+    const managedDepartmentIds = parseManagedDepartmentIds(formData)
+    const adminClient = createAdminClient()
+    await setManagedDepartments(adminClient, employeeRowId, managedDepartmentIds)
+  }
 
   revalidatePath(`/admin/employees/${employeeRowId}`)
   return { success: 'Saved' }
@@ -100,4 +116,72 @@ export async function resetPasswordAction(
   if (error) return { error: error.message }
 
   return { success: 'Password reset' }
+}
+
+export async function archiveEmployeeAction(
+  targetAuthUserId: string,
+  targetEmployeeId: string,
+  targetRole: string,
+  _prevState: ActionState,
+  formData: FormData
+): Promise<ActionState> {
+  try {
+    await requireAdmin()
+  } catch {
+    return { error: NOT_AUTHORIZED }
+  }
+
+  const password = String(formData.get('confirmPassword') ?? '')
+  if (!password) {
+    return { error: 'Enter your password to confirm' }
+  }
+
+  if (targetRole === 'superadmin') {
+    return { error: 'The superadmin account cannot be archived' }
+  }
+
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user?.email) {
+    return { error: NOT_AUTHORIZED }
+  }
+
+  // Re-verify the CALLER's own password (not the target employee's) before
+  // allowing this destructive action to proceed.
+  const { error: verifyError } = await supabase.auth.signInWithPassword({
+    email: user.email,
+    password,
+  })
+
+  if (verifyError) {
+    return { error: 'Incorrect password' }
+  }
+
+  if (user.id === targetAuthUserId) {
+    return { error: 'You cannot archive your own account' }
+  }
+
+  const adminClient = createAdminClient()
+  const { data: archivedRows, error } = await adminClient
+    .from('employees')
+    .update({ archived: true, status: 'inactive' })
+    .eq('employee_id', targetEmployeeId)
+    .eq('auth_user_id', targetAuthUserId)
+    .neq('role', 'superadmin')
+    .select('id')
+
+  if (error) return { error: error.message }
+
+  // Re-check at the DB, not the page-load-time targetRole closure: if the
+  // target's role changed to superadmin between page load and submit, the
+  // neq() above matches zero rows and the archive silently doesn't happen.
+  if (!archivedRows || archivedRows.length === 0) {
+    return { error: 'The superadmin account cannot be archived' }
+  }
+
+  revalidatePath('/admin')
+  redirect('/admin')
 }

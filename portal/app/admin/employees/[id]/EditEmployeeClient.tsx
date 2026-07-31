@@ -8,9 +8,11 @@ import {
   updateEmployeeAction,
   uploadDocumentAction,
   resetPasswordAction,
+  archiveEmployeeAction,
   type ActionState,
 } from './actions'
 import { PageHeader } from '@/components/PageHeader'
+import type { Department } from '@/lib/departments'
 import {
   card,
   input,
@@ -27,9 +29,11 @@ type Employee = {
   employee_id: string
   name: string
   position: string | null
+  department_id: string | null
   contact_info: string | null
   join_date: string | null
   status: 'active' | 'inactive'
+  role: 'superadmin' | 'admin' | 'manager' | 'employee'
 }
 
 type Document = { id: string; label: string; file_path: string }
@@ -73,6 +77,8 @@ function SkeletonCard() {
 export default function EditEmployeeClient({ id }: { id: string }) {
   const [employee, setEmployee] = useState<Employee | null>(null)
   const [documents, setDocuments] = useState<Document[]>([])
+  const [departments, setDepartments] = useState<Department[]>([])
+  const [managedDepartmentIds, setManagedDepartmentIds] = useState<string[]>([])
   const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
@@ -81,6 +87,8 @@ export default function EditEmployeeClient({ id }: { id: string }) {
       .then((data) => {
         setEmployee(data.employee)
         setDocuments(data.documents)
+        setDepartments(data.departments)
+        setManagedDepartmentIds(data.managedDepartmentIds)
         setLoaded(true)
       })
   }, [id])
@@ -95,6 +103,15 @@ export default function EditEmployeeClient({ id }: { id: string }) {
   )
   const [resetState, resetAction] = useActionState(
     resetPasswordAction.bind(null, employee?.auth_user_id ?? ''),
+    initialState
+  )
+  const [archiveState, archiveAction] = useActionState(
+    archiveEmployeeAction.bind(
+      null,
+      employee?.auth_user_id ?? '',
+      employee?.employee_id ?? '',
+      employee?.role ?? ''
+    ),
     initialState
   )
 
@@ -147,6 +164,26 @@ export default function EditEmployeeClient({ id }: { id: string }) {
             </div>
 
             <div>
+              <label htmlFor="departmentId" className={labelClass}>
+                Department
+              </label>
+              <select
+                id="departmentId"
+                name="departmentId"
+                required
+                defaultValue={employee.department_id ?? ''}
+                className={input}
+              >
+                <option value="">Select a department</option>
+                {departments.map((dept) => (
+                  <option key={dept.id} value={dept.id}>
+                    {dept.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
               <label htmlFor="status" className={labelClass}>
                 Status
               </label>
@@ -181,6 +218,25 @@ export default function EditEmployeeClient({ id }: { id: string }) {
               />
             </div>
           </div>
+
+          {employee.role === 'manager' && (
+            <div className="mt-5 border-t border-border pt-5 sm:col-span-2">
+              <p className={labelClass}>Departments managed</p>
+              <div className="flex flex-col gap-2">
+                {departments.map((dept) => (
+                  <label key={dept.id} className="flex items-center gap-2 text-[0.9375rem] text-ink">
+                    <input
+                      type="checkbox"
+                      name="managedDepartmentIds"
+                      value={dept.id}
+                      defaultChecked={managedDepartmentIds.includes(dept.id)}
+                    />
+                    {dept.name}
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
 
           <FormMessage state={updateState} />
 
@@ -258,6 +314,38 @@ export default function EditEmployeeClient({ id }: { id: string }) {
             </button>
           </form>
         </div>
+
+        {employee.role !== 'superadmin' && (
+          <div className={`${card} max-w-2xl border border-border`}>
+            <h2 className="font-display text-base font-semibold text-ink">Archive employee</h2>
+            <p className="mt-1 text-[0.8125rem] text-ink-muted">
+              Revokes login and hides this employee from the active list. Their task
+              history, documents, and past reports are kept, and this can be
+              reversed by an engineer directly in the database if needed.
+            </p>
+
+            <form action={archiveAction} className="mt-4 flex flex-col gap-4 sm:max-w-xs">
+              <div>
+                <label htmlFor="confirmPassword" className={labelClass}>
+                  Your password
+                </label>
+                <input
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type="password"
+                  required
+                  className={input}
+                />
+              </div>
+
+              <FormMessage state={archiveState} />
+
+              <button type="submit" className={`${buttonCoral} w-fit`}>
+                Archive employee
+              </button>
+            </form>
+          </div>
+        )}
       </div>
     </>
   )

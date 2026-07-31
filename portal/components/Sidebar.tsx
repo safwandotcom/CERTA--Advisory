@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Users, LogOut, Menu, X } from 'lucide-react'
+import { LayoutDashboard, Users, Building2, FileBarChart, LogOut, Menu, X } from 'lucide-react'
 import { signOutAction } from '@/app/actions'
 
 type NavItem = {
@@ -28,7 +28,28 @@ const ADMIN_NAV: NavItem[] = [
     href: '/admin',
     label: 'Employees',
     icon: Users,
-    isActive: (pathname) => pathname.startsWith('/admin'),
+    isActive: (pathname) => pathname === '/admin' || pathname.startsWith('/admin/employees'),
+  },
+  {
+    href: '/admin/departments',
+    label: 'Departments',
+    icon: Building2,
+    isActive: (pathname) => pathname.startsWith('/admin/departments'),
+  },
+  {
+    href: '/admin/reports',
+    label: 'Reports',
+    icon: FileBarChart,
+    isActive: (pathname) => pathname.startsWith('/admin/reports'),
+  },
+]
+
+const MANAGER_NAV: NavItem[] = [
+  {
+    href: '/manager',
+    label: 'My Team',
+    icon: Users,
+    isActive: (pathname) => pathname.startsWith('/manager'),
   },
 ]
 
@@ -45,13 +66,13 @@ function SidebarContent({
   roleLabel,
   onNavigate,
 }: {
-  variant: 'employee' | 'admin'
+  variant: 'employee' | 'admin' | 'manager'
   name: string
   roleLabel: string
   onNavigate?: () => void
 }) {
   const pathname = usePathname()
-  const nav = variant === 'admin' ? ADMIN_NAV : EMPLOYEE_NAV
+  const nav = variant === 'admin' ? ADMIN_NAV : variant === 'manager' ? MANAGER_NAV : EMPLOYEE_NAV
 
   return (
     <>
@@ -117,7 +138,7 @@ export function Sidebar({
   name,
   roleLabel,
 }: {
-  variant: 'employee' | 'admin'
+  variant: 'employee' | 'admin' | 'manager'
   name: string
   roleLabel: string
 }) {

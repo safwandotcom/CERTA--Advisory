@@ -29,7 +29,10 @@ export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname
   const isApi = path.startsWith('/api/')
 
-  if (!user && (path.startsWith('/dashboard') || path.startsWith('/admin') || isApi)) {
+  if (
+    !user &&
+    (path.startsWith('/dashboard') || path.startsWith('/admin') || path.startsWith('/manager') || isApi)
+  ) {
     // API callers get a status code, not an HTML login page.
     return isApi
       ? NextResponse.json({ error: 'Not authorized' }, { status: 401 })
@@ -43,10 +46,22 @@ export async function middleware(request: NextRequest) {
       .eq('auth_user_id', user.id)
       .single()
 
-    if (employee?.role !== 'admin') {
+    if (employee?.role !== 'admin' && employee?.role !== 'superadmin') {
       return isApi
         ? NextResponse.json({ error: 'Not authorized' }, { status: 403 })
         : NextResponse.redirect(new URL('/dashboard', request.url))
+    }
+  }
+
+  if (user && path.startsWith('/manager')) {
+    const { data: employee } = await supabase
+      .from('employees')
+      .select('role')
+      .eq('auth_user_id', user.id)
+      .single()
+
+    if (!['superadmin', 'admin', 'manager'].includes(employee?.role ?? '')) {
+      return NextResponse.redirect(new URL('/dashboard', request.url))
     }
   }
 
@@ -59,5 +74,5 @@ export async function middleware(request: NextRequest) {
 // '/admin/:path*' already covers /admin/employees/** and the Server Actions
 // POSTed to those page URLs.
 export const config = {
-  matcher: ['/dashboard/:path*', '/admin/:path*', '/api/employees/:path*'],
+  matcher: ['/dashboard/:path*', '/admin/:path*', '/manager/:path*', '/api/employees/:path*'],
 }
