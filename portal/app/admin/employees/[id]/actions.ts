@@ -165,13 +165,22 @@ export async function archiveEmployeeAction(
   }
 
   const adminClient = createAdminClient()
-  const { error } = await adminClient
+  const { data: archivedRows, error } = await adminClient
     .from('employees')
     .update({ archived: true, status: 'inactive' })
     .eq('employee_id', targetEmployeeId)
     .eq('auth_user_id', targetAuthUserId)
+    .neq('role', 'superadmin')
+    .select('id')
 
   if (error) return { error: error.message }
+
+  // Re-check at the DB, not the page-load-time targetRole closure: if the
+  // target's role changed to superadmin between page load and submit, the
+  // neq() above matches zero rows and the archive silently doesn't happen.
+  if (!archivedRows || archivedRows.length === 0) {
+    return { error: 'The superadmin account cannot be archived' }
+  }
 
   revalidatePath('/admin')
   redirect('/admin')
