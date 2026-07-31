@@ -49,8 +49,11 @@ export async function assignTaskAction(
   // Assignment is unrestricted by department, but the assignee must be a
   // project member to see the task in that project's views — add them if
   // they aren't already, rather than making the assigning manager do a
-  // separate step first.
-  await addProjectMember(supabase, projectId, assignedTo)
+  // separate step first. Check the result: if this silently failed, the
+  // task would still get created but the assignee couldn't see it in the
+  // project, defeating the whole point of this step.
+  const { error: memberError } = await addProjectMember(supabase, projectId, assignedTo)
+  if (memberError) return { error: memberError }
 
   const { error } = await createTask(supabase, {
     projectId,
