@@ -141,15 +141,30 @@ create policy "task_comments_insert" on task_comments
     )
   );
 
--- ── Tasks: additional write policy for the new, unrestricted model ───────
+-- ── Tasks: unrestricted assignment for the new model ────────────────────
 -- Coexists with Phase 2's tasks_manager_admin_write (still department-
 -- scoped) until Task 13 removes that one. Permissive policies OR together,
 -- so a manager can write via EITHER the old department-scoped policy or
 -- this new unconditional one — meaning assignment is already unrestricted
 -- as of this migration, even before Task 13 cleans up the old policy.
-create policy "tasks_manager_unrestricted_write" on tasks
-  for all using (public.is_admin() or public.is_manager_or_admin())
+--
+-- Deliberately split from SELECT: the design spec scopes task/project
+-- *visibility* to "own projects" for managers (they see a project's board
+-- only if they're a member), while *assignment* is unrestricted (any
+-- manager can assign into any project, any employee, any department, per
+-- the spec's permission table). A single FOR ALL policy here would grant
+-- unconditional SELECT too, silently widening visibility past what the
+-- spec intends — caught in Task 1's review, fixed before this ever
+-- touched a live database.
+create policy "tasks_manager_unrestricted_insert" on tasks
+  for insert with check (public.is_admin() or public.is_manager_or_admin());
+
+create policy "tasks_manager_unrestricted_update" on tasks
+  for update using (public.is_admin() or public.is_manager_or_admin())
   with check (public.is_admin() or public.is_manager_or_admin());
+
+create policy "tasks_project_member_select" on tasks
+  for select using (public.is_admin() or public.is_project_member(project_id));
 
 create index projects_status_idx on projects (status);
 create index project_members_employee_id_idx on project_members (employee_id);
