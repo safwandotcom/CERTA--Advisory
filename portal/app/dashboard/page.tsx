@@ -2,6 +2,8 @@ import { FileText, Download, Inbox } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { PageHeader } from '@/components/PageHeader'
 import { card, statusPillClass } from '@/lib/ui'
+import { listTasksForEmployee } from '@/lib/tasks'
+import EmployeeTaskStatusSelect from './EmployeeTaskStatusSelect'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -14,6 +16,8 @@ export default async function DashboardPage() {
     .select('*, departments(name)')
     .eq('auth_user_id', user!.id)
     .single()
+
+  const tasks = await listTasksForEmployee(supabase, employee!.id)
 
   const { data: documents } = await supabase
     .from('employee_documents')
@@ -60,6 +64,26 @@ export default async function DashboardPage() {
             </div>
           ))}
         </dl>
+      </section>
+
+      <section className={`${card} mt-6`}>
+        <h2 className="font-display text-base font-semibold text-ink">Your tasks</h2>
+
+        {tasks.length > 0 ? (
+          <ul className="mt-4 divide-y divide-border">
+            {tasks.map((task) => (
+              <li key={task.id} className="flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0">
+                <div>
+                  <p className="text-[0.9375rem] font-semibold text-ink">{task.title}</p>
+                  {task.due_date && <p className="text-[0.8125rem] text-ink-muted">Due {task.due_date}</p>}
+                </div>
+                <EmployeeTaskStatusSelect taskId={task.id} status={task.status} />
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="mt-4 text-[0.9375rem] text-ink-muted">No tasks assigned yet.</p>
+        )}
       </section>
 
       <section className={`${card} mt-6`}>
