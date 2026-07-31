@@ -3,6 +3,7 @@ import { Plus, ChevronRight, Users, UserCheck, ShieldCheck } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { PageHeader } from '@/components/PageHeader'
 import { card, buttonCoral, statusPillClass, rolePillClass } from '@/lib/ui'
+import { ArchiveEmployeeButton } from './ArchiveEmployeeButton'
 
 export default async function AdminDashboardPage({
   searchParams,
@@ -87,7 +88,7 @@ export default async function AdminDashboardPage({
               <th className="px-6 py-3 text-xs font-semibold uppercase tracking-[0.04em] text-ink-muted">
                 Status
               </th>
-              <th className="w-10 px-6 py-3" />
+              <th className="w-32 px-6 py-3" />
             </tr>
           </thead>
           <tbody>
@@ -108,10 +109,20 @@ export default async function AdminDashboardPage({
                 <td className="px-6 py-3.5">
                   <span className={statusPillClass(emp.status)}>{emp.status}</span>
                 </td>
-                <td className="px-6 py-3.5 text-right">
-                  <Link href={`/admin/employees/${emp.id}`} aria-label={`View ${emp.name}`}>
-                    <ChevronRight size={16} strokeWidth={2} className="ml-auto text-ink-muted" />
-                  </Link>
+                <td className="px-6 py-3.5">
+                  <div className="flex items-center justify-end gap-4">
+                    {!showArchived && emp.role !== 'superadmin' && (
+                      <ArchiveEmployeeButton
+                        authUserId={emp.auth_user_id}
+                        employeeId={emp.employee_id}
+                        role={emp.role}
+                        name={emp.name}
+                      />
+                    )}
+                    <Link href={`/admin/employees/${emp.id}`} aria-label={`View ${emp.name}`}>
+                      <ChevronRight size={16} strokeWidth={2} className="text-ink-muted" />
+                    </Link>
+                  </div>
                 </td>
               </tr>
             ))}
