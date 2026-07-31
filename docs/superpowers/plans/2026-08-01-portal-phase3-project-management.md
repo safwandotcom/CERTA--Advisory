@@ -388,12 +388,13 @@ Update the `Task` type to add:
   labels: string[]
 ```
 
-Update `createTask()`'s input type and insert call to accept and write the new fields:
+Update `createTask()`'s input type and insert call to accept and write the new fields. Keep `departmentId` as a still-accepted (optional) parameter alongside the new optional `projectId`, so the existing Phase 2 caller (`assignTaskAction` in `app/manager/actions.ts`, which still only knows about `departmentId` until Task 7 rewrites it) keeps compiling and working exactly as before — this task must not leave the build in a broken intermediate state:
 ```ts
 export async function createTask(
   supabase: SupabaseClient,
   input: {
-    projectId: string
+    projectId?: string
+    departmentId?: string // still accepted for the pre-Task-7 caller; Task 7 stops passing this
     assignedTo: string
     assignedBy: string
     title: string
@@ -410,8 +411,8 @@ export async function createTask(
     .single()
 
   const { error } = await supabase.from('tasks').insert({
-    project_id: input.projectId,
-    department_id: employee?.department_id ?? null,
+    project_id: input.projectId ?? null,
+    department_id: input.departmentId ?? employee?.department_id ?? null,
     assigned_to: input.assignedTo,
     assigned_by: input.assignedBy,
     title: input.title,
@@ -424,7 +425,7 @@ export async function createTask(
 }
 ```
 
-Note this changes `createTask()`'s required input from `departmentId` to `projectId` — `department_id` is now derived from the assignee's current department (the informational-snapshot behavior described in the design spec), not passed in directly. This is a breaking signature change; Task 7 (the new assign-task form) is the only caller and will be written against this new signature, but if any other caller exists by the time this task runs, update it too.
+Task 7 will pass `projectId` and stop passing `departmentId` (letting it fall back to the assignee's current department automatically, matching the design spec's informational-snapshot behavior) — but that's Task 7's change to make, not this one's.
 
 Add the new project-scoped list function, using the same assignee-name-embed pattern already proven safe in this file:
 ```ts
@@ -452,7 +453,7 @@ cd portal
 npx tsc --noEmit
 ```
 
-Expected: errors in any existing caller of `createTask()` that still passes `departmentId` — fix those call sites now to pass `projectId` instead. (As of this task, `app/manager/actions.ts`'s `assignTaskAction` is the only caller; it will be rewritten in Task 7, so a temporary type error there is expected and acceptable to leave for Task 7 to resolve — note this explicitly in your report rather than silently patching Task 7's file early.)
+Expected: no errors — both `projectId` and `departmentId` are optional, so the existing `assignTaskAction` caller (still passing `departmentId`) keeps compiling unchanged. If you see an error here, something is wrong with this task's change, not an acceptable known gap — fix it before committing.
 
 - [ ] **Step 4: Commit**
 
@@ -803,15 +804,16 @@ git commit -m "Add Projects list page and project creation"
 
 **Files:**
 - Create: `portal/app/projects/[id]/page.tsx`
-- Create: `portal/app/projects/[id]/ViewSwitcher.tsx`
+- Create: `portal/app/projects/[id]/ProjectBoard.tsx`
 - Create: `portal/app/projects/[id]/BoardView.tsx`
 - Create: `portal/app/projects/[id]/ListView.tsx`
 - Create: `portal/app/projects/[id]/CalendarView.tsx`
 - Create: `portal/app/projects/[id]/TaskStatusSelect.tsx`
+- Create: `portal/components/ViewSwitcher.tsx`
 
 **Interfaces:**
 - Consumes: `listTasksForProject()` (Task 3), `Task`/`TaskPriority`/`TaskStatus` (Task 3), `updateTaskStatusAction` (reuse Phase 2's `app/manager/actions.ts` export — it's already unconditional for admin/manager via `requireManagerOrAdmin()`, so no new action is needed here).
-- Produces: `/projects/[id]` route; a `ViewSwitcher` client component reusable by Task 9 (the employee personal view) — export it from this task's location so Task 9 can import it, or move it to `components/` if that's cleaner once written (your call — note whichever you choose in your report so Task 9's implementer knows where to import from).
+- Produces: `/projects/[id]` route; `ViewMode`/`useViewMode`/`ViewSwitcher` exported from `portal/components/ViewSwitcher.tsx` (not under `app/projects/[id]/` — it lives in the shared `components/` directory specifically because Task 9 imports it verbatim for the employee personal view).
 
 - [ ] **Step 1: Write the view switcher**
 
@@ -1023,7 +1025,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
 }
 ```
 
-Note: `ProjectBoard` (a client component wrapping the view switcher + the three view components, since `useViewMode` is a client hook) doesn't exist yet in the files list above — write it now as part of this step, at `portal/app/projects/[id]/ProjectBoard.tsx`:
+`ProjectBoard` is the client component wrapping the view switcher + the three view components (needed because `useViewMode` is a client hook) — write it at `portal/app/projects/[id]/ProjectBoard.tsx`:
 ```tsx
 'use client'
 
@@ -1254,6 +1256,7 @@ git commit -m "Add unrestricted task assignment with priority, labels, auto-memb
 - Create: `portal/app/projects/[id]/tasks/[taskId]/CommentThread.tsx`
 - Modify: `portal/app/projects/[id]/BoardView.tsx`
 - Modify: `portal/app/projects/[id]/ListView.tsx`
+- Modify: `portal/app/projects/[id]/ProjectBoard.tsx`
 
 **Interfaces:**
 - Consumes: `listSubtasks()`/`createSubtask()`/`toggleSubtask()`, `listComments()`/`createComment()` (Task 4).
@@ -1825,7 +1828,7 @@ Note `tasks.project_id` has exactly one FK to `projects` and `tasks.department_i
 
 - [ ] **Step 3: Update the caller**
 
-Read `portal/app/manager/page.tsx` in full — wait, this file is being replaced by `/projects` in this phase (Task 5/6). Check whether `/manager`'s monthly-report-popup call site should move to `/projects/page.tsx` instead. If `/manager` still exists at this point in the plan (it does — Task 13 is what removes Phase 2's department-scoped code, and that hasn't run yet), leave `/manager`'s call alone for now and add the new call to `portal/app/projects/page.tsx`: fetch the caller's `created_at` (add this to the `AuthorizedEmployee` type / `loadCallerOrThrow()`'s select if not already present — check `lib/auth.ts` first), the caller's projects (`listProjects`), call `getUnreportedPriorMonths(supabase, caller.id, caller.created_at, projects)` when `caller.role === 'manager'`, and render `<MonthlyReportModal months={...} />` at the top of the returned fragment, same placement pattern as Phase 2's `/manager` page.
+`/manager/page.tsx` still exists at this point in the plan — Task 13 is what deletes it, and that hasn't run yet — so leave it untouched in this task. Add the new monthly-report call to `portal/app/projects/page.tsx` instead: fetch the caller's `created_at` (add this to the `AuthorizedEmployee` type / `loadCallerOrThrow()`'s select if not already present — check `lib/auth.ts` first), the caller's projects (`listProjects`), call `getUnreportedPriorMonths(supabase, caller.id, caller.created_at, projects)` when `caller.role === 'manager'`, and render `<MonthlyReportModal months={...} />` at the top of the returned fragment, same placement pattern as Phase 2's `/manager` page used.
 
 - [ ] **Step 4: Update `submitMonthlyReportAction`**
 
