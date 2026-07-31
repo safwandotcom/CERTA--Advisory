@@ -13,7 +13,7 @@ export default async function DashboardPage() {
 
   const { data: employee } = await supabase
     .from('employees')
-    .select('*, departments(name)')
+    .select('*, departments!employees_department_id_fkey(name)')
     .eq('auth_user_id', user!.id)
     .single()
 
