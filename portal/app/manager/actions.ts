@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { requireManagerOrAdmin, NOT_AUTHORIZED } from '@/lib/auth'
 import { createTask, updateTaskStatus, type TaskStatus } from '@/lib/tasks'
+import { periodMonthRange } from '@/lib/reports'
 
 export type ActionState = { error?: string; success?: string }
 
@@ -69,9 +70,22 @@ export async function submitMonthlyReportAction(
     return { error: NOT_AUTHORIZED }
   }
 
+  // Monthly reports are a manager-only responsibility — admin/superadmin
+  // don't submit them (design spec's permission table). requireManagerOrAdmin()
+  // only checks role membership, not this narrower rule, so enforce it here.
+  if (caller.role !== 'manager') {
+    return { error: 'Only a department manager can submit its monthly report' }
+  }
+
   const supabase = await createClient()
 
-  const { data: tasks } = await supabase.from('tasks').select('*').eq('department_id', departmentId)
+  const { start, end } = periodMonthRange(periodMonth)
+  const { data: tasks } = await supabase
+    .from('tasks')
+    .select('*')
+    .eq('department_id', departmentId)
+    .gte('created_at', start)
+    .lt('created_at', end)
 
   const statusCounts: Record<string, number> = { NEW: 0, STARTED: 0, PENDING: 0, COMPLETED: 0 }
   for (const t of tasks ?? []) {

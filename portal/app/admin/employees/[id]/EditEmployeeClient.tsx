@@ -170,6 +170,7 @@ export default function EditEmployeeClient({ id }: { id: string }) {
               <select
                 id="departmentId"
                 name="departmentId"
+                required
                 defaultValue={employee.department_id ?? ''}
                 className={input}
               >

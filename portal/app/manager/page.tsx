@@ -28,7 +28,10 @@ export default async function ManagerPage() {
     .eq('archived', false)
 
   const tasks = await listTasksForDepartments(supabase, managedIds)
-  const unreportedMonths = await getUnreportedPriorMonths(supabase, departments)
+  // Monthly reporting is a manager-only responsibility (admin/superadmin
+  // don't submit reports — see the design spec's permission table) — an
+  // admin visiting /manager must never see or be able to trigger it.
+  const unreportedMonths = caller.role === 'manager' ? await getUnreportedPriorMonths(supabase, departments) : []
 
   return (
     <>

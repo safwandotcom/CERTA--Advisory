@@ -5,7 +5,11 @@ import { createClient } from '@/lib/supabase/server'
 import { requireAdmin } from '@/lib/auth'
 
 export async function createDepartmentAction(formData: FormData) {
-  await requireAdmin()
+  try {
+    await requireAdmin()
+  } catch {
+    return
+  }
   const name = String(formData.get('name') ?? '').trim()
   if (!name) return
 
@@ -15,7 +19,11 @@ export async function createDepartmentAction(formData: FormData) {
 }
 
 export async function archiveDepartmentAction(departmentId: string) {
-  await requireAdmin()
+  try {
+    await requireAdmin()
+  } catch {
+    return
+  }
   const supabase = await createClient()
   await supabase.from('departments').update({ archived: true }).eq('id', departmentId)
   revalidatePath('/admin/departments')
