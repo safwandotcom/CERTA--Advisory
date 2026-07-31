@@ -20,8 +20,8 @@ export default function ProjectBoard({
       <div className="mb-4 flex justify-end">
         <ViewSwitcher mode={mode} onChange={setMode} />
       </div>
-      {mode === 'board' && <BoardView tasks={tasks} />}
-      {mode === 'list' && <ListView tasks={tasks} />}
+      {mode === 'board' && <BoardView projectId={projectId} tasks={tasks} />}
+      {mode === 'list' && <ListView projectId={projectId} tasks={tasks} />}
       {mode === 'calendar' && <CalendarView tasks={tasks} />}
     </>
   )

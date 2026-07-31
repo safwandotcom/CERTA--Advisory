@@ -1,8 +1,15 @@
+import Link from 'next/link'
 import type { Task } from '@/lib/tasks'
 import { card } from '@/lib/ui'
 import TaskStatusSelect from './TaskStatusSelect'
 
-export default function ListView({ tasks }: { tasks: (Task & { assignee_name: string })[] }) {
+export default function ListView({
+  projectId,
+  tasks,
+}: {
+  projectId: string
+  tasks: (Task & { assignee_name: string })[]
+}) {
   return (
     <section className={`${card} overflow-x-auto p-0`}>
       <table className="w-full min-w-[640px] text-left">
@@ -18,7 +25,11 @@ export default function ListView({ tasks }: { tasks: (Task & { assignee_name: st
         <tbody>
           {tasks.map((task) => (
             <tr key={task.id} className="border-b border-border last:border-0">
-              <td className="px-6 py-3.5 text-[0.9375rem] font-semibold text-ink">{task.title}</td>
+              <td className="px-6 py-3.5 text-[0.9375rem] font-semibold text-ink">
+                <Link href={`/projects/${projectId}/tasks/${task.id}`} className="hover:underline">
+                  {task.title}
+                </Link>
+              </td>
               <td className="px-6 py-3.5 text-[0.9375rem] text-ink">{task.assignee_name}</td>
               <td className="px-6 py-3.5 text-[0.9375rem] capitalize text-ink-muted">{task.priority}</td>
               <td className="px-6 py-3.5 text-[0.9375rem] text-ink-muted">{task.due_date ?? '—'}</td>
