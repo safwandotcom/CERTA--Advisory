@@ -1262,7 +1262,15 @@ Note this deliberately offers **every active employee company-wide** in the assi
 
 - [ ] **Step 3: Wire it into the project detail page**
 
-Modify `portal/app/projects/[id]/page.tsx`: fetch all active employees (`supabase.from('employees').select('id, employee_id, name').eq('archived', false)`) and render `<AssignTaskForm projectId={id} employees={allEmployees ?? []} />` above `<ProjectBoard ... />`.
+Modify `portal/app/projects/[id]/page.tsx`: fetch all active employees and render `<AssignTaskForm projectId={id} employees={allEmployees ?? []} />` above `<ProjectBoard ... />`. Use `createAdminClient()` (from `@/lib/supabase/admin`) for this specific read, not the page's existing RLS-scoped `supabase` — the same reason Task 5's member picker needed it: Phase 2's `employees` RLS still scopes a manager's own SELECT to their managed department(s), so the assignee dropdown would silently shrink to just that manager's department otherwise, contradicting "assign to any employee, any department." Task 6's `page.tsx` already has a `supabase` in scope for other reads (`listTasksForProject`, the project fetch) — those stay on the RLS-scoped client; only add a second, admin client for this one employee list:
+```ts
+const adminClient = createAdminClient()
+const { data: allEmployees } = await adminClient
+  .from('employees')
+  .select('id, employee_id, name')
+  .eq('archived', false)
+  .order('name')
+```
 
 - [ ] **Step 4: Type-check and manually verify**
 
