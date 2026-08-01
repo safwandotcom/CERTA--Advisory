@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { PageHeader } from '@/components/PageHeader'
 import { card, statusPillClass } from '@/lib/ui'
 import { listTasksForEmployee } from '@/lib/tasks'
-import EmployeeTaskStatusSelect from './EmployeeTaskStatusSelect'
+import MyTasksView from './MyTasksView'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -67,23 +67,7 @@ export default async function DashboardPage() {
       </section>
 
       <section className={`${card} mt-6`}>
-        <h2 className="font-display text-base font-semibold text-ink">Your tasks</h2>
-
-        {tasks.length > 0 ? (
-          <ul className="mt-4 divide-y divide-border">
-            {tasks.map((task) => (
-              <li key={task.id} className="flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0">
-                <div>
-                  <p className="text-[0.9375rem] font-semibold text-ink">{task.title}</p>
-                  {task.due_date && <p className="text-[0.8125rem] text-ink-muted">Due {task.due_date}</p>}
-                </div>
-                <EmployeeTaskStatusSelect taskId={task.id} status={task.status} />
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="mt-4 text-[0.9375rem] text-ink-muted">No tasks assigned yet.</p>
-        )}
+        <MyTasksView tasks={tasks} />
       </section>
 
       <section className={`${card} mt-6`}>

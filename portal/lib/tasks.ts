@@ -98,11 +98,15 @@ export async function listTasksForProject(
 export async function listTasksForEmployee(
   supabase: SupabaseClient,
   employeeId: string
-): Promise<Task[]> {
+): Promise<(Task & { project_name: string | null })[]> {
   const { data } = await supabase
     .from('tasks')
-    .select('*')
+    .select('*, projects(name)')
     .eq('assigned_to', employeeId)
     .order('created_at', { ascending: false })
-  return data ?? []
+
+  return (data ?? []).map((row) => ({
+    ...row,
+    project_name: (row as unknown as { projects: { name: string } | null }).projects?.name ?? null,
+  }))
 }
