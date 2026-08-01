@@ -24,5 +24,34 @@ create trigger tasks_stamp_department
 -- rather than pointlessly recreating an identical, now-unused view.
 drop view if exists manager_roster;
 
+-- tasks_select and task_status_history_select (0002) both reference
+-- is_manager_of() in their qual — is_manager_of(uuid) cannot be dropped
+-- while either policy still depends on it (error 2BP01, caught by actually
+-- running this migration before it was assumed complete).
+-- tasks_project_member_select (Task 1) already covers project-based
+-- visibility as a separate, additional permissive policy, so removing the
+-- is_manager_of() clause here only drops now-redundant department-manager
+-- visibility; the remaining is_admin() and assigned_to=self clauses are
+-- unchanged from the original.
+drop policy "tasks_select" on tasks;
+create policy "tasks_select" on tasks
+  for select using (
+    public.is_admin()
+    or exists (select 1 from employees e where e.id = tasks.assigned_to and e.auth_user_id = auth.uid())
+  );
+
+drop policy "task_status_history_select" on task_status_history;
+create policy "task_status_history_select" on task_status_history
+  for select using (
+    exists (
+      select 1 from tasks t
+      where t.id = task_status_history.task_id
+      and (
+        public.is_admin()
+        or exists (select 1 from employees e where e.id = t.assigned_to and e.auth_user_id = auth.uid())
+      )
+    )
+  );
+
 drop table department_managers;
 drop function public.is_manager_of(uuid);
