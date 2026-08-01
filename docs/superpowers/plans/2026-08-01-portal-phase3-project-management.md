@@ -2010,7 +2010,15 @@ git commit -m "Update admin reports view for per-manager reporting"
 - Modify: `portal/app/manager/actions.ts` (remove now-dead code, keep `updateTaskStatusAction`/`submitMonthlyReportAction`/`assignTaskAction` — these are still used, just move them or leave in place, your call, note which in your report)
 - Modify: `portal/components/Sidebar.tsx` (remove the `/manager` nav item if `/manager` is deleted)
 - Modify: `portal/middleware.ts` (remove the `/manager` protection block if the route no longer exists)
-- Modify: `portal/lib/departments.ts` (remove `listManagedDepartmentIds`/`setManagedDepartments`/`parseManagedDepartmentIds` — no longer called by anything once `/manager`'s old page is gone; confirm with a repo-wide grep before deleting each one, the same verification discipline Phase 2 Task 6 used before dropping the legacy `department` column)
+- Modify: `portal/lib/departments.ts` (remove `listManagedDepartmentIds`/`setManagedDepartments`/`parseManagedDepartmentIds`)
+- Modify: `portal/app/admin/employees/new/actions.ts` (remove the `role === 'manager'` → `setManagedDepartments` branch and its now-unused import)
+- Modify: `portal/app/admin/employees/new/NewEmployeeClient.tsx` (remove the `role === 'manager'` "Departments managed" checkbox block)
+- Modify: `portal/app/admin/employees/[id]/actions.ts` (remove the `currentEmployee?.role === 'manager'` → `setManagedDepartments` branch and its now-unused import; leave the rest of `updateEmployeeAction` — the employee's own `departmentId` field and the task-department-migration-on-move logic — untouched, that's a different, still-valid concept)
+- Modify: `portal/app/admin/employees/[id]/EditEmployeeClient.tsx` (remove the `employee.role === 'manager'` "Departments managed" checkbox block)
+- Modify: `portal/app/api/employees/[id]/route.ts` (remove `listManagedDepartmentIds` import/call and the `managedDepartmentIds` field from the JSON response; keep `departments`, still used to populate the employee's own `departmentId` select)
+- Modify: `portal/lib/departments.test.ts` (remove the `parseManagedDepartmentIds` describe block; keep any other tests in the file, if present)
+
+**A pre-flight repo-wide grep (already run once while preparing this task) found more live callers than a first read of `/manager/page.tsx` alone would suggest** — the admin employee create/edit forms still have a "Departments managed" checkbox UI wired to `department_managers` via `setManagedDepartments`/`listManagedDepartmentIds`, entirely separate from `/manager/page.tsx`. All of the files above are real, current callers as of this plan being written — this is not a hypothetical "confirm nothing else references it" step, it's a known, enumerated list. Still re-run the grep yourself in Step 1 in case anything changed since, but expect to find exactly these files, not just `/manager/page.tsx`.
 
 **Interfaces:**
 - Produces: the live database no longer has `department_managers`, `is_manager_of()`, or the old cross-department-rejecting version of `validate_task_assignment()`.
@@ -2019,7 +2027,7 @@ git commit -m "Update admin reports view for per-manager reporting"
 
 - [ ] **Step 1: Repo-wide grep before writing the migration**
 
-Before touching any schema, grep the whole `portal/` tree for `is_manager_of`, `department_managers`, `listManagedDepartmentIds`, `setManagedDepartments`, `parseManagedDepartmentIds` — confirm every application-code reference has already been removed or replaced (Tasks 5–12 should have made `/manager`'s old page the only remaining caller). If anything still references them, stop and fix that call site as part of this task before proceeding to the migration.
+Before touching any schema, grep the whole `portal/` tree for `is_manager_of`, `department_managers`, `listManagedDepartmentIds`, `setManagedDepartments`, `parseManagedDepartmentIds` — confirm the caller list matches the **Files** section above (nine files: the five originally expected plus the admin employee create/edit forms, their actions, and the employee API route). If anything else turns up beyond that list, stop and fix that call site as part of this task before proceeding to the migration.
 
 - [ ] **Step 2: Write the migration**
 
@@ -2027,7 +2035,6 @@ Before touching any schema, grep the whole `portal/` tree for `is_manager_of`, `
 ```sql
 drop policy "employees_select_managed_department" on employees;
 drop policy "tasks_manager_admin_write" on tasks;
-drop policy "tasks_employee_update_own" on tasks; -- recreated below, unchanged in substance, dropped only because it's redundant with tasks_manager_unrestricted_write's coverage — actually keep this one if it still serves the employee-self-update path independent of the manager policy; verify before dropping (see note)
 
 drop trigger "tasks_validate_assignment" on tasks;
 drop function public.validate_task_assignment();
@@ -2058,11 +2065,11 @@ drop table department_managers;
 drop function public.is_manager_of(uuid);
 ```
 
-**Before running this**, re-verify the note left inline above about `tasks_employee_update_own` — read the current live RLS policy list on `tasks` via `\d+ tasks` in the SQL Editor (or `select policyname, cmd, qual from pg_policies where tablename = 'tasks'`) and confirm whether `tasks_employee_update_own` is still needed alongside `tasks_manager_unrestricted_write` (added in Task 1) before dropping it — if employees still need their own narrower update path (they do — `tasks_manager_unrestricted_write` only grants managers/admins, not the assignee themselves), **do not drop `tasks_employee_update_own`**, remove that line from the migration.
+**`tasks_employee_update_own` is deliberately NOT in this migration — do not add a line dropping it.** `tasks_manager_unrestricted_update` (Task 1) only grants managers/admins write access; a plain employee updating their own assigned task's status (`updateOwnTaskStatusAction`, used by every `EmployeeTaskStatusSelect` on `/dashboard`) depends entirely on `tasks_employee_update_own`'s narrower `assigned_to = auth.uid()`-style check, which nothing else replaces. Dropping it would silently break every employee's ability to update their own task status. If you want to double check before running this, `select policyname, cmd, qual from pg_policies where tablename = 'tasks';` in the SQL Editor will show it's still there and still needed.
 
 - [ ] **Step 3: Delete `/manager`'s old page and prune dead code**
 
-Delete `portal/app/manager/page.tsx`. Remove the now-unused `is_manager_of`-dependent code paths from `portal/app/manager/actions.ts` if any remain (there shouldn't be, if Task 7 rewrote `assignTaskAction` correctly — confirm by reading the file, don't blindly delete). Remove `listManagedDepartmentIds`/`setManagedDepartments`/`parseManagedDepartmentIds` from `portal/lib/departments.ts` per Step 1's grep confirmation. Update `Sidebar.tsx` and `middleware.ts` to drop the `/manager` route entirely (redirect `/manager` to `/projects` in middleware instead of just removing the block, so any bookmarked links don't 404 — add `if (path === '/manager') return NextResponse.redirect(new URL('/projects', request.url))` near the top of the middleware function).
+Delete `portal/app/manager/page.tsx`. Remove the now-unused `is_manager_of`-dependent code paths from `portal/app/manager/actions.ts` if any remain (there shouldn't be, if Task 7 rewrote `assignTaskAction` correctly — confirm by reading the file, don't blindly delete). Remove `listManagedDepartmentIds`/`setManagedDepartments`/`parseManagedDepartmentIds` from `portal/lib/departments.ts`. Remove the "Departments managed" checkbox UI and its supporting action/route code from the four admin employee-form files listed above (each removal is a self-contained `role === 'manager'`-gated block — read each file in full first, remove only that block plus its now-unused import, leave everything else, including the employee's own single `departmentId` field, untouched). Remove the `parseManagedDepartmentIds` test block from `portal/lib/departments.test.ts`. Update `Sidebar.tsx` and `middleware.ts` to drop the `/manager` route entirely (redirect `/manager` to `/projects` in middleware instead of just removing the block, so any bookmarked links don't 404 — add `if (path === '/manager') return NextResponse.redirect(new URL('/projects', request.url))` near the top of the middleware function).
 
 - [ ] **Step 4: Type-check, lint, test**
 
