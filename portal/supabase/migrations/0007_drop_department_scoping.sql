@@ -18,13 +18,11 @@ create trigger tasks_stamp_department
   before insert or update of assigned_to on tasks
   for each row execute function public.stamp_task_department();
 
+-- manager_roster (0004) existed solely to back the old /manager page's
+-- roster display; that page is deleted by this migration and nothing else
+-- queries this view (confirmed via repo-wide grep) — drop it outright
+-- rather than pointlessly recreating an identical, now-unused view.
 drop view if exists manager_roster;
-create view manager_roster
-with (security_invoker = true) as
-select id, employee_id, name, department_id, status
-from employees
-where archived = false;
-grant select on manager_roster to authenticated;
 
 drop table department_managers;
 drop function public.is_manager_of(uuid);
