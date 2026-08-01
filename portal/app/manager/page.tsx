@@ -2,9 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { requireManagerOrAdmin } from '@/lib/auth'
 import { listDepartments, listManagedDepartmentIds } from '@/lib/departments'
 import { listTasksForDepartments } from '@/lib/tasks'
-import { getUnreportedPriorMonths } from '@/lib/reports'
 import { PageHeader } from '@/components/PageHeader'
-import { MonthlyReportModal } from '@/components/MonthlyReportModal'
 import { card } from '@/lib/ui'
 import AssignTaskForm from './AssignTaskForm'
 import TaskStatusSelect from './TaskStatusSelect'
@@ -31,14 +29,9 @@ export default async function ManagerPage() {
     .in('department_id', activeManagedIds.length > 0 ? activeManagedIds : ['00000000-0000-0000-0000-000000000000'])
 
   const tasks = await listTasksForDepartments(supabase, activeManagedIds)
-  // Monthly reporting is a manager-only responsibility (admin/superadmin
-  // don't submit reports — see the design spec's permission table) — an
-  // admin visiting /manager must never see or be able to trigger it.
-  const unreportedMonths = caller.role === 'manager' ? await getUnreportedPriorMonths(supabase, departments) : []
 
   return (
     <>
-      <MonthlyReportModal months={unreportedMonths} />
       <PageHeader title="My Team" subtitle={`${departments.length} department(s), ${roster?.length ?? 0} people`} />
 
       <AssignTaskForm departments={departments} roster={roster ?? []} />

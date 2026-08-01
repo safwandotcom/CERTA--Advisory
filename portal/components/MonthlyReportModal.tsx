@@ -17,7 +17,7 @@ export function MonthlyReportModal({ months }: { months: UnreportedMonth[] }) {
   async function handleSubmit() {
     setSubmitting(true)
     setError(null)
-    const result = await submitMonthlyReportAction(current.departmentId, current.periodMonth)
+    const result = await submitMonthlyReportAction(current.periodMonth)
     setSubmitting(false)
     if (result.error) {
       setError(result.error)
@@ -30,7 +30,7 @@ export function MonthlyReportModal({ months }: { months: UnreportedMonth[] }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 p-4">
       <div className="w-full max-w-md rounded-[16px] bg-white p-6">
         <h2 className="font-display text-lg font-semibold text-ink">
-          Monthly report — {current.departmentName}
+          Monthly report — {current.projectNames.join(', ')}
         </h2>
         <p className="mt-1 text-[0.8125rem] text-ink-muted">
           For {current.periodMonth.slice(0, 7)}. This submits regardless of whether every task is

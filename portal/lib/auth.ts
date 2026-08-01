@@ -7,6 +7,7 @@ export type AuthorizedEmployee = {
   name: string
   role: 'superadmin' | 'admin' | 'manager' | 'employee'
   status: 'active' | 'inactive'
+  created_at: string
 }
 
 // Deliberately generic: never leak whether the caller was unauthenticated,
@@ -27,7 +28,7 @@ async function loadCallerOrThrow(): Promise<AuthorizedEmployee> {
 
   const { data: employee, error } = await supabase
     .from('employees')
-    .select('id, auth_user_id, employee_id, name, role, status')
+    .select('id, auth_user_id, employee_id, name, role, status, created_at')
     .eq('auth_user_id', user.id)
     .single()
 

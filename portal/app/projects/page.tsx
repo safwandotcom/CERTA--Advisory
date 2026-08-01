@@ -3,12 +3,14 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requireManagerOrAdmin } from '@/lib/auth'
 import { listProjects } from '@/lib/projects'
+import { getUnreportedPriorMonths } from '@/lib/reports'
 import { PageHeader } from '@/components/PageHeader'
+import { MonthlyReportModal } from '@/components/MonthlyReportModal'
 import { card } from '@/lib/ui'
 import NewProjectForm from './NewProjectForm'
 
 export default async function ProjectsPage() {
-  await requireManagerOrAdmin()
+  const caller = await requireManagerOrAdmin()
   const supabase = await createClient()
 
   // Phase 3's whole point is that a manager can involve any employee from
@@ -28,8 +30,15 @@ export default async function ProjectsPage() {
 
   const projects = await listProjects(supabase)
 
+  const unreportedMonths =
+    caller.role === 'manager'
+      ? await getUnreportedPriorMonths(supabase, caller.id, caller.created_at, projects)
+      : []
+
   return (
     <>
+      <MonthlyReportModal months={unreportedMonths} />
+
       <PageHeader title="Projects" subtitle={`${projects.length} active project(s)`} />
 
       <NewProjectForm employees={allEmployees ?? []} />

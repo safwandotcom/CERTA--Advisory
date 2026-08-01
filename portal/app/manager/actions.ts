@@ -86,10 +86,7 @@ export async function updateTaskStatusAction(taskId: string, status: TaskStatus)
   return { success: 'Updated' }
 }
 
-export async function submitMonthlyReportAction(
-  departmentId: string,
-  periodMonth: string
-): Promise<ActionState> {
+export async function submitMonthlyReportAction(periodMonth: string): Promise<ActionState> {
   let caller
   try {
     caller = await requireManagerOrAdmin()
@@ -105,14 +102,13 @@ export async function submitMonthlyReportAction(
   }
 
   const supabase = await createClient()
+  const { data: memberships } = await supabase.from('project_members').select('project_id').eq('employee_id', caller.id)
+  const projectIds = (memberships ?? []).map((m) => m.project_id)
 
   const { start, end } = periodMonthRange(periodMonth)
-  const { data: tasks } = await supabase
-    .from('tasks')
-    .select('*')
-    .eq('department_id', departmentId)
-    .gte('created_at', start)
-    .lt('created_at', end)
+  const { data: tasks } = projectIds.length
+    ? await supabase.from('tasks').select('*').in('project_id', projectIds).gte('created_at', start).lt('created_at', end)
+    : { data: [] }
 
   const statusCounts: Record<string, number> = { NEW: 0, STARTED: 0, PENDING: 0, COMPLETED: 0 }
   for (const t of tasks ?? []) {
@@ -120,13 +116,12 @@ export async function submitMonthlyReportAction(
   }
 
   const { error } = await supabase.from('monthly_reports').insert({
-    department_id: departmentId,
     manager_id: caller.id,
     period_month: periodMonth,
     stats: { statusCounts, tasks: tasks ?? [] },
   })
 
   if (error) return { error: error.message }
-  revalidatePath('/manager')
+  revalidatePath('/projects')
   return { success: 'Report submitted' }
 }
