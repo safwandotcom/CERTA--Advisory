@@ -12,6 +12,9 @@ test('admin creates a new employee', async ({ page }) => {
   await page.getByLabel('Employee ID').fill(newId)
   await page.getByLabel('Full name').fill('Test Employee')
   await page.getByLabel('Initial password').fill('temporary-password-123')
+  // Department is a required field (see NewEmployeeClient.tsx) — select the
+  // first real option, skipping the "Select a department" placeholder.
+  await page.getByLabel('Department').selectOption({ index: 1 })
   await page.getByRole('button', { name: /create employee/i }).click()
 
   await expect(page).toHaveURL(/\/admin$/)
