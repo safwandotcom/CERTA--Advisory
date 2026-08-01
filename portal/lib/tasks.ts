@@ -62,23 +62,6 @@ export async function updateTaskStatus(
   return { error: error?.message }
 }
 
-export async function listTasksForDepartments(
-  supabase: SupabaseClient,
-  departmentIds: string[]
-): Promise<(Task & { assignee_name: string })[]> {
-  if (departmentIds.length === 0) return []
-  const { data } = await supabase
-    .from('tasks')
-    .select('*, employees!tasks_assigned_to_fkey(name)')
-    .in('department_id', departmentIds)
-    .order('created_at', { ascending: false })
-
-  return (data ?? []).map((row) => ({
-    ...row,
-    assignee_name: (row as unknown as { employees: { name: string } }).employees?.name ?? 'Unknown',
-  }))
-}
-
 export async function listTasksForProject(
   supabase: SupabaseClient,
   projectId: string

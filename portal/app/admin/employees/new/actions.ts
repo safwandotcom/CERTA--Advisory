@@ -4,7 +4,6 @@ import { redirect } from 'next/navigation'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createEmployeeRecord } from '@/lib/employees'
 import { requireAdmin, requireSuperAdmin, NOT_AUTHORIZED } from '@/lib/auth'
-import { parseManagedDepartmentIds, setManagedDepartments } from '@/lib/departments'
 
 export type CreateEmployeeState = { error?: string }
 
@@ -39,7 +38,7 @@ export async function createEmployeeAction(
 
   try {
     const adminClient = createAdminClient()
-    const { employeeRowId } = await createEmployeeRecord(adminClient, {
+    await createEmployeeRecord(adminClient, {
       employeeId,
       name,
       password,
@@ -48,11 +47,6 @@ export async function createEmployeeAction(
       contactInfo: String(formData.get('contactInfo') ?? '') || undefined,
       joinDate: String(formData.get('joinDate') ?? '') || undefined,
     })
-
-    if (role === 'manager') {
-      const managedDepartmentIds = parseManagedDepartmentIds(formData)
-      await setManagedDepartments(adminClient, employeeRowId, managedDepartmentIds)
-    }
   } catch (err) {
     return { error: err instanceof Error ? err.message : 'Failed to create employee' }
   }

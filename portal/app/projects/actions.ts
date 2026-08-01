@@ -24,8 +24,9 @@ export async function createProjectAction(_prevState: ActionState, formData: For
   // reject the creator's own membership insert (chicken-and-egg — you
   // can't be a member of a project before your own membership row
   // exists). Authorization is already enforced above by
-  // requireManagerOrAdmin(); this mirrors the same pattern Phase 2 used
-  // for setManagedDepartments().
+  // requireManagerOrAdmin(); this mirrors the same admin-client-bypass
+  // pattern used elsewhere in this app for the same chicken-and-egg reason
+  // (e.g. assignTaskAction's auto-add-member insert in app/manager/actions.ts).
   const supabase = createAdminClient()
   const { projectId, error } = await createProject(supabase, {
     name,

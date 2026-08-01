@@ -78,7 +78,6 @@ export default function EditEmployeeClient({ id }: { id: string }) {
   const [employee, setEmployee] = useState<Employee | null>(null)
   const [documents, setDocuments] = useState<Document[]>([])
   const [departments, setDepartments] = useState<Department[]>([])
-  const [managedDepartmentIds, setManagedDepartmentIds] = useState<string[]>([])
   const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
@@ -88,7 +87,6 @@ export default function EditEmployeeClient({ id }: { id: string }) {
         setEmployee(data.employee)
         setDocuments(data.documents)
         setDepartments(data.departments)
-        setManagedDepartmentIds(data.managedDepartmentIds)
         setLoaded(true)
       })
   }, [id])
@@ -218,25 +216,6 @@ export default function EditEmployeeClient({ id }: { id: string }) {
               />
             </div>
           </div>
-
-          {employee.role === 'manager' && (
-            <div className="mt-5 border-t border-border pt-5 sm:col-span-2">
-              <p className={labelClass}>Departments managed</p>
-              <div className="flex flex-col gap-2">
-                {departments.map((dept) => (
-                  <label key={dept.id} className="flex items-center gap-2 text-[0.9375rem] text-ink">
-                    <input
-                      type="checkbox"
-                      name="managedDepartmentIds"
-                      value={dept.id}
-                      defaultChecked={managedDepartmentIds.includes(dept.id)}
-                    />
-                    {dept.name}
-                  </label>
-                ))}
-              </div>
-            </div>
-          )}
 
           <FormMessage state={updateState} />
 

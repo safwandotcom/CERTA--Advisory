@@ -64,9 +64,9 @@ export async function requireSuperAdmin(): Promise<AuthorizedEmployee> {
 }
 
 /**
- * Guard for the /manager section: superadmin and admin can view it
- * unscoped (RLS returns every department for them); a manager sees only
- * their own department(s) via is_manager_of() in the underlying queries.
+ * Guard for manager-or-admin actions across the Phase 3 projects feature:
+ * superadmin, admin, and manager can all pass; access to any given project
+ * is then scoped by project membership, not by department.
  */
 export async function requireManagerOrAdmin(): Promise<AuthorizedEmployee> {
   const employee = await loadCallerOrThrow()

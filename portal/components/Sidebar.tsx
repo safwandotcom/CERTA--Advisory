@@ -46,12 +46,6 @@ const ADMIN_NAV: NavItem[] = [
 
 const MANAGER_NAV: NavItem[] = [
   {
-    href: '/manager',
-    label: 'My Team',
-    icon: Users,
-    isActive: (pathname) => pathname.startsWith('/manager'),
-  },
-  {
     href: '/projects',
     label: 'Projects',
     icon: FolderKanban,

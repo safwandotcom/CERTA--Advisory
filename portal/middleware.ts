@@ -29,11 +29,16 @@ export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname
   const isApi = path.startsWith('/api/')
 
+  // /manager was replaced by the project-scoped /projects section — redirect
+  // rather than 404 so any bookmarked links still land somewhere useful.
+  if (path === '/manager') {
+    return NextResponse.redirect(new URL('/projects', request.url))
+  }
+
   if (
     !user &&
     (path.startsWith('/dashboard') ||
       path.startsWith('/admin') ||
-      path.startsWith('/manager') ||
       path.startsWith('/projects') ||
       isApi)
   ) {
@@ -54,18 +59,6 @@ export async function middleware(request: NextRequest) {
       return isApi
         ? NextResponse.json({ error: 'Not authorized' }, { status: 403 })
         : NextResponse.redirect(new URL('/dashboard', request.url))
-    }
-  }
-
-  if (user && path.startsWith('/manager')) {
-    const { data: employee } = await supabase
-      .from('employees')
-      .select('role')
-      .eq('auth_user_id', user.id)
-      .single()
-
-    if (!['superadmin', 'admin', 'manager'].includes(employee?.role ?? '')) {
-      return NextResponse.redirect(new URL('/dashboard', request.url))
     }
   }
 

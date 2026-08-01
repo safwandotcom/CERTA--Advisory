@@ -101,20 +101,6 @@ export default function NewEmployeeClient({
           </div>
         </div>
 
-        {role === 'manager' && (
-          <div className="mt-5 border-t border-border pt-5">
-            <p className={labelClass}>Departments managed</p>
-            <div className="flex flex-col gap-2">
-              {departments.map((dept) => (
-                <label key={dept.id} className="flex items-center gap-2 text-[0.9375rem] text-ink">
-                  <input type="checkbox" name="managedDepartmentIds" value={dept.id} />
-                  {dept.name}
-                </label>
-              ))}
-            </div>
-          </div>
-        )}
-
         {state.error && (
           <p role="alert" className={`${errorText} mt-5`}>
             <AlertCircle size={16} strokeWidth={2} className="shrink-0" />

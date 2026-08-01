@@ -82,7 +82,7 @@ export async function updateTaskStatusAction(taskId: string, status: TaskStatus)
   const supabase = await createClient()
   const { error } = await updateTaskStatus(supabase, taskId, status)
   if (error) return { error }
-  revalidatePath('/manager')
+  revalidatePath('/projects')
   return { success: 'Updated' }
 }
 

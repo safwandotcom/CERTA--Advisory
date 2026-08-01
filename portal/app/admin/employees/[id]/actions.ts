@@ -5,7 +5,6 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requireAdmin, NOT_AUTHORIZED } from '@/lib/auth'
-import { parseManagedDepartmentIds, setManagedDepartments } from '@/lib/departments'
 
 export type ActionState = { error?: string; success?: string }
 
@@ -24,7 +23,7 @@ export async function updateEmployeeAction(
 
   const { data: currentEmployee } = await supabase
     .from('employees')
-    .select('role, department_id')
+    .select('department_id')
     .eq('id', employeeRowId)
     .single()
 
@@ -52,12 +51,6 @@ export async function updateEmployeeAction(
   // the employee's now-updated department_id, so it stays consistent.
   if (newDepartmentId && currentEmployee?.department_id && currentEmployee.department_id !== newDepartmentId) {
     await supabase.from('tasks').update({ department_id: newDepartmentId }).eq('assigned_to', employeeRowId)
-  }
-
-  if (currentEmployee?.role === 'manager') {
-    const managedDepartmentIds = parseManagedDepartmentIds(formData)
-    const adminClient = createAdminClient()
-    await setManagedDepartments(adminClient, employeeRowId, managedDepartmentIds)
   }
 
   revalidatePath(`/admin/employees/${employeeRowId}`)
