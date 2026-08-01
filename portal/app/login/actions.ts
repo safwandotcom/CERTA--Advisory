@@ -49,7 +49,7 @@ export async function loginAction(
     employee.role === 'superadmin' || employee.role === 'admin'
       ? '/admin'
       : employee.role === 'manager'
-        ? '/manager'
+        ? '/projects'
         : '/dashboard'
 
   redirect(target)

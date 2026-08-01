@@ -24,7 +24,7 @@ export default async function Home() {
     employee?.role === 'superadmin' || employee?.role === 'admin'
       ? '/admin'
       : employee?.role === 'manager'
-        ? '/manager'
+        ? '/projects'
         : '/dashboard'
 
   redirect(target)
