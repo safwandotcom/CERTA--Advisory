@@ -75,3 +75,13 @@ export async function requireManagerOrAdmin(): Promise<AuthorizedEmployee> {
   }
   return employee
 }
+
+/**
+ * Guard for any authenticated, active employee regardless of role — used
+ * where RLS (not the app layer) is the real access boundary, e.g. the task
+ * detail page, which project_members/tasks/subtasks/task_comments RLS
+ * already scopes correctly to project members.
+ */
+export async function requireEmployee(): Promise<AuthorizedEmployee> {
+  return loadCallerOrThrow()
+}

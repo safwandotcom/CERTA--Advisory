@@ -61,10 +61,10 @@ export async function listProjectMembers(
     .select('employees!project_members_employee_id_fkey(id, employee_id, name)')
     .eq('project_id', projectId)
 
-  return (data ?? []).map((row) => {
-    const emp = (row as unknown as { employees: { id: string; employee_id: string; name: string } }).employees
-    return { id: emp.id, employee_id: emp.employee_id, name: emp.name }
-  })
+  return (data ?? [])
+    .map((row) => (row as unknown as { employees: { id: string; employee_id: string; name: string } | null }).employees)
+    .filter((emp): emp is { id: string; employee_id: string; name: string } => Boolean(emp))
+    .map((emp) => ({ id: emp.id, employee_id: emp.employee_id, name: emp.name }))
 }
 
 export async function addProjectMember(

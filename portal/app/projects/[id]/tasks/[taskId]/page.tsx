@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { requireManagerOrAdmin } from '@/lib/auth'
+import { requireEmployee } from '@/lib/auth'
 import { listSubtasks } from '@/lib/subtasks'
 import { listComments } from '@/lib/comments'
 import { PageHeader } from '@/components/PageHeader'
@@ -14,7 +14,7 @@ export default async function TaskDetailPage({
 }: {
   params: Promise<{ id: string; taskId: string }>
 }) {
-  await requireManagerOrAdmin()
+  await requireEmployee()
   const { id: projectId, taskId } = await params
   const supabase = await createClient()
 

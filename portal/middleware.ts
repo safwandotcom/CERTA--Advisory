@@ -63,14 +63,17 @@ export async function middleware(request: NextRequest) {
   }
 
   if (user && path.startsWith('/projects')) {
-    const { data: employee } = await supabase
-      .from('employees')
-      .select('role')
-      .eq('auth_user_id', user.id)
-      .single()
+    const isTaskDetail = /^\/projects\/[^/]+\/tasks\//.test(path)
+    if (!isTaskDetail) {
+      const { data: employee } = await supabase
+        .from('employees')
+        .select('role')
+        .eq('auth_user_id', user.id)
+        .single()
 
-    if (!['superadmin', 'admin', 'manager'].includes(employee?.role ?? '')) {
-      return NextResponse.redirect(new URL('/dashboard', request.url))
+      if (!['superadmin', 'admin', 'manager'].includes(employee?.role ?? '')) {
+        return NextResponse.redirect(new URL('/dashboard', request.url))
+      }
     }
   }
 
