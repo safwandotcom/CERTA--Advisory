@@ -24,11 +24,18 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
   // not the page's RLS-scoped `supabase` above, or the picker would
   // silently shrink to just that manager's department (the same bug
   // caught and fixed for the new-project member picker in Task 5).
+  //
+  // Excludes admin/superadmin: Phase 2's tasks_validate_assignment trigger
+  // (still active until Task 13) requires a task's department_id to match
+  // the assignee's own department_id, and admin/superadmin employees have
+  // no department_id — assigning to one always fails at the DB level.
+  // Matches the existing "admin doesn't count as an employee" precedent.
   const adminClient = createAdminClient()
   const { data: allEmployees } = await adminClient
     .from('employees')
     .select('id, employee_id, name')
     .eq('archived', false)
+    .not('role', 'in', '(admin,superadmin)')
     .order('name')
 
   return (
