@@ -1,9 +1,12 @@
 import { FileText, Download, Inbox } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { PageHeader } from '@/components/PageHeader'
 import { card, statusPillClass } from '@/lib/ui'
 import { listTasksForEmployee } from '@/lib/tasks'
+import { listProjectMembers } from '@/lib/projects'
 import MyTasksView from './MyTasksView'
+import CreateTaskForm from './CreateTaskForm'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -18,6 +21,38 @@ export default async function DashboardPage() {
     .single()
 
   const tasks = await listTasksForEmployee(supabase, employee!.id)
+
+  // Project memberships determine both which projects this employee can
+  // create a task in (tasks_project_member_insert RLS mirrors this) and
+  // who the assignee options are for each — fetched up front here so
+  // CreateTaskForm can switch projects client-side without a round-trip.
+  const { data: memberships } = await supabase
+    .from('project_members')
+    .select('projects(id, name, status)')
+    .eq('employee_id', employee!.id)
+
+  const myProjects = (memberships ?? [])
+    .map((row) => (row as unknown as { projects: { id: string; name: string; status: string } | null }).projects)
+    .filter((p): p is { id: string; name: string; status: string } => p !== null && p.status === 'active')
+    .map(({ id, name }) => ({ id, name }))
+
+  // listProjectMembers() embeds each row's employees!project_members_employee_id_fkey(...)
+  // record. On the caller's RLS-scoped `supabase` client, employees_select_self_or_admin
+  // blocks that embed for every member who isn't the caller themselves — PostgREST doesn't
+  // drop the parent row in that case, it returns the embedded employees field as null, which
+  // crashes listProjectMembers()'s `emp.id` access as soon as a project has a second member.
+  // Same chicken-and-egg RLS gap as createOwnTaskAction's assignee lookup (and the precedent
+  // in Task 5's createProjectAction / app/projects/page.tsx / app/projects/[id]/page.tsx): this
+  // is a plain read to populate the assignee picker with fellow project members' name/ID, not a
+  // security-sensitive check, so the service-role client is appropriate here. The real
+  // authorization boundary — which projects this employee may create a task in at all — is
+  // already enforced above by the RLS-scoped `memberships` query and, ultimately, by
+  // tasks_project_member_insert on the actual write.
+  const adminClient = createAdminClient()
+  const membersByProject: { [projectId: string]: { id: string; employee_id: string; name: string }[] } = {}
+  for (const project of myProjects) {
+    membersByProject[project.id] = await listProjectMembers(adminClient, project.id)
+  }
 
   const { data: documents } = await supabase
     .from('employee_documents')
@@ -65,6 +100,10 @@ export default async function DashboardPage() {
           ))}
         </dl>
       </section>
+
+      <div className="mt-6">
+        <CreateTaskForm projects={myProjects} membersByProject={membersByProject} />
+      </div>
 
       <section className={`${card} mt-6`}>
         <MyTasksView tasks={tasks} />
