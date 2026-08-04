@@ -30,6 +30,12 @@ export function NotificationBell({ initialUnreadCount }: { initialUnreadCount: n
       if (!notification.read_at) {
         await markNotificationReadAction(notification.id)
         setUnreadCount((c) => Math.max(0, c - 1))
+        setNotifications(
+          (list) =>
+            list?.map((n) =>
+              n.id === notification.id ? { ...n, read_at: n.read_at ?? new Date().toISOString() } : n
+            ) ?? null
+        )
       }
       setOpen(false)
       if (notification.link) router.push(notification.link)
