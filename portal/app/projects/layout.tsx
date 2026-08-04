@@ -1,6 +1,8 @@
 import { redirect } from 'next/navigation'
 import { requireEmployee } from '@/lib/auth'
+import { createClient } from '@/lib/supabase/server'
 import { Sidebar } from '@/components/Sidebar'
+import { countUnreadNotifications } from '@/lib/notifications'
 
 export default async function ProjectsLayout({ children }: { children: React.ReactNode }) {
   let caller
@@ -11,6 +13,9 @@ export default async function ProjectsLayout({ children }: { children: React.Rea
   }
 
   const isManagerOrAdmin = ['superadmin', 'admin', 'manager'].includes(caller.role)
+
+  const supabase = await createClient()
+  const unreadCount = await countUnreadNotifications(supabase)
 
   return (
     <div className="flex h-screen">
@@ -26,6 +31,7 @@ export default async function ProjectsLayout({ children }: { children: React.Rea
                 ? 'Admin'
                 : 'Employee'
         }
+        unreadCount={unreadCount}
       />
       <main className="flex-1 overflow-y-auto bg-white pt-14 md:pt-0">
         <div className="mx-auto max-w-5xl px-5 py-8 sm:px-10 sm:py-10">{children}</div>

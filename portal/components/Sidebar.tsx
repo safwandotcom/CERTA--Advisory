@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { LayoutDashboard, Users, Building2, FileBarChart, FolderKanban, LogOut, Menu, X } from 'lucide-react'
 import { signOutAction } from '@/app/actions'
+import { NotificationBell } from '@/components/NotificationBell'
 
 type NavItem = {
   href: string
@@ -64,11 +65,13 @@ function SidebarContent({
   variant,
   name,
   roleLabel,
+  unreadCount,
   onNavigate,
 }: {
   variant: 'employee' | 'admin' | 'manager'
   name: string
   roleLabel: string
+  unreadCount: number
   onNavigate?: () => void
 }) {
   const pathname = usePathname()
@@ -76,7 +79,7 @@ function SidebarContent({
 
   return (
     <>
-      <div className="flex h-16 items-center px-6">
+      <div className="flex h-16 items-center justify-between px-6">
         <Image
           src="/brand/certa-lockup.png"
           alt="CERTA& Advisory"
@@ -85,6 +88,7 @@ function SidebarContent({
           priority
           className="h-7 w-auto"
         />
+        <NotificationBell initialUnreadCount={unreadCount} />
       </div>
 
       <nav className="flex-1 space-y-1 px-3 pt-2">
@@ -137,10 +141,12 @@ export function Sidebar({
   variant,
   name,
   roleLabel,
+  unreadCount,
 }: {
   variant: 'employee' | 'admin' | 'manager'
   name: string
   roleLabel: string
+  unreadCount: number
 }) {
   const [open, setOpen] = useState(false)
 
@@ -189,6 +195,7 @@ export function Sidebar({
               variant={variant}
               name={name}
               roleLabel={roleLabel}
+              unreadCount={unreadCount}
               onNavigate={() => setOpen(false)}
             />
           </aside>
@@ -197,7 +204,7 @@ export function Sidebar({
 
       {/* Desktop sidebar */}
       <aside className="hidden h-full w-64 shrink-0 flex-col border-r border-border bg-surface-tint md:flex">
-        <SidebarContent variant={variant} name={name} roleLabel={roleLabel} />
+        <SidebarContent variant={variant} name={name} roleLabel={roleLabel} unreadCount={unreadCount} />
       </aside>
     </>
   )
