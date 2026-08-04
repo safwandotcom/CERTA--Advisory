@@ -54,10 +54,10 @@ Submitting (not admin approval) is what lifts the gate the first time — matche
 ## Submission & Review
 
 1. Employee fills the form. Can save progress per-section as they go (a plain update to their `employee_onboarding` row); nothing is validated as "final" until they hit **Submit**, which requires every required field and all three documents to be present.
-2. On submit: `status → submitted`, `submitted_at` set. Admin sees a pending-review indicator (same visual pattern as other admin work-items already in the portal, e.g. a count badge).
+2. On submit: `status → submitted`, `submitted_at` set. A notification is emitted to every active admin/superadmin via the shared notification center (`2026-08-05-notification-center-design.md`).
 3. Admin opens the submission (new "Onboarding" tab on the existing employee-edit page at `/admin/employees/[id]`) — sees all fields and can view/download the three documents via signed URLs, same pattern as `employee_documents` today.
 4. Admin action: **Mark Complete** (`status → complete`, `reviewed_by`/`reviewed_at` set) or **Request Correction** (`status → needs_correction`, `correction_notes` set to the admin's explanation, `reviewed_by`/`reviewed_at` set).
-5. If `needs_correction`: employee is re-gated to `/onboarding`, sees the correction note at the top of the form, form is pre-filled with their prior answers (whole form re-editable, not just flagged fields — kept simple deliberately, see Non-goals). Resubmitting clears `correction_notes` and returns to step 2.
+5. If `needs_correction`: employee is re-gated to `/onboarding`, sees the correction note at the top of the form, form is pre-filled with their prior answers (whole form re-editable, not just flagged fields — kept simple deliberately, see Non-goals). A notification is emitted to the employee. Resubmitting clears `correction_notes` and returns to step 2.
 6. Once `complete`: the employee no longer has write access to `employee_onboarding` (enforced at RLS, not just hidden in the UI). Any future change goes through admin editing the employee record — the existing `/admin/employees/[id]` edit screen gets extended to include these fields.
 
 ## Access Control (RLS)
@@ -85,4 +85,4 @@ Submitting (not admin approval) is what lifts the gate the first time — matche
 - No configurable/admin-editable field list — the field set is fixed by this spec; a future "form builder" is out of scope (YAGNI).
 - No payroll processing against the bank details collected here.
 - No retroactive onboarding requirement for existing employee accounts — moot, since those accounts will be recreated before this ships.
-- No notifications/emails on submit or correction — surfaced only via in-portal indicators, consistent with how the rest of the portal handles work-items today.
+- No email/push notifications — submit and correction events surface via the shared in-app notification center (`2026-08-05-notification-center-design.md`), not email.

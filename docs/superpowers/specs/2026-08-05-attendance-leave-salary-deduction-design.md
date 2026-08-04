@@ -67,8 +67,8 @@ A calendar day counts as an **unexplained absence** for an employee if: it's a w
 ## Leave
 
 1. Employee opens "Request Leave," picks a leave type, start/end date, and optionally marks the first/last day as half. The form shows their current balance for that type: `allocated_days (this year) − (approved + pending) days already counted against it`. They can still submit even if the request would exceed the remaining balance — the UI warns, but doesn't block (admin makes the call).
-2. Submitting creates a `pending` `leave_requests` row. Admin sees it in a pending-review list (same indicator pattern as onboarding review).
-3. Admin approves or rejects, with an optional note. Approving an already-overlapping-with-another-approved-request date range is rejected at the database level (no double-booking the same employee).
+2. Submitting creates a `pending` `leave_requests` row. A notification is emitted to every active admin/superadmin via the shared notification center (`2026-08-05-notification-center-design.md`).
+3. Admin approves or rejects, with an optional note. Approving an already-overlapping-with-another-approved-request date range is rejected at the database level (no double-booking the same employee). A notification is emitted to the requesting employee either way.
 4. Cancelling: employee can cancel their own `pending` request freely. Cancelling an `approved` request requires admin action (keeps balance/deduction math trustworthy — an employee can't silently un-take approved leave that already fed into a deduction estimate).
 
 ## Salary Deduction Summary

@@ -18,7 +18,7 @@ This is a straightforward extension of patterns already established in the codeb
 Out of scope for this phase (deliberately deferred):
 - SLA timers, due dates, or auto-escalation on tickets.
 - Category/priority driving any routing or notification logic — both are informational/sortable only.
-- Email or other external notifications — same in-portal-only indicator approach used for onboarding review and leave approval.
+- Email or other external notifications — in-portal only, via the shared notification center (`2026-08-05-notification-center-design.md`).
 - Multi-department ticketing (HR tickets, Facilities tickets, etc.) — this system is IT-specific by design; generalizing to "any department can run a ticket queue" is materially bigger scope than what was requested.
 - Reassignment by IT-department members themselves — only admin/superadmin can reassign, to avoid queue-stealing disputes.
 - A confirmation step before reopening a resolved ticket — the requester reopening it is itself the signal, no extra approval gate.
@@ -46,11 +46,11 @@ Out of scope for this phase (deliberately deferred):
 
 ## Lifecycle
 
-1. **Create**: employee fills title, description, category, priority, optional attachment(s). Row created at `status = open`, `assigned_to = null`.
+1. **Create**: employee fills title, description, category, priority, optional attachment(s). Row created at `status = open`, `assigned_to = null`. A notification is emitted to every active member of the IT department (`2026-08-05-notification-center-design.md`).
 2. **Claim**: any employee whose `employees.department_id` matches `company_settings.it_support_department_id` sees the open/unassigned queue and can claim a ticket. Claiming sets `status = in_progress`, `assigned_to = <claimant>`. Claiming an already-claimed ticket is rejected at the database level — first claim wins, no race where two people end up assigned.
 3. **Discuss**: while `open` or `in_progress`, the requester, the assignee (once claimed), and any other IT-department member can post comments — covers "can you send a screenshot" / "tried restarting, still broken" back-and-forth.
-4. **Resolve**: the assignee (or admin/superadmin) sets `status = resolved`, `resolved_at = now()`, and must supply `resolution_note` — resolving without a note is rejected.
-5. **Reopen**: the requester (or admin/superadmin) can reopen a `resolved` ticket. This sets `status = in_progress`, keeps the same `assigned_to`, clears `resolved_at` and `resolution_note`. No separate confirmation step — reopening is itself the signal that it needs more work.
+4. **Resolve**: the assignee (or admin/superadmin) sets `status = resolved`, `resolved_at = now()`, and must supply `resolution_note` — resolving without a note is rejected. A notification is emitted to the requester.
+5. **Reopen**: the requester (or admin/superadmin) can reopen a `resolved` ticket. This sets `status = in_progress`, keeps the same `assigned_to`, clears `resolved_at` and `resolution_note`. No separate confirmation step — reopening is itself the signal that it needs more work. A notification is emitted to the assignee.
 
 ## Permissions
 
@@ -81,7 +81,7 @@ Admin/superadmin have blanket oversight — same pattern as every other subsyste
 
 - No SLA timers, due dates, or auto-escalation.
 - No routing/notification logic driven by category or priority — sortable/informational only.
-- No email or external notifications.
+- No email or external notifications — in-app only via the shared notification center.
 - No multi-department ticketing beyond IT.
 - No IT-member-initiated reassignment.
 - No confirmation gate before reopening a resolved ticket.
