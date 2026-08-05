@@ -46,12 +46,19 @@ test('an employee cannot read another employee row via the API', async () => {
 test('an employee is redirected away from /admin in the UI', async ({ page }) => {
   const employeeId = `rls-ui-${Date.now()}`
   const adminClient = createAdminClient()
-  await createEmployeeRecord(adminClient, {
+  const { employeeRowId } = await createEmployeeRecord(adminClient, {
     employeeId,
     password: 'password-ui-123',
     name: 'UI Employee',
     role: 'employee',
   })
+
+  // Every new employee now gets a `not_started` onboarding row (Task 6),
+  // which would otherwise route this employee through the onboarding gate
+  // (Task 7) instead of /dashboard. This test is specifically about admin
+  // access denial, so mark onboarding complete up front to keep it decoupled
+  // from that unrelated gate.
+  await adminClient.from('employee_onboarding').update({ status: 'complete' }).eq('employee_id', employeeRowId)
 
   await page.goto('/login')
   await page.getByLabel('Employee ID').fill(employeeId)
