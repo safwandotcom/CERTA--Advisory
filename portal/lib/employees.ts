@@ -1,5 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { employeeIdToEmail } from './employeeAuth'
+import { createOnboardingRow } from './onboarding'
 
 export type NewEmployeeInput = {
   employeeId: string
@@ -47,6 +48,14 @@ export async function createEmployeeRecord(
   if (dbError || !employeeRow) {
     await adminClient.auth.admin.deleteUser(authUser.user.id)
     throw new Error(`Failed to create employee record: ${dbError?.message}`)
+  }
+
+  const { error: onboardingError } = await createOnboardingRow(adminClient, employeeRow.id)
+
+  if (onboardingError) {
+    await adminClient.from('employees').delete().eq('id', employeeRow.id)
+    await adminClient.auth.admin.deleteUser(authUser.user.id)
+    throw new Error(`Failed to create onboarding record: ${onboardingError}`)
   }
 
   return { employeeRowId: employeeRow.id }
