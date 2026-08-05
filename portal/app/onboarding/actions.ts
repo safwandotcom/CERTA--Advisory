@@ -120,7 +120,7 @@ export async function uploadOnboardingDocumentAction(
   }
 
   const ext = file.name.split('.').pop() ?? 'bin'
-  const filePath = `${employee.id}/${UPLOAD_SLOT_FILE_NAMES[slot]}.${ext}`
+  const filePath = `${employee.auth_user_id}/${UPLOAD_SLOT_FILE_NAMES[slot]}.${ext}`
 
   const supabase = await createClient()
 
