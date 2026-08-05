@@ -5,6 +5,8 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requireAdmin, NOT_AUTHORIZED } from '@/lib/auth'
+import { markOnboardingComplete, requestOnboardingCorrection } from '@/lib/onboarding'
+import { notifyEmployees } from '@/lib/notifications'
 
 export type ActionState = { error?: string; success?: string }
 
@@ -189,4 +191,54 @@ export async function archiveEmployeeAction(
 
   revalidatePath('/admin')
   redirect('/admin')
+}
+
+export async function markOnboardingCompleteAction(
+  employeeRowId: string,
+  _prevState: ActionState,
+  _formData: FormData
+): Promise<ActionState> {
+  let reviewer
+  try {
+    reviewer = await requireAdmin()
+  } catch {
+    return { error: NOT_AUTHORIZED }
+  }
+
+  const adminClient = createAdminClient()
+  const { error } = await markOnboardingComplete(adminClient, employeeRowId, reviewer.id)
+  if (error) return { error }
+
+  revalidatePath(`/admin/employees/${employeeRowId}`)
+  return { success: 'Onboarding marked complete' }
+}
+
+export async function requestOnboardingCorrectionAction(
+  employeeRowId: string,
+  _prevState: ActionState,
+  formData: FormData
+): Promise<ActionState> {
+  let reviewer
+  try {
+    reviewer = await requireAdmin()
+  } catch {
+    return { error: NOT_AUTHORIZED }
+  }
+
+  const note = String(formData.get('correctionNote') ?? '').trim()
+  if (!note) {
+    return { error: 'Explain what needs to be corrected' }
+  }
+
+  const adminClient = createAdminClient()
+  const { error } = await requestOnboardingCorrection(adminClient, employeeRowId, reviewer.id, note)
+  if (error) return { error }
+
+  await notifyEmployees(adminClient, [employeeRowId], {
+    title: 'Your onboarding needs a correction',
+    link: '/onboarding',
+  })
+
+  revalidatePath(`/admin/employees/${employeeRowId}`)
+  return { success: 'Correction requested' }
 }

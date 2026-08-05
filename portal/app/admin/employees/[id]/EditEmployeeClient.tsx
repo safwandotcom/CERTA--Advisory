@@ -9,6 +9,8 @@ import {
   uploadDocumentAction,
   resetPasswordAction,
   archiveEmployeeAction,
+  markOnboardingCompleteAction,
+  requestOnboardingCorrectionAction,
   type ActionState,
 } from './actions'
 import { PageHeader } from '@/components/PageHeader'
@@ -37,6 +39,26 @@ type Employee = {
 }
 
 type Document = { id: string; label: string; file_path: string }
+
+type Onboarding = {
+  status: 'not_started' | 'submitted' | 'needs_correction' | 'complete'
+  date_of_birth: string | null
+  fathers_name: string | null
+  mothers_name: string | null
+  blood_group: string | null
+  phone: string | null
+  personal_email: string | null
+  present_address: string | null
+  permanent_address: string | null
+  emergency_contact_name: string | null
+  emergency_contact_relationship: string | null
+  emergency_contact_phone: string | null
+  bank_name: string | null
+  account_holder_name: string | null
+  account_number: string | null
+  branch_code: string | null
+  correction_notes: string | null
+}
 
 const initialState: ActionState = {}
 
@@ -79,6 +101,12 @@ export default function EditEmployeeClient({ id }: { id: string }) {
   const [documents, setDocuments] = useState<Document[]>([])
   const [departments, setDepartments] = useState<Department[]>([])
   const [loaded, setLoaded] = useState(false)
+  const [onboarding, setOnboarding] = useState<Onboarding | null>(null)
+  const [onboardingDocumentUrls, setOnboardingDocumentUrls] = useState<{
+    nationalId: string | null
+    offerLetter: string | null
+    photo: string | null
+  }>({ nationalId: null, offerLetter: null, photo: null })
 
   useEffect(() => {
     fetch(`/api/employees/${id}`)
@@ -87,6 +115,8 @@ export default function EditEmployeeClient({ id }: { id: string }) {
         setEmployee(data.employee)
         setDocuments(data.documents)
         setDepartments(data.departments)
+        setOnboarding(data.onboarding)
+        setOnboardingDocumentUrls(data.onboardingDocumentUrls)
         setLoaded(true)
       })
   }, [id])
@@ -110,6 +140,14 @@ export default function EditEmployeeClient({ id }: { id: string }) {
       employee?.employee_id ?? '',
       employee?.role ?? ''
     ),
+    initialState
+  )
+  const [completeState, completeAction] = useActionState(
+    markOnboardingCompleteAction.bind(null, id),
+    initialState
+  )
+  const [correctionState, correctionAction] = useActionState(
+    requestOnboardingCorrectionAction.bind(null, id),
     initialState
   )
 
@@ -269,6 +307,93 @@ export default function EditEmployeeClient({ id }: { id: string }) {
               Upload
             </button>
           </form>
+        </div>
+
+        <div className={`${card} max-w-2xl`}>
+          <h2 className="font-display text-base font-semibold text-ink">Onboarding</h2>
+
+          {!onboarding || onboarding.status === 'not_started' ? (
+            <p className="mt-4 text-[0.9375rem] text-ink-muted">Not yet submitted.</p>
+          ) : (
+            <>
+              <p className="mt-1 text-[0.8125rem] font-semibold uppercase tracking-[0.04em] text-ink-muted">
+                Status: {onboarding.status.replace('_', ' ')}
+              </p>
+
+              <dl className="mt-4 grid grid-cols-1 gap-x-8 gap-y-4 sm:grid-cols-2">
+                {[
+                  { label: 'Date of birth', value: onboarding.date_of_birth },
+                  { label: "Father's name", value: onboarding.fathers_name },
+                  { label: "Mother's name", value: onboarding.mothers_name },
+                  { label: 'Blood group', value: onboarding.blood_group },
+                  { label: 'Phone', value: onboarding.phone },
+                  { label: 'Personal email', value: onboarding.personal_email },
+                  { label: 'Present address', value: onboarding.present_address },
+                  { label: 'Permanent address', value: onboarding.permanent_address },
+                  { label: 'Emergency contact', value: onboarding.emergency_contact_name },
+                  { label: 'Relationship', value: onboarding.emergency_contact_relationship },
+                  { label: 'Emergency phone', value: onboarding.emergency_contact_phone },
+                  { label: 'Bank name', value: onboarding.bank_name },
+                  { label: 'Account holder', value: onboarding.account_holder_name },
+                  { label: 'Account number', value: onboarding.account_number },
+                  { label: 'Branch / routing code', value: onboarding.branch_code },
+                ].map((field) => (
+                  <div key={field.label}>
+                    <dt className="text-xs font-semibold uppercase tracking-[0.04em] text-ink-muted">
+                      {field.label}
+                    </dt>
+                    <dd className="mt-1 text-[0.9375rem] text-ink">{field.value ?? '—'}</dd>
+                  </div>
+                ))}
+              </dl>
+
+              <div className="mt-4 flex flex-wrap gap-4">
+                {onboardingDocumentUrls.nationalId && (
+                  <a href={onboardingDocumentUrls.nationalId} target="_blank" rel="noreferrer" className="text-[0.8125rem] font-semibold text-certa-green-deep hover:underline">
+                    National ID copy
+                  </a>
+                )}
+                {onboardingDocumentUrls.offerLetter && (
+                  <a href={onboardingDocumentUrls.offerLetter} target="_blank" rel="noreferrer" className="text-[0.8125rem] font-semibold text-certa-green-deep hover:underline">
+                    Signed offer letter
+                  </a>
+                )}
+                {onboardingDocumentUrls.photo && (
+                  <a href={onboardingDocumentUrls.photo} target="_blank" rel="noreferrer" className="text-[0.8125rem] font-semibold text-certa-green-deep hover:underline">
+                    Photo
+                  </a>
+                )}
+              </div>
+
+              {onboarding.status === 'submitted' && (
+                <div className="mt-6 flex flex-col gap-4 border-t border-border pt-5 sm:max-w-sm">
+                  <form action={completeAction}>
+                    <FormMessage state={completeState} />
+                    <button type="submit" className={`${buttonPrimary} mt-2`}>
+                      Mark complete
+                    </button>
+                  </form>
+
+                  <form action={correctionAction} className="flex flex-col gap-3">
+                    <label htmlFor="correctionNote" className={labelClass}>
+                      Request a correction
+                    </label>
+                    <textarea id="correctionNote" name="correctionNote" required rows={2} className={input} />
+                    <FormMessage state={correctionState} />
+                    <button type="submit" className={`${buttonCoral} w-fit`}>
+                      Send back for correction
+                    </button>
+                  </form>
+                </div>
+              )}
+
+              {onboarding.status === 'complete' && (
+                <p className="mt-4 text-[0.8125rem] font-medium text-certa-green-deep">
+                  Reviewed and marked complete.
+                </p>
+              )}
+            </>
+          )}
         </div>
 
         <div className={`${card} max-w-2xl`}>
