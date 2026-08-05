@@ -40,6 +40,7 @@ export async function middleware(request: NextRequest) {
     (path.startsWith('/dashboard') ||
       path.startsWith('/admin') ||
       path.startsWith('/projects') ||
+      path.startsWith('/onboarding') ||
       isApi)
   ) {
     // API callers get a status code, not an HTML login page.
@@ -77,6 +78,38 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  // Onboarding gate: an employee/manager whose onboarding isn't at least
+  // submitted is redirected to /onboarding from every other protected route.
+  // Admin/superadmin never onboard themselves (they're the ones creating
+  // other accounts), so this block only runs for /dashboard and /projects,
+  // never /admin. Conversely, once onboarding is submitted or complete,
+  // visiting /onboarding itself redirects away — the form isn't editable in
+  // either of those states (see employee_onboarding_update_self RLS).
+  if (user && (path.startsWith('/dashboard') || path.startsWith('/projects') || path.startsWith('/onboarding'))) {
+    const { data: employee } = await supabase
+      .from('employees')
+      .select('id, role')
+      .eq('auth_user_id', user.id)
+      .single()
+
+    if (employee && (employee.role === 'employee' || employee.role === 'manager')) {
+      const { data: onboarding } = await supabase
+        .from('employee_onboarding')
+        .select('status')
+        .eq('employee_id', employee.id)
+        .single()
+
+      const needsOnboarding = !onboarding || onboarding.status === 'not_started' || onboarding.status === 'needs_correction'
+
+      if (needsOnboarding && !path.startsWith('/onboarding')) {
+        return NextResponse.redirect(new URL('/onboarding', request.url))
+      }
+      if (!needsOnboarding && path.startsWith('/onboarding')) {
+        return NextResponse.redirect(new URL('/dashboard', request.url))
+      }
+    }
+  }
+
   return response
 }
 
@@ -86,5 +119,12 @@ export async function middleware(request: NextRequest) {
 // '/admin/:path*' already covers /admin/employees/** and the Server Actions
 // POSTed to those page URLs.
 export const config = {
-  matcher: ['/dashboard/:path*', '/admin/:path*', '/manager/:path*', '/projects/:path*', '/api/employees/:path*'],
+  matcher: [
+    '/dashboard/:path*',
+    '/admin/:path*',
+    '/manager/:path*',
+    '/projects/:path*',
+    '/onboarding/:path*',
+    '/api/employees/:path*',
+  ],
 }
