@@ -68,10 +68,10 @@ export async function saveOrSubmitOnboardingAction(
     return { error: `Please complete: ${missing.join(', ')}` }
   }
 
-  const { error: submitError } = await submitOnboarding(supabase, employee.id)
+  const adminClient = createAdminClient()
+  const { error: submitError } = await submitOnboarding(adminClient, employee.id)
   if (submitError) return { error: submitError }
 
-  const adminClient = createAdminClient()
   const adminIds = await listActiveAdminIds(adminClient)
   await notifyEmployees(adminClient, adminIds, {
     title: `New onboarding submission: ${employee.name}`,
@@ -108,6 +108,19 @@ export async function uploadOnboardingDocumentAction(
     return { error: NOT_AUTHORIZED }
   }
 
+  const supabase = await createClient()
+
+  // Storage RLS (0012) intentionally no longer gates uploads on onboarding
+  // status — see that migration's comment — so the app layer is the only
+  // place left enforcing it. Without this, a submitted/complete employee
+  // could POST directly to this action and silently replace an
+  // already-reviewed document via the deterministic, upsert:true path,
+  // violating spec acceptance criterion #8. See final-review Finding 2.
+  const onboarding = await getOnboarding(supabase, employee.id)
+  if (!onboarding || (onboarding.status !== 'not_started' && onboarding.status !== 'needs_correction')) {
+    return { error: 'Your onboarding is no longer editable' }
+  }
+
   const file = formData.get('file') as File | null
   if (!file || file.size === 0) {
     return { error: 'Choose a file first' }
@@ -122,20 +135,20 @@ export async function uploadOnboardingDocumentAction(
   const ext = file.name.split('.').pop() ?? 'bin'
   const filePath = `${employee.auth_user_id}/${UPLOAD_SLOT_FILE_NAMES[slot]}.${ext}`
 
-  const supabase = await createClient()
-
   const { error: uploadError } = await supabase.storage
     .from('onboarding-documents')
     .upload(filePath, file, { upsert: true })
 
   if (uploadError) return { error: uploadError.message }
 
-  const { error: dbError } = await supabase
+  const { data: updated, error: dbError } = await supabase
     .from('employee_onboarding')
     .update({ [UPLOAD_SLOT_COLUMNS[slot]]: filePath })
     .eq('employee_id', employee.id)
+    .select('id')
 
   if (dbError) return { error: dbError.message }
+  if (!updated || updated.length === 0) return { error: 'Your onboarding is no longer editable' }
 
   revalidatePath('/onboarding')
   return { success: 'Uploaded' }

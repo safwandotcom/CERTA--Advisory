@@ -320,6 +320,13 @@ export default function EditEmployeeClient({ id }: { id: string }) {
                 Status: {onboarding.status.replace('_', ' ')}
               </p>
 
+              {onboarding.status === 'needs_correction' && onboarding.correction_notes && (
+                <p className="mt-2 rounded-[8px] border border-signal-coral bg-signal-coral/5 px-3 py-2 text-[0.8125rem] text-ink">
+                  <span className="font-semibold text-signal-coral-deep">Correction requested: </span>
+                  {onboarding.correction_notes}
+                </p>
+              )}
+
               <dl className="mt-4 grid grid-cols-1 gap-x-8 gap-y-4 sm:grid-cols-2">
                 {[
                   { label: 'Date of birth', value: onboarding.date_of_birth },
