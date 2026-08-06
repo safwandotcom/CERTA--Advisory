@@ -75,6 +75,61 @@ test('an employee cannot self-complete onboarding or set review fields', async (
   expect(reviewFieldError).not.toBeNull()
 })
 
+// Final-review Finding 5, part 2: the "cannot self-complete" test above only
+// exercises the trigger (enforce_onboarding_self_edit_columns), on a row
+// still at not_started. This test targets a different boundary:
+// employee_onboarding_update_self's status-gated USING clause, on a row
+// that has moved past not_started/needs_correction — the case the trigger
+// alone would NOT catch, since a plain field edit (not a status/review-field
+// change) sails through the trigger untouched.
+test('an employee whose onboarding is submitted cannot edit their own row', async () => {
+  const adminClient = createAdminClient()
+
+  const submittedId = `ob-submitted-${Date.now()}`
+  const { employeeRowId: submittedRowId } = await createEmployeeRecord(adminClient, {
+    employeeId: submittedId,
+    password: 'password-submitted-123',
+    name: 'Submitted Employee',
+    role: 'employee',
+  })
+
+  const { error: setSubmittedError } = await adminClient
+    .from('employee_onboarding')
+    .update({ status: 'submitted', submitted_at: new Date().toISOString() })
+    .eq('employee_id', submittedRowId)
+  expect(setSubmittedError).toBeNull()
+
+  const submittedClient = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
+  await submittedClient.auth.signInWithPassword({
+    email: employeeIdToEmail(submittedId),
+    password: 'password-submitted-123',
+  })
+
+  const { data: writeResult, error: writeError } = await submittedClient
+    .from('employee_onboarding')
+    .update({ phone: 'should-not-apply' })
+    .eq('employee_id', submittedRowId)
+    .select('id')
+
+  // employee_onboarding_update_self's USING clause only matches status in
+  // ('not_started', 'needs_correction') — a submitted row falls outside
+  // that, so RLS filters the row out of the update entirely: no error,
+  // zero rows returned/affected (same "silent no-op" shape Finding 4 fixed
+  // the app layer to detect).
+  expect(writeError).toBeNull()
+  expect(writeResult).toHaveLength(0)
+
+  const { data: unchanged } = await adminClient
+    .from('employee_onboarding')
+    .select('phone')
+    .eq('employee_id', submittedRowId)
+    .single()
+  expect(unchanged?.phone).toBeNull()
+})
+
 test('a manager has no elevated access to another employee\'s onboarding row', async () => {
   const adminClient = createAdminClient()
 
@@ -165,4 +220,65 @@ test('an employee cannot read, mark-read, or create a notification belonging to 
     .from('notifications')
     .insert({ recipient_id: targetRowId, title: 'Should fail' })
   expect(insertError).not.toBeNull()
+})
+
+// Final-review Finding 5, part 1: no test previously covered the storage
+// side of the onboarding-documents bucket, which migration 0012 re-keyed
+// onto a bare auth.uid() folder check (see that migration's comment) after
+// the original employees-table-joined policy was found to be unreliable
+// under real Storage-API writes.
+test('an employee cannot upload into or read from another employee\'s onboarding-documents folder', async () => {
+  const adminClient = createAdminClient()
+
+  const aId = `ob-storage-a-${Date.now()}`
+  await createEmployeeRecord(adminClient, {
+    employeeId: aId,
+    password: 'password-storage-a-123',
+    name: 'Storage Employee A',
+    role: 'employee',
+  })
+
+  const bId = `ob-storage-b-${Date.now()}`
+  const { employeeRowId: bRowId } = await createEmployeeRecord(adminClient, {
+    employeeId: bId,
+    password: 'password-storage-b-123',
+    name: 'Storage Employee B',
+    role: 'employee',
+  })
+
+  const { data: employeeB } = await adminClient
+    .from('employees')
+    .select('auth_user_id')
+    .eq('id', bRowId)
+    .single()
+  const bAuthUserId = employeeB!.auth_user_id as string
+
+  // Seed a file in B's folder via the service-role client (bypasses RLS) so
+  // there is something for A to attempt to read.
+  const seedPath = `${bAuthUserId}/national-id.pdf`
+  const { error: seedError } = await adminClient.storage
+    .from('onboarding-documents')
+    .upload(seedPath, Buffer.from('seed onboarding document'), {
+      contentType: 'application/pdf',
+      upsert: true,
+    })
+  expect(seedError).toBeNull()
+
+  const aClient = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
+  await aClient.auth.signInWithPassword({ email: employeeIdToEmail(aId), password: 'password-storage-a-123' })
+
+  // Cannot upload into B's folder.
+  const { error: uploadError } = await aClient.storage
+    .from('onboarding-documents')
+    .upload(`${bAuthUserId}/offer-letter.pdf`, Buffer.from('malicious upload'), {
+      contentType: 'application/pdf',
+    })
+  expect(uploadError).not.toBeNull()
+
+  // Cannot read/download an object from B's folder.
+  const { data: downloadData, error: downloadError } = await aClient.storage
+    .from('onboarding-documents')
+    .download(seedPath)
+  expect(downloadData).toBeNull()
+  expect(downloadError).not.toBeNull()
 })
