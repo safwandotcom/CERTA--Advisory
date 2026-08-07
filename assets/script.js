@@ -132,3 +132,61 @@ if (!reducedMotion && motionEls.length) {
 
   startLoop();
 }
+
+// ---------- World clock (UK / BD live time) ----------
+const worldClockCards = document.querySelectorAll('.world-clock__card');
+if (worldClockCards.length) {
+  const clockFormatters = new Map();
+
+  function clockPartsFor(timeZone) {
+    if (!clockFormatters.has(timeZone)) {
+      clockFormatters.set(
+        timeZone,
+        new Intl.DateTimeFormat('en-GB', {
+          timeZone,
+          hourCycle: 'h23',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          weekday: 'short',
+        })
+      );
+    }
+    const parts = clockFormatters.get(timeZone).formatToParts(new Date());
+    const get = (type) => Number(parts.find((p) => p.type === type)?.value ?? 0);
+    return {
+      hour: get('hour'),
+      minute: get('minute'),
+      second: get('second'),
+      weekday: parts.find((p) => p.type === 'weekday')?.value ?? '',
+    };
+  }
+
+  function updateWorldClocks() {
+    worldClockCards.forEach((card) => {
+      const timeZone = card.getAttribute('data-tz');
+      const { hour, minute, second, weekday } = clockPartsFor(timeZone);
+
+      const hourHand = card.querySelector('.world-clock__hand--hour');
+      const minuteHand = card.querySelector('.world-clock__hand--minute');
+      hourHand.style.transform = `rotate(${((hour % 12) + minute / 60) * 30}deg)`;
+      minuteHand.style.transform = `rotate(${(minute + second / 60) * 6}deg)`;
+
+      card.querySelector('[data-time]').textContent =
+        `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+
+      const isWeekday = weekday !== 'Sat' && weekday !== 'Sun';
+      const isBusinessHour = hour >= 9 && hour < 18;
+      const isOpen = isWeekday && isBusinessHour;
+
+      const statusEl = card.querySelector('[data-status]');
+      statusEl.innerHTML = `<span class="dot"></span> ${isOpen ? 'Business hours' : 'After hours'}`;
+      statusEl.classList.toggle('is-open', isOpen);
+
+      card.classList.toggle('is-night', hour < 6 || hour >= 20);
+    });
+  }
+
+  updateWorldClocks();
+  setInterval(updateWorldClocks, 1000);
+}

@@ -83,7 +83,38 @@
           <a class="btn btn-coral" href="#contact">Book a discovery call</a>
           <a class="btn btn-secondary" href="#services">See our services</a>
         </div>
-        <div class="hero__markets" data-reveal style="--reveal-delay:400">
+        <div class="world-clock" data-reveal style="--reveal-delay:400" aria-label="Live local time in London and Dhaka">
+          <span class="world-clock__caption">Live in your working day</span>
+          <div class="world-clock__pair">
+            <div class="world-clock__card" data-tz="Europe/London">
+              <svg class="world-clock__face" viewBox="0 0 100 100" aria-hidden="true">
+                <circle class="world-clock__ring" cx="50" cy="50" r="44"></circle>
+                <line class="world-clock__hand world-clock__hand--hour" x1="50" y1="50" x2="50" y2="28"></line>
+                <line class="world-clock__hand world-clock__hand--minute" x1="50" y1="50" x2="50" y2="16"></line>
+                <circle class="world-clock__pivot" cx="50" cy="50" r="3"></circle>
+              </svg>
+              <div class="world-clock__info">
+                <span class="world-clock__city">London</span>
+                <span class="world-clock__time" data-time>--:--</span>
+                <span class="world-clock__status" data-status><span class="dot"></span> --</span>
+              </div>
+            </div>
+            <div class="world-clock__card" data-tz="Asia/Dhaka">
+              <svg class="world-clock__face" viewBox="0 0 100 100" aria-hidden="true">
+                <circle class="world-clock__ring" cx="50" cy="50" r="44"></circle>
+                <line class="world-clock__hand world-clock__hand--hour" x1="50" y1="50" x2="50" y2="28"></line>
+                <line class="world-clock__hand world-clock__hand--minute" x1="50" y1="50" x2="50" y2="16"></line>
+                <circle class="world-clock__pivot" cx="50" cy="50" r="3"></circle>
+              </svg>
+              <div class="world-clock__info">
+                <span class="world-clock__city">Dhaka</span>
+                <span class="world-clock__time" data-time>--:--</span>
+                <span class="world-clock__status" data-status><span class="dot"></span> --</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="hero__markets" data-reveal style="--reveal-delay:460">
           <strong>Built for teams in</strong>
           <div class="market-tags">
             <span class="market-tag">UK</span>
@@ -92,7 +123,7 @@
             <span class="market-tag">Europe</span>
           </div>
         </div>
-        <div class="credential-strip" data-reveal style="--reveal-delay:460">
+        <div class="credential-strip" data-reveal style="--reveal-delay:520">
           <span class="credential-strip__label">We work in your stack</span>
           <div class="credential-chips">
             <span class="credential-chip">Xero</span>

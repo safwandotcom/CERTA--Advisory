@@ -374,6 +374,68 @@ html.js [data-reveal].is-visible { opacity: 1; transform: none; }
   border-radius: var(--radius-sm);
 }
 
+/* ---------- World clock (UK / BD live time) ---------- */
+.world-clock {
+  margin-top: var(--space-lg);
+  padding: var(--space-md);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface-tint);
+}
+.world-clock__caption {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--ink-muted);
+  margin-bottom: var(--space-sm);
+}
+.world-clock__pair { display: flex; gap: var(--space-md); flex-wrap: wrap; }
+.world-clock__card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  background: var(--white);
+  transition: background 400ms var(--ease-standard);
+}
+.world-clock__card.is-night { background: var(--surface-tint); }
+.world-clock__face { width: 56px; height: 56px; flex: none; }
+.world-clock__ring { fill: none; stroke: var(--certa-green); stroke-width: 5; }
+.world-clock__hand {
+  stroke: var(--ink);
+  stroke-width: 4;
+  stroke-linecap: round;
+  transform-box: view-box;
+  transform-origin: 50px 50px;
+  transition: transform 200ms var(--ease-standard);
+}
+.world-clock__hand--minute { stroke: var(--signal-coral); stroke-width: 3; }
+.world-clock__pivot { fill: var(--ink); }
+.world-clock__info { display: flex; flex-direction: column; gap: 2px; }
+.world-clock__city { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.04em; color: var(--ink-muted); }
+.world-clock__time {
+  font-family: var(--font-display);
+  font-size: 1.375rem;
+  font-weight: 600;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.world-clock__status { display: flex; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 600; color: var(--ink-muted); }
+.world-clock__status .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--ink-muted); flex: none; }
+.world-clock__status.is-open .dot { background: var(--certa-green); }
+.world-clock__status.is-open { color: var(--certa-green-deep); }
+
+@media (prefers-reduced-motion: reduce) {
+  .world-clock__hand { transition: none; }
+  .world-clock__card { transition: none; }
+}
+
+@media (max-width: 560px) {
+  .world-clock__pair { flex-direction: column; }
+}
+
 .hero__mark {
   position: relative;
   display: flex;
