@@ -51,9 +51,10 @@ SRC = Path(r"C:\Users\HP\Downloads\Certa& Advisory.Logo.png")
 FULL_BBOX = (194, 307, 18528, 8058)   # ring + dash + full wordmark
 MARK_BBOX = (194, 307, 8163, 8058)    # ring + dash only, wordmark excluded
 
-MARKETING_DIR = Path(r"E:\CERTA ADVISORY\assets")
-PORTAL_BRAND_DIR = Path(r"E:\CERTA ADVISORY\portal\public\brand")
-PORTAL_APP_DIR = Path(r"E:\CERTA ADVISORY\portal\app")
+REPO_ROOT = Path(__file__).resolve().parent.parent  # repo root, wherever this checkout/worktree lives
+MARKETING_DIR = REPO_ROOT / "assets"
+PORTAL_BRAND_DIR = REPO_ROOT / "portal" / "public" / "brand"
+PORTAL_APP_DIR = REPO_ROOT / "portal" / "app"
 
 
 def make_lockup(src: Image.Image, bbox: tuple[int, int, int, int], out_height: int, pad: int) -> Image.Image:
@@ -160,7 +161,7 @@ def has_color_near(im: Image.Image, target: tuple[int, int, int], tol: int = 6) 
     return bool((diff <= tol * 3).any())
 
 
-base = Path(r"E:\CERTA ADVISORY\assets")
+base = Path("assets")  # run this from the repo root (same checkout you ran the script from)
 
 lockup = Image.open(base / "certa-lockup.png")
 assert lockup.size[1] == 220, f"lockup height changed: {lockup.size}"
@@ -181,16 +182,16 @@ fav = Image.open(base / "favicon.ico")
 assert fav.size[0] >= 48, f"favicon largest size too small: {fav.size}"
 
 for p in [
-    Path(r"E:\CERTA ADVISORY\portal\public\brand\certa-lockup.png"),
-    Path(r"E:\CERTA ADVISORY\portal\public\brand\certa-mark.png"),
-    Path(r"E:\CERTA ADVISORY\portal\app\favicon.ico"),
+    Path("portal/public/brand/certa-lockup.png"),
+    Path("portal/public/brand/certa-mark.png"),
+    Path("portal/app/favicon.ico"),
 ]:
     assert p.exists(), f"missing {p}"
 
 print("All logo asset checks passed.")
 ```
 
-Expected: `All logo asset checks passed.` with no assertion errors.
+Expected: `All logo asset checks passed.` with no assertion errors. **Run this from the repo root** (`E:\CERTA ADVISORY\.claude\worktrees\brand-refresh-uk-time`), the same checkout the generation script ran from — not any other checkout of this repo.
 
 - [ ] **Step 4: Visual spot-check**
 

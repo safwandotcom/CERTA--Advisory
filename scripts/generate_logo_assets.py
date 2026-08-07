@@ -16,9 +16,10 @@ SRC = Path(r"C:\Users\HP\Downloads\Certa& Advisory.Logo.png")
 FULL_BBOX = (194, 307, 18528, 8058)   # ring + dash + full wordmark
 MARK_BBOX = (194, 307, 8163, 8058)    # ring + dash only, wordmark excluded
 
-MARKETING_DIR = Path(r"E:\CERTA ADVISORY\assets")
-PORTAL_BRAND_DIR = Path(r"E:\CERTA ADVISORY\portal\public\brand")
-PORTAL_APP_DIR = Path(r"E:\CERTA ADVISORY\portal\app")
+REPO_ROOT = Path(__file__).resolve().parent.parent  # repo root, wherever this checkout/worktree lives
+MARKETING_DIR = REPO_ROOT / "assets"
+PORTAL_BRAND_DIR = REPO_ROOT / "portal" / "public" / "brand"
+PORTAL_APP_DIR = REPO_ROOT / "portal" / "app"
 
 
 def make_lockup(src: Image.Image, bbox: tuple[int, int, int, int], out_height: int, pad: int) -> Image.Image:
