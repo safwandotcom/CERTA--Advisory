@@ -3,8 +3,8 @@
   --certa-green: #00904C;
   --certa-green-deep: #00753E;
   --certa-green-tint: #E4F3EA;
-  --signal-coral: #F15A40;
-  --signal-coral-deep: #D8442B;
+  --signal-coral: #ED1C25;
+  --signal-coral-deep: #B8232A;
   --ink: #231F20;
   --ink-muted: #55565A;
   --surface-tint: #F6F9F7;
@@ -139,8 +139,8 @@ html.js [data-reveal].is-visible { opacity: 1; transform: none; }
 .btn-primary { background: var(--certa-green-deep); color: var(--white); }
 .btn-primary:hover { background: var(--ink); transform: translateY(-2px); box-shadow: var(--shadow-hover); }
 
-.btn-coral { background: var(--signal-coral); color: var(--ink); }
-.btn-coral:hover { background: var(--signal-coral-deep); color: var(--white); transform: translateY(-2px); box-shadow: var(--shadow-hover); }
+.btn-coral { background: var(--signal-coral-deep); color: var(--white); }
+.btn-coral:hover { background: var(--ink); color: var(--white); transform: translateY(-2px); box-shadow: var(--shadow-hover); }
 
 .btn-secondary { background: var(--white); color: var(--ink); border: 1px solid var(--border); }
 .btn-secondary:hover { background: var(--surface-tint); }

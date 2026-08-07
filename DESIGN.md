@@ -5,8 +5,8 @@ colors:
   certa-green: "#00904C"
   certa-green-deep: "#00753E"
   certa-green-tint: "#E4F3EA"
-  signal-coral: "#F15A40"
-  signal-coral-deep: "#D8442B"
+  signal-coral: "#ED1C25"
+  signal-coral-deep: "#B8232A"
   ink: "#231F20"
   ink-muted: "#55565A"
   surface-tint: "#F6F9F7"
@@ -119,8 +119,8 @@ Two brand colors inherited directly from the mark, deployed with discipline agai
 - **Certa Green Deep** (#007A3E / `#00753E`): a darkened working shade of Certa Green, used wherever green carries small text or sits behind white text (primary buttons, links, hover states). Exists specifically because raw Certa Green fails AA contrast at small sizes.
 
 ### Secondary
-- **Signal Coral** (#F15A40): the mark's dash color. Reserved for the single highest-priority action per screen — the primary CTA, a key stat, a rare highlight. Its scarcity is what makes it register as urgency against the green-and-neutral field.
-- **Signal Coral Deep** (#D8442B): hover/active state for coral elements.
+- **Signal Coral** (#ED1C25): the mark's dash color. Reserved for the single highest-priority action per screen — the primary CTA, a key stat, a rare highlight. Its scarcity is what makes it register as urgency against the green-and-neutral field.
+- **Signal Coral Deep** (#B8232A): the UI-safe working shade of Signal Coral, used wherever coral carries small text, sits behind white text, or fills a button — coral buttons, error states, badges. Exists specifically because raw Signal Coral fails AA contrast at small sizes, the same reasoning as Certa Green Deep.
 
 ### Neutral
 - **Ink** (#231F20): primary text and headline color. This is the same near-black used in the logo's wordmark — 16.3:1 contrast on white.
@@ -131,7 +131,7 @@ Two brand colors inherited directly from the mark, deployed with discipline agai
 - **White** (#FFFFFF): base canvas.
 
 ### Named Rules
-**The Contrast-Safe Brand Rule.** Raw Certa Green (#00904C, 4.1:1) and raw Signal Coral (#F15A40, 3.4:1) both fail AA for small text on white. Never set body copy or button labels directly in either raw color. Use Certa Green Deep for small green text/UI, and pair Signal Coral only with Ink text (4.9:1) or use it strictly as a large decorative surface — never as a small-text color.
+**The Contrast-Safe Brand Rule.** Raw Certa Green (#00904C, 4.1:1) and raw Signal Coral (#ED1C25, 3.7:1 against Ink, 4.4:1 against white) all fail AA for small text on white. Never set body copy or button labels directly in either raw color. Use Certa Green Deep for small green text/UI, and Signal Coral Deep (6.3:1 against white) for small coral text/UI and coral button fills — reserve raw Signal Coral strictly for large decorative surfaces (the mark's dash, hero accent rings, large graphic strokes), never as a small-text or button-fill color.
 
 **The One Action Rule.** Signal Coral marks exactly one action per screen — the primary CTA. If two elements compete for coral, one of them is wrong.
 
@@ -167,7 +167,7 @@ Flat by default. Depth is conveyed through the Surface Tint / White alternation 
 ### Buttons
 - **Shape:** moderately rounded (`border-radius: 10px`, `rounded.md`) — not a full pill. A full pill reads as startup-casual; this system needs to hold a finance conversation, so the shape is measured rather than playful, while still departing from the squared-off, dense-menu feel of the competitor set.
 - **Primary:** Certa Green Deep background, white label text, `15px 28px` padding. Used for the main conversion action ("Book a discovery call").
-- **Coral (single-use):** Signal Coral background, Ink label text. Reserved for the one highest-priority CTA on the page — typically the hero.
+- **Coral (single-use):** Signal Coral Deep background, white label text. Reserved for the one highest-priority CTA on the page — typically the hero.
 - **Secondary/Ghost:** white background, Ink text, 1px Border outline. Used for lower-priority actions ("See our services").
 - **Hover / Focus:** background shifts one step darker (Deep variants) or to Surface Tint (ghost); adds `hover-lift` shadow and a 2px upward translate over 180ms ease-out-quart. Focus-visible adds a 2px Certa Green outline offset 2px, on every variant, keyboard or not.
 
@@ -211,7 +211,7 @@ The mark (open green ring + coral dash) always keeps clear space equal to the ri
 ### Do:
 - **Do** keep navigation to a single flat row, six links maximum — no nested menus.
 - **Do** use Certa Green Deep (#00753E), not raw Certa Green, for any small text or white-on-green button.
-- **Do** pair Signal Coral with Ink text, never white text, unless the coral element is large/decorative only.
+- **Do** pair Signal Coral Deep with white text for buttons and interactive fills; reserve raw Signal Coral for large decorative surfaces only, never as a small-text or button-fill color.
 - **Do** let Surface Tint (#F6F9F7) and White alternate section-by-section as the primary rhythm device.
 - **Do** cap body paragraphs at 65–75ch and keep one clear idea per section.
 - **Do** reserve Signal Coral for exactly one action per screen.
@@ -226,7 +226,7 @@ The mark (open green ring + coral dash) always keeps clear space equal to the ri
 - **Don't** build dense, deeply-nested navigation menus that bury the actual offer.
 - **Don't** use stock-photo hero imagery as a substitute for a point of view.
 - **Don't** add drop shadows to resting cards or buttons — shadows appear only on hover.
-- **Don't** set raw Certa Green (#00904C) or raw Signal Coral (#F15A40) as small body text or button-label color on white — both fail AA contrast at that size.
+- **Don't** set raw Certa Green (#00904C) or raw Signal Coral (#ED1C25) as small body text or button-label color on white — both fail AA contrast at that size; use their Deep variants instead.
 - **Don't** use uppercase tracked "eyebrow" labels above every section heading — pick one deliberate typographic cadence instead of the generic AI-landing-page kicker.
 - **Don't** list or imply HR, EOR, or general BPO services — this is an accounting-only practice; every service line must be an accounting-firm function.
 - **Don't** use full-pill buttons or casual, startup-register copy — this needs to hold a finance conversation, not a product demo.
