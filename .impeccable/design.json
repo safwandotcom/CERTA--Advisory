@@ -6,8 +6,8 @@
     "colorMeta": {
       "certa-green": { "role": "primary", "displayName": "Certa Green", "canonical": "oklch(56% 0.15 154)", "tonalRamp": ["#00351D", "#00522C", "#00753E", "#00904C", "#2FAE6E", "#7CCB9E", "#BEE5D0", "#E4F3EA"] },
       "certa-green-deep": { "role": "primary-deep", "displayName": "Certa Green Deep", "canonical": "oklch(48% 0.13 154)" },
-      "signal-coral": { "role": "secondary", "displayName": "Signal Coral", "canonical": "oklch(68% 0.17 35)", "tonalRamp": ["#5C160A", "#8A2515", "#B93420", "#D8442B", "#F15A40", "#F58269", "#F9AB99", "#FCD5CB"] },
-      "signal-coral-deep": { "role": "secondary-deep", "displayName": "Signal Coral Deep", "canonical": "oklch(56% 0.17 33)" },
+      "signal-coral": { "role": "secondary", "displayName": "Signal Coral", "canonical": "oklch(60% 0.23 27)", "tonalRamp": ["#5C1512", "#8A2320", "#B9322E", "#B8232A", "#ED1C25", "#F68075", "#FAAAA0", "#FDD4CF"] },
+      "signal-coral-deep": { "role": "secondary-deep", "displayName": "Signal Coral Deep", "canonical": "oklch(51% 0.18 25)" },
       "ink": { "role": "neutral", "displayName": "Ink", "canonical": "oklch(23% 0.004 260)" },
       "ink-muted": { "role": "neutral", "displayName": "Ink Muted", "canonical": "oklch(41% 0.004 260)" },
       "surface-tint": { "role": "neutral-bg", "displayName": "Surface Tint", "canonical": "oklch(97.5% 0.006 155)" },
@@ -49,7 +49,7 @@
       "refersTo": "button-coral",
       "description": "Single highest-priority CTA on a page, typically the hero.",
       "html": "<button class=\"ds-btn ds-btn-coral\">Start the conversation</button>",
-      "css": ".ds-btn-coral { background: #F15A40; color: #231F20; font-family: Inter, 'Segoe UI', sans-serif; font-weight: 600; font-size: 0.9375rem; letter-spacing: 0.01em; padding: 15px 28px; border: none; border-radius: 10px; cursor: pointer; transition: background 200ms cubic-bezier(0.22,1,0.36,1), transform 200ms cubic-bezier(0.22,1,0.36,1), box-shadow 200ms cubic-bezier(0.22,1,0.36,1); } .ds-btn-coral:hover { background: #D8442B; color: #FFFFFF; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(35,31,32,0.12); } .ds-btn-coral:focus-visible { outline: 2px solid #231F20; outline-offset: 2px; }"
+      "css": ".ds-btn-coral { background: #B8232A; color: #FFFFFF; font-family: Inter, 'Segoe UI', sans-serif; font-weight: 600; font-size: 0.9375rem; letter-spacing: 0.01em; padding: 15px 28px; border: none; border-radius: 10px; cursor: pointer; transition: background 200ms cubic-bezier(0.22,1,0.36,1), transform 200ms cubic-bezier(0.22,1,0.36,1), box-shadow 200ms cubic-bezier(0.22,1,0.36,1); } .ds-btn-coral:hover { background: #231F20; color: #FFFFFF; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(35,31,32,0.12); } .ds-btn-coral:focus-visible { outline: 2px solid #231F20; outline-offset: 2px; }"
     },
     {
       "name": "Secondary Button",
@@ -103,7 +103,7 @@
       "Credibility carried by specifics: named software, qualifications, jurisdictions, never bare adjectives"
     ],
     "rules": [
-      { "name": "The Contrast-Safe Brand Rule", "body": "Raw Certa Green (#00904C, 4.1:1) and raw Signal Coral (#F15A40, 3.4:1) both fail AA for small text on white. Use Certa Green Deep for small green text/UI, and pair Signal Coral only with Ink text or use it strictly as a large decorative surface.", "section": "colors" },
+      { "name": "The Contrast-Safe Brand Rule", "body": "Raw Certa Green (#00904C, 4.1:1) and raw Signal Coral (#ED1C25, 3.7:1 against Ink, 4.4:1 against white) all fail AA for small text on white. Use Certa Green Deep for small green text/UI, and Signal Coral Deep (6.3:1 against white) for small coral text/UI and coral button fills; reserve raw Signal Coral strictly for large decorative surfaces.", "section": "colors" },
       { "name": "The One Action Rule", "body": "Signal Coral marks exactly one action per screen, the primary CTA. If two elements compete for coral, one of them is wrong.", "section": "colors" },
       { "name": "The Wordmark-Weight Rule", "body": "CERTA& is set bold, Advisory sits in a lighter weight underneath. Echo that same bold/light contrast anywhere the two words appear together.", "section": "typography" },
       { "name": "The Flat-At-Rest Rule", "body": "Nothing has a shadow in its default state. Shadows are a response to hover/focus, never a resting decoration.", "section": "elevation" }
@@ -111,7 +111,7 @@
     "dos": [
       "Do keep navigation to a single flat row, five links maximum, no nested menus.",
       "Do use Certa Green Deep (#00753E), not raw Certa Green, for any small text or white-on-green button.",
-      "Do pair Signal Coral with Ink text, never white text, unless the coral element is large/decorative only.",
+      "Do pair Signal Coral Deep with white text for buttons and interactive fills; reserve raw Signal Coral for large decorative surfaces only.",
       "Do let Surface Tint (#F6F9F7) and White alternate section-by-section as the primary rhythm device.",
       "Do cap body paragraphs at 65-75ch and keep one clear idea per section.",
       "Do reserve Signal Coral for exactly one action per screen.",
@@ -123,7 +123,7 @@
       "Don't build dense, deeply-nested navigation menus that bury the actual offer.",
       "Don't use stock-photo hero imagery as a substitute for a point of view.",
       "Don't add drop shadows to resting cards or buttons, shadows appear only on hover.",
-      "Don't set raw Certa Green (#00904C) or raw Signal Coral (#F15A40) as small body text or button-label color on white.",
+      "Don't set raw Certa Green (#00904C) or raw Signal Coral (#ED1C25) as small body text or button-label color on white; use their Deep variants instead.",
       "Don't use uppercase tracked eyebrow labels above every section heading.",
       "Don't list or imply HR, EOR, or general BPO services; this is an accounting-only practice.",
       "Don't use full-pill buttons or casual, startup-register copy."
