@@ -190,3 +190,46 @@ if (worldClockCards.length) {
   updateWorldClocks();
   setInterval(updateWorldClocks, 1000);
 }
+
+// ---------- Process stat count-up ----------
+// Default markup already shows the final value (progressive enhancement, matching the
+// [data-reveal] philosophy in styles.css): only reset to 0 and animate back up once
+// html.js is armed, IntersectionObserver is available, and reduced-motion isn't set.
+const countEls = document.querySelectorAll('[data-count-to]');
+if (!reducedMotion && 'IntersectionObserver' in window && countEls.length) {
+  const countDuration = 900; // ms
+
+  function animateCount(el) {
+    const target = parseInt(el.getAttribute('data-count-to'), 10) || 0;
+    const suffix = el.getAttribute('data-count-suffix') || '';
+    const start = performance.now();
+
+    function step(now) {
+      const progress = Math.min(1, (now - start) / countDuration);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const value = Math.round(target * eased);
+      el.textContent = `${value}${suffix}`;
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      } else {
+        el.textContent = `${target}${suffix}`;
+      }
+    }
+    requestAnimationFrame(step);
+  }
+
+  const countObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const suffix = entry.target.getAttribute('data-count-suffix') || '';
+          entry.target.textContent = `0${suffix}`;
+          animateCount(entry.target);
+          countObserver.unobserve(entry.target);
+        }
+      });
+    },
+    { threshold: 0.4 }
+  );
+  countEls.forEach((el) => countObserver.observe(el));
+}
