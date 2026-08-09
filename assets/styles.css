@@ -592,19 +592,6 @@ html.js [data-reveal].is-visible { opacity: 1; transform: none; }
   border-collapse: collapse;
   min-width: 640px;
 }
-.comparison-table caption {
-  text-align: left;
-  caption-side: top;
-  margin-bottom: var(--space-lg);
-}
-.comparison-table caption h2 {
-  font-size: clamp(1.75rem, 2.6vw, 2.5rem);
-  font-weight: 600;
-  line-height: 1.15;
-  letter-spacing: -0.01em;
-  max-width: 46ch;
-}
-.comparison-table caption p { color: var(--ink-muted); margin-top: var(--space-sm); max-width: 60ch; }
 .comparison-table th,
 .comparison-table td {
   text-align: left;
@@ -731,7 +718,7 @@ html.js [data-reveal].is-visible { opacity: 1; transform: none; }
   width: 40px;
   height: 40px;
   border-radius: var(--radius-md);
-  background: var(--surface-tint);
+  background: var(--certa-green-tint);
   display: flex;
   align-items: center;
   justify-content: center;
