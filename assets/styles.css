@@ -765,6 +765,40 @@ html.js [data-reveal].is-visible { opacity: 1; transform: none; }
 .client-profile h3 { color: var(--white); font-size: 1.0625rem; font-weight: 600; margin-bottom: 8px; }
 .client-profile p { color: rgba(255, 255, 255, 0.68); font-size: 0.9375rem; }
 
+/* ---------- FAQ ---------- */
+.faq-head { max-width: 640px; margin-bottom: var(--space-lg); }
+.faq-head h2 {
+  font-size: clamp(1.75rem, 2.6vw, 2.5rem);
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+}
+.faq-list { border-top: 1px solid var(--border); }
+.faq-item { border-bottom: 1px solid var(--border); padding: var(--space-md) 0; }
+.faq-item summary {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.0625rem;
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+.faq-item summary::-webkit-details-marker { display: none; }
+.faq-item summary::after {
+  content: '+';
+  font-size: 1.5rem;
+  font-weight: 400;
+  color: var(--certa-green-deep);
+  flex: none;
+  transition: transform 200ms var(--ease-standard);
+}
+.faq-item[open] summary::after { transform: rotate(45deg); }
+.faq-item p { color: var(--ink-muted); margin-top: var(--space-sm); max-width: 62ch; }
+.faq-item summary:focus-visible { outline: 2px solid var(--certa-green); outline-offset: 4px; }
+
 /* ---------- Careers ---------- */
 .careers-grid {
   display: grid;
@@ -888,4 +922,5 @@ html.js [data-reveal].is-visible { opacity: 1; transform: none; }
 .mobile-nav__links a { font-family: var(--font-display); font-size: 1.75rem; font-weight: 600; text-decoration: none; color: var(--ink); }
 @media (prefers-reduced-motion: reduce) {
   .mobile-nav { transition: none; }
+  .faq-item summary::after { transition: none; }
 }
