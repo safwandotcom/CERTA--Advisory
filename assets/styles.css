@@ -585,6 +585,58 @@ html.js [data-reveal].is-visible { opacity: 1; transform: none; }
 .process-step h3 { font-size: 1.0625rem; font-weight: 600; margin-bottom: 8px; }
 .process-step p { color: var(--ink-muted); font-size: 0.9375rem; }
 
+/* ---------- Outsourcing vs in-house comparison ---------- */
+.comparison-table-wrap { overflow-x: auto; }
+.comparison-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 640px;
+}
+.comparison-table caption {
+  text-align: left;
+  caption-side: top;
+  margin-bottom: var(--space-lg);
+}
+.comparison-table caption h2 {
+  font-size: clamp(1.75rem, 2.6vw, 2.5rem);
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  max-width: 46ch;
+}
+.comparison-table caption p { color: var(--ink-muted); margin-top: var(--space-sm); max-width: 60ch; }
+.comparison-table th,
+.comparison-table td {
+  text-align: left;
+  padding: var(--space-md);
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+  font-size: 0.9375rem;
+}
+.comparison-table thead th {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.8125rem;
+  letter-spacing: 0.02em;
+  color: var(--ink-muted);
+  border-bottom: 2px solid var(--border);
+  padding-bottom: var(--space-sm);
+}
+.comparison-table thead th:last-child { color: var(--certa-green-deep); }
+.comparison-table tbody th[scope="row"] {
+  font-family: var(--font-display);
+  font-weight: 600;
+  color: var(--ink);
+  width: 18%;
+  white-space: nowrap;
+}
+.comparison-table tbody td:first-of-type { color: var(--ink-muted); }
+.comparison-table tbody td:last-child {
+  border-left: 2px solid var(--certa-green-tint);
+  color: var(--ink);
+}
+.comparison-table tbody tr:nth-child(even) { background: var(--white); }
+
 /* ---------- Why Choose CERTA& ---------- */
 .why-us { position: relative; overflow: hidden; }
 .why-us__head { max-width: 620px; margin: 0 auto var(--space-2xl); text-align: center; }
