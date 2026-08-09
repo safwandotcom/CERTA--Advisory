@@ -636,6 +636,7 @@ html.js [data-reveal].is-visible { opacity: 1; transform: none; }
   color: var(--ink);
 }
 .comparison-table tbody tr:nth-child(even) { background: var(--white); }
+.comparison-table tbody tr:nth-child(odd) { background: var(--surface-tint); }
 
 /* ---------- Why Choose CERTA& ---------- */
 .why-us { position: relative; overflow: hidden; }
@@ -730,7 +731,7 @@ html.js [data-reveal].is-visible { opacity: 1; transform: none; }
   width: 40px;
   height: 40px;
   border-radius: var(--radius-md);
-  background: var(--white);
+  background: var(--surface-tint);
   display: flex;
   align-items: center;
   justify-content: center;
