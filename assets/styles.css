@@ -786,6 +786,15 @@ html.js [data-reveal].is-visible { opacity: 1; transform: none; }
 .security-card__mark svg { width: 20px; height: 20px; stroke: var(--certa-green-deep); }
 .security-card h3 { font-size: 1.0625rem; font-weight: 600; margin-bottom: 8px; }
 .security-card p { color: var(--ink-muted); font-size: 0.9375rem; }
+.security-card__mark svg * {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset 500ms var(--ease-standard);
+}
+.security-card__mark svg *:nth-child(2) { transition-delay: 120ms; }
+.security-card__mark svg *:nth-child(3) { transition-delay: 240ms; }
+.security-card__mark svg *:nth-child(4) { transition-delay: 360ms; }
+.security-card.is-visible .security-card__mark svg * { stroke-dashoffset: 0; }
 
 /* ---------- Our Clients ---------- */
 .clients-band { background: var(--ink); }
@@ -875,6 +884,18 @@ html.js [data-reveal].is-visible { opacity: 1; transform: none; }
 .cta-band h2 { color: var(--white); font-size: clamp(1.75rem, 2.6vw, 2.5rem); }
 .cta-band p { color: rgba(255,255,255,0.75); margin-top: var(--space-sm); max-width: 50ch; }
 .cta-band__actions { display: flex; gap: var(--space-sm); flex-wrap: wrap; justify-content: flex-start; }
+.cta-mark { width: 32px; height: 32px; margin-top: var(--space-sm); }
+.cta-mark .certa-mark__ring {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset 600ms var(--ease-standard);
+}
+.cta-mark .certa-mark__dash {
+  opacity: 0;
+  transition: opacity 200ms var(--ease-standard) 550ms;
+}
+.cta-band.is-visible .cta-mark .certa-mark__ring { stroke-dashoffset: 0; }
+.cta-band.is-visible .cta-mark .certa-mark__dash { opacity: 1; }
 
 /* ---------- Footer ---------- */
 .site-footer {
@@ -972,4 +993,6 @@ html.js [data-reveal].is-visible { opacity: 1; transform: none; }
   .faq-item summary::after { transition: none; }
   .stat-item__flourish, .stat-item__flourish .certa-mark__ring { transition: none; opacity: 1; transform: none; stroke-dashoffset: 0; }
   .process-line__fill { transform: scaleX(1) !important; }
+  .security-card__mark svg * { transition: none; stroke-dashoffset: 0; }
+  .cta-mark .certa-mark__ring, .cta-mark .certa-mark__dash { transition: none; stroke-dashoffset: 0; opacity: 1; }
 }
