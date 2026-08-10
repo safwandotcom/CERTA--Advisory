@@ -869,6 +869,12 @@ html.js [data-reveal].is-visible { opacity: 1; transform: none; }
 .faq-item p { color: var(--ink-muted); margin-top: var(--space-sm); max-width: 62ch; }
 .faq-item summary:focus-visible { outline: 2px solid var(--certa-green); outline-offset: 4px; }
 
+/* ---------- Table/FAQ hover polish ---------- */
+.comparison-table tbody tr { transition: background 200ms var(--ease-standard); }
+.comparison-table tbody tr:hover { background: var(--certa-green-tint); }
+.faq-item { transition: background 200ms var(--ease-standard); }
+.faq-item:hover { background: var(--surface-tint); }
+
 /* ---------- Careers ---------- */
 .careers-grid {
   display: grid;
