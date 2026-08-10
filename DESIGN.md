@@ -204,7 +204,7 @@ The mark (open green ring + coral dash) always keeps clear space equal to the ri
 - **Reduced motion:** both systems fully disable under `prefers-reduced-motion: reduce` — reveals show their end state immediately, parallax transforms are removed, idle float animations stop.
 
 ### Named Rules
-**The Static-By-Default Rule.** Full-scale, full-bleed layout and signature scroll motion are not the same thing as decorating every element. Parallax is reserved for the hero and the Why Us visual only; reveal-on-scroll is used for content blocks, not sprinkled onto every icon and label. If it's not one of the two named signature moments, it does not get parallax.
+**The Signature Moments Rule** (supersedes the earlier two-moment Static-By-Default Rule, expanded 2026-08-11). Full-scale, full-bleed layout and signature scroll motion are not the same thing as decorating every element. Scroll-driven and stroke-draw motion beyond the standard `[data-reveal]` fade-up and hover/focus states is reserved for exactly six named moments: (1) the preloader's ring-draws/dash-snaps sequence and its shared-element morph into the hero mark, (2) the hero's decorative rings and floating mark, (3) the "By the numbers" stat band's count-up and closing ring flourish, (4) the Process section's scroll-choreographed connecting line (desktop only), (5) the Why Us visual, and (6) the Security cards' icon draw-in plus the closing CTA's ring-complete flourish. If it's not one of these six, it does not get scroll-driven or stroke-draw motion — it gets the standard reveal-on-scroll treatment or nothing.
 
 ## 6. Do's and Don'ts
 
@@ -217,7 +217,7 @@ The mark (open green ring + coral dash) always keeps clear space equal to the ri
 - **Do** reserve Signal Coral for exactly one action per screen.
 - **Do** back every credibility claim with a specific: a named software platform, a qualification, a jurisdiction, a number.
 - **Do** use moderately rounded 10px buttons (`rounded.md`), not full pills.
-- **Do** reserve parallax for the hero and Why Us visual only; use reveal-on-scroll for content blocks, per the Static-By-Default Rule.
+- **Do** reserve scroll-driven and stroke-draw motion for the six named Signature Moments only; use reveal-on-scroll for everything else, per the Signature Moments Rule.
 - **Do** default every `[data-reveal]` element to fully visible; only arm the hidden pre-reveal state once JS confirms it can animate.
 - **Do** present Team, Clients, and Careers content honestly: role-based structure instead of invented named staff, sector/market profiles instead of fabricated client logos.
 
