@@ -15,6 +15,13 @@
 </head>
 <body>
 
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="certa-mark" viewBox="0 0 100 100">
+    <path class="certa-mark__ring" pathLength="1" d="M 81.93 66.62 A 36 36 0 1 1 81.93 33.38" fill="none" stroke="var(--certa-green)" stroke-width="12" stroke-linecap="round"/>
+    <rect class="certa-mark__dash" x="80" y="44" width="17" height="12" rx="6" fill="var(--signal-coral)"/>
+  </symbol>
+</svg>
+
 <div class="preloader" id="preloader" role="status" aria-live="polite">
   <div class="preloader__inner">
     <img class="preloader__mark" src="assets/certa-mark.png" alt="" />
@@ -48,7 +55,7 @@
 
 <div class="mobile-nav" id="mobileNav">
   <div class="mobile-nav__top">
-    <img src="assets/certa-mark.png" alt="" style="height:32px" />
+    <svg class="certa-mark-use" viewBox="0 0 100 100" aria-hidden="true" style="height:32px;width:32px"><use href="#certa-mark"></use></svg>
     <button class="nav-toggle" id="navClose" aria-label="Close menu" style="display:inline-flex">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="4" x2="20" y2="20"/><line x1="20" y1="4" x2="4" y2="20"/></svg>
     </button>
@@ -143,7 +150,7 @@
         </div>
       </div>
       <div class="hero__mark" data-reveal style="--reveal-delay:200">
-        <img src="assets/certa-mark.png" alt="" data-parallax data-speed="-0.16" data-float data-float-amp="26" data-float-period="3.4" data-float-rotate="6" />
+        <svg class="certa-mark-use" viewBox="0 0 100 100" aria-hidden="true" data-parallax data-speed="-0.16" data-float data-float-amp="26" data-float-period="3.4" data-float-rotate="6"><use href="#certa-mark"></use></svg>
       </div>
     </div>
   </section>
@@ -341,7 +348,7 @@
         <div class="why-us__visual" data-reveal style="--reveal-delay:120">
           <span class="why-us__blob" data-parallax data-speed="0.06"></span>
           <span class="why-us__ring-outline" data-parallax data-speed="-0.1" data-float data-float-amp="6" data-float-period="8" data-float-rotate="3"></span>
-          <img class="why-us__mark" src="assets/certa-mark.png" alt="" data-float data-float-amp="16" data-float-period="4" />
+          <svg class="why-us__mark certa-mark-use" viewBox="0 0 100 100" aria-hidden="true" data-float data-float-amp="16" data-float-period="4"><use href="#certa-mark"></use></svg>
           <span class="why-us__floater why-us__floater--top" data-parallax data-speed="0.16" data-float data-float-amp="10" data-float-period="3.8" data-float-phase="1.5">
             <span class="dot"></span> Fixed scope
           </span>

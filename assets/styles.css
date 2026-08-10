@@ -86,6 +86,8 @@ a { color: inherit; }
 
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
+.certa-mark-use { display: block; height: auto; }
+
 .eyebrow-free { /* marker: this project intentionally has no eyebrow kickers, see DESIGN.md Don'ts */ }
 
 /* ---------- Scroll reveal (progressive enhancement) ---------- */
@@ -457,7 +459,7 @@ html.js [data-reveal].is-visible { opacity: 1; transform: none; }
   justify-content: center;
   align-items: center;
 }
-.hero__mark img {
+.hero__mark svg {
   width: min(360px, 82%);
   height: auto;
   position: relative;
@@ -859,7 +861,7 @@ html.js [data-reveal].is-visible { opacity: 1; transform: none; }
   .hero { min-height: 100svh; padding: calc(var(--space-xl) + 40px) 0 var(--space-lg); }
   .hero__grid { grid-template-columns: 1fr; }
   .hero__mark { order: -1; }
-  .hero__mark img { width: min(220px, 60%); }
+  .hero__mark svg { width: min(220px, 60%); }
   .hero__decor .ring--one { width: 380px; height: 380px; }
   .hero__decor .ring--two { width: 260px; height: 260px; }
   .section__head { grid-template-columns: 1fr; }
