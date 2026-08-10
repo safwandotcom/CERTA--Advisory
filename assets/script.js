@@ -120,7 +120,7 @@ updateHeaderState();
 // ---------- Motion: idle float + scroll parallax ----------
 // Unified into one rAF loop per element so float (continuous) and parallax (scroll-linked)
 // compose into a single transform instead of two writers fighting over the same property.
-const motionEls = Array.from(document.querySelectorAll('[data-parallax], [data-float]'));
+const motionEls = Array.from(document.querySelectorAll('[data-parallax], [data-float], [data-line-progress]'));
 
 if (!reducedMotion && motionEls.length) {
   const start = performance.now();
@@ -131,6 +131,22 @@ if (!reducedMotion && motionEls.length) {
     const viewportH = window.innerHeight;
 
     motionEls.forEach((el) => {
+      if (el.hasAttribute('data-line-progress')) {
+        const track = el.closest('.process');
+        if (track) {
+          const rect = track.getBoundingClientRect();
+          const start = viewportH * 0.8;
+          const end = viewportH * 0.25;
+          const raw = (start - rect.top) / (start - end);
+          const progress = Math.min(1, Math.max(0, raw));
+          el.style.transform = `scaleX(${progress.toFixed(3)})`;
+          const steps = track.querySelectorAll('.process-step');
+          const activeIndex = Math.floor(progress * steps.length);
+          steps.forEach((step, i) => step.classList.toggle('is-active', progress > 0 && i <= activeIndex));
+        }
+        return;
+      }
+
       let y = 0;
       let rot = 0;
 

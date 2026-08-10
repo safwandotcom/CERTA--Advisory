@@ -613,10 +613,18 @@ html.js [data-reveal].is-visible { opacity: 1; transform: none; }
 .process-stat__label { font-size: 0.875rem; color: var(--ink-muted); }
 
 .process {
+  position: relative;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: var(--space-md);
   counter-reset: step;
+}
+.process-line { display: none; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--border); z-index: 0; }
+.process-line__fill { position: absolute; inset: 0; background: var(--certa-green); transform-origin: left; transform: scaleX(0); }
+
+@media (min-width: 861px) and (hover: hover) {
+  .process-line { display: block; }
+  .process-step { border-top-color: transparent; }
 }
 .process-step {
   position: relative;
@@ -631,6 +639,8 @@ html.js [data-reveal].is-visible { opacity: 1; transform: none; }
   display: block;
   margin-bottom: var(--space-sm);
 }
+.process-step.is-active .process-step__num,
+.process-step.is-active h3 { color: var(--certa-green-deep); }
 .process-step h3 { font-size: 1.0625rem; font-weight: 600; margin-bottom: 8px; }
 .process-step p { color: var(--ink-muted); font-size: 0.9375rem; }
 
@@ -961,4 +971,5 @@ html.js [data-reveal].is-visible { opacity: 1; transform: none; }
   .mobile-nav { transition: none; }
   .faq-item summary::after { transition: none; }
   .stat-item__flourish, .stat-item__flourish .certa-mark__ring { transition: none; opacity: 1; transform: none; stroke-dashoffset: 0; }
+  .process-line__fill { transform: scaleX(1) !important; }
 }
