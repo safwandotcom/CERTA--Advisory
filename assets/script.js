@@ -16,10 +16,46 @@ if (preloader) {
     requestAnimationFrame(() => requestAnimationFrame(() => preloaderMark.classList.add('is-drawing')));
   }
 
+  function morphMarkToHero() {
+    const heroMark = document.querySelector('.hero__mark .certa-mark-use');
+    if (!preloaderMark || !heroMark) return;
+
+    const startRect = preloaderMark.getBoundingClientRect();
+    const endRect = heroMark.getBoundingClientRect();
+    const clone = preloaderMark.cloneNode(true);
+    clone.classList.add('mark-morph-clone');
+    clone.style.position = 'fixed';
+    clone.style.left = `${startRect.left}px`;
+    clone.style.top = `${startRect.top}px`;
+    clone.style.width = `${startRect.width}px`;
+    clone.style.height = `${startRect.height}px`;
+    clone.style.margin = '0';
+    clone.style.zIndex = '10050';
+    clone.style.pointerEvents = 'none';
+    document.body.appendChild(clone);
+
+    heroMark.style.opacity = '0';
+
+    requestAnimationFrame(() => {
+      const scaleX = endRect.width / startRect.width;
+      const scaleY = endRect.height / startRect.height;
+      const translateX = endRect.left - startRect.left;
+      const translateY = endRect.top - startRect.top;
+      clone.style.transition = 'transform 950ms var(--ease-standard), opacity 950ms var(--ease-standard)';
+      clone.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scaleX}, ${scaleY})`;
+    });
+
+    setTimeout(() => {
+      heroMark.style.opacity = '';
+      clone.remove();
+    }, 950);
+  }
+
   function hidePreloader() {
     const elapsed = performance.now() - shownAt;
     const wait = Math.max(0, minDisplay - elapsed);
     setTimeout(() => {
+      if (!reducedMotion) morphMarkToHero();
       preloader.classList.add('is-hidden');
       document.documentElement.classList.remove('is-loading');
     }, wait);
