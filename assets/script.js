@@ -112,11 +112,16 @@ if ('IntersectionObserver' in window && revealEls.length) {
 // ---------- Header: transparent-over-hero, solid once scrolled ----------
 const siteHeader = document.querySelector('.site-header');
 const navProgress = document.querySelector('.nav-progress');
+// scrollHeight is a layout-flushing read; cache it and only recompute on resize
+// instead of on every scroll event.
+let scrollMax = document.documentElement.scrollHeight - window.innerHeight;
+window.addEventListener('resize', () => {
+  scrollMax = document.documentElement.scrollHeight - window.innerHeight;
+}, { passive: true });
 function updateHeaderState() {
   siteHeader.classList.toggle('is-scrolled', window.scrollY > 40);
   if (navProgress) {
-    const max = document.documentElement.scrollHeight - window.innerHeight;
-    const progress = max > 0 ? Math.min(1, window.scrollY / max) : 0;
+    const progress = scrollMax > 0 ? Math.min(1, window.scrollY / scrollMax) : 0;
     navProgress.style.transform = `scaleX(${progress.toFixed(3)})`;
   }
 }
@@ -311,12 +316,21 @@ if (magneticCta && canHover && !reducedMotion) {
   const radius = 60; // px — activation radius around the button's center
   const maxPull = 8; // px — cap on the visual pull
 
-  function handleMagneticMove(e) {
+  // Coalesce work into the rAF cadence: mousemove only records the latest
+  // pointer position (cheap); the actual getBoundingClientRect() measurement
+  // and style write happen at most once per frame, avoiding a forced layout
+  // read on every one of the (potentially hundreds of) mousemove events.
+  let lastX = 0;
+  let lastY = 0;
+  let magneticPending = false;
+
+  function applyMagneticPull() {
+    magneticPending = false;
     const rect = magneticCta.getBoundingClientRect();
     const cx = rect.left + rect.width / 2;
     const cy = rect.top + rect.height / 2;
-    const dx = e.clientX - cx;
-    const dy = e.clientY - cy;
+    const dx = lastX - cx;
+    const dy = lastY - cy;
     const dist = Math.hypot(dx, dy);
     if (dist < radius) {
       const pull = (1 - dist / radius) * maxPull;
@@ -324,6 +338,15 @@ if (magneticCta && canHover && !reducedMotion) {
       magneticCta.style.transform = `translate(${(Math.cos(angle) * pull).toFixed(1)}px, ${(Math.sin(angle) * pull).toFixed(1)}px)`;
     } else {
       magneticCta.style.transform = '';
+    }
+  }
+
+  function handleMagneticMove(e) {
+    lastX = e.clientX;
+    lastY = e.clientY;
+    if (!magneticPending) {
+      magneticPending = true;
+      requestAnimationFrame(applyMagneticPull);
     }
   }
 

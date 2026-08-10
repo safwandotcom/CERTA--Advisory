@@ -296,7 +296,7 @@ html.js [data-reveal].is-visible { opacity: 1; transform: none; }
 .nav-toggle svg { width: 24px; height: 24px; }
 
 /* ---------- By the numbers ---------- */
-.stats-band { padding: var(--space-lg) 0; }
+.section.stats-band { padding: var(--space-lg) 0; }
 .stats-band__row {
   display: flex;
   flex-wrap: wrap;
@@ -633,12 +633,12 @@ html.js [data-reveal].is-visible { opacity: 1; transform: none; }
   gap: var(--space-md);
   counter-reset: step;
 }
-.process-line { display: none; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--border); z-index: 0; }
+.process-line { display: none; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--border); z-index: 1; }
 .process-line__fill { position: absolute; inset: 0; background: var(--certa-green); transform-origin: left; transform: scaleX(0); }
 
 @media (min-width: 861px) and (hover: hover) {
   .process-line { display: block; }
-  .process-step { border-top-color: transparent; }
+  html.js .process-step { border-top-color: transparent; }
 }
 .process-step {
   position: relative;
