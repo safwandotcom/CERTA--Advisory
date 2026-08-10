@@ -152,6 +152,8 @@ html.js [data-reveal].is-visible { opacity: 1; transform: none; }
 .btn-ghost-onlight { background: transparent; color: var(--white); border: 1px solid rgba(255,255,255,0.35); }
 .btn-ghost-onlight:hover { background: rgba(255,255,255,0.1); }
 
+.magnetic-cta { display: inline-block; transition: transform 200ms var(--ease-standard); }
+
 @media (prefers-reduced-motion: reduce) {
   .btn:hover { transform: none; }
 }

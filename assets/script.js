@@ -301,3 +301,31 @@ if (!reducedMotion && 'IntersectionObserver' in window && countEls.length) {
   );
   countEls.forEach((el) => countObserver.observe(el));
 }
+
+// ---------- Hero CTA cursor-proximity pull ----------
+// Mouse-only enhancement (no listener attached at all on touch/reduced-motion), and capped
+// to a few pixels so it reads as engineered precision, not a playful "magnetic button."
+const magneticCta = document.querySelector('.magnetic-cta');
+const canHover = window.matchMedia('(hover: hover)').matches;
+if (magneticCta && canHover && !reducedMotion) {
+  const radius = 60; // px — activation radius around the button's center
+  const maxPull = 8; // px — cap on the visual pull
+
+  function handleMagneticMove(e) {
+    const rect = magneticCta.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const dx = e.clientX - cx;
+    const dy = e.clientY - cy;
+    const dist = Math.hypot(dx, dy);
+    if (dist < radius) {
+      const pull = (1 - dist / radius) * maxPull;
+      const angle = Math.atan2(dy, dx);
+      magneticCta.style.transform = `translate(${(Math.cos(angle) * pull).toFixed(1)}px, ${(Math.sin(angle) * pull).toFixed(1)}px)`;
+    } else {
+      magneticCta.style.transform = '';
+    }
+  }
+
+  window.addEventListener('mousemove', handleMagneticMove, { passive: true });
+}
