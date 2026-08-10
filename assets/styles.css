@@ -184,14 +184,20 @@ html.js [data-reveal].is-visible { opacity: 1; transform: none; }
 .preloader.is-hidden .preloader__inner {
   transform: scale(2.6);
 }
-.preloader__mark {
-  width: 100px;
-  height: 100px;
-  animation: certa-spin 1.6s linear infinite;
+.preloader__mark { width: 100px; height: 100px; }
+.preloader__mark .certa-mark__ring {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset 600ms var(--ease-standard);
 }
-@keyframes certa-spin {
-  to { transform: rotate(360deg); }
+.preloader__mark .certa-mark__dash {
+  opacity: 0;
+  transform: scale(0.4);
+  transform-origin: 88px 50px;
+  transition: opacity 150ms var(--ease-standard) 650ms, transform 150ms var(--ease-standard) 650ms;
 }
+.preloader__mark.is-drawing .certa-mark__ring { stroke-dashoffset: 0; }
+.preloader__mark.is-drawing .certa-mark__dash { opacity: 1; transform: scale(1); }
 .preloader__sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
 @media (prefers-reduced-motion: reduce) {
@@ -199,7 +205,8 @@ html.js [data-reveal].is-visible { opacity: 1; transform: none; }
   .preloader.is-hidden { opacity: 0; }
   .preloader__inner { transition: none; }
   .preloader.is-hidden .preloader__inner { transform: none; }
-  .preloader__mark { animation: none; }
+  .preloader__mark .certa-mark__ring { stroke-dashoffset: 0; transition: none; }
+  .preloader__mark .certa-mark__dash { opacity: 1; transform: scale(1); transition: none; }
 }
 
 /* ---------- Header ---------- */

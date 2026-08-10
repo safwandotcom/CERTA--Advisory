@@ -1,9 +1,20 @@
+const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
 // ---------- Preloader ----------
 const preloader = document.getElementById('preloader');
 if (preloader) {
   document.documentElement.classList.add('is-loading');
   const shownAt = performance.now();
-  const minDisplay = 1800; // ms — deliberate pause so the spinning mark actually registers, not just a flash
+  // ms — the draw-on sequence itself is ~900ms (600ms ring + 150ms dash-snap + 150ms hold);
+  // minDisplay adds a short settle so the completed mark registers before the iris opens.
+  const minDisplay = 1400;
+
+  const preloaderMark = preloader.querySelector('.preloader__mark');
+  if (preloaderMark && !reducedMotion) {
+    // Double rAF: wait a frame so the browser has committed the initial (undrawn) state
+    // before adding the class that transitions it, so the transition actually plays.
+    requestAnimationFrame(() => requestAnimationFrame(() => preloaderMark.classList.add('is-drawing')));
+  }
 
   function hidePreloader() {
     const elapsed = performance.now() - shownAt;
@@ -73,7 +84,6 @@ updateHeaderState();
 // ---------- Motion: idle float + scroll parallax ----------
 // Unified into one rAF loop per element so float (continuous) and parallax (scroll-linked)
 // compose into a single transform instead of two writers fighting over the same property.
-const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const motionEls = Array.from(document.querySelectorAll('[data-parallax], [data-float]'));
 
 if (!reducedMotion && motionEls.length) {

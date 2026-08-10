@@ -24,7 +24,10 @@
 
 <div class="preloader" id="preloader" role="status" aria-live="polite">
   <div class="preloader__inner">
-    <img class="preloader__mark" src="assets/certa-mark.png" alt="" />
+    <svg class="preloader__mark" viewBox="0 0 100 100" aria-hidden="true">
+      <path class="certa-mark__ring" pathLength="1" d="M 81.93 66.62 A 36 36 0 1 1 81.93 33.38" fill="none" stroke="var(--certa-green)" stroke-width="12" stroke-linecap="round"/>
+      <rect class="certa-mark__dash" x="80" y="44" width="17" height="12" rx="6" fill="var(--signal-coral)"/>
+    </svg>
   </div>
   <span class="preloader__sr">Loading CERTA&amp; Advisory…</span>
 </div>
