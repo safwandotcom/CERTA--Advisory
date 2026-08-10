@@ -111,8 +111,14 @@ if ('IntersectionObserver' in window && revealEls.length) {
 
 // ---------- Header: transparent-over-hero, solid once scrolled ----------
 const siteHeader = document.querySelector('.site-header');
+const navProgress = document.querySelector('.nav-progress');
 function updateHeaderState() {
   siteHeader.classList.toggle('is-scrolled', window.scrollY > 40);
+  if (navProgress) {
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    const progress = max > 0 ? Math.min(1, window.scrollY / max) : 0;
+    navProgress.style.transform = `scaleX(${progress.toFixed(3)})`;
+  }
 }
 window.addEventListener('scroll', updateHeaderState, { passive: true });
 updateHeaderState();
