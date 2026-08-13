@@ -12,6 +12,7 @@ import {
   FolderKanban,
   CalendarDays,
   ClipboardCheck,
+  Clock,
   Settings,
   LogOut,
   Menu,
@@ -39,6 +40,12 @@ const EMPLOYEE_NAV: NavItem[] = [
     label: 'Leave',
     icon: CalendarDays,
     isActive: (pathname) => pathname.startsWith('/dashboard/leave'),
+  },
+  {
+    href: '/dashboard/timesheet',
+    label: 'Timesheet',
+    icon: Clock,
+    isActive: (pathname) => pathname.startsWith('/dashboard/timesheet'),
   },
 ]
 
@@ -72,6 +79,12 @@ const ADMIN_NAV: NavItem[] = [
     label: 'Review Leave',
     icon: ClipboardCheck,
     isActive: (pathname) => pathname === '/admin/leave' || pathname.startsWith('/admin/leave/'),
+  },
+  {
+    href: '/admin/timesheet',
+    label: 'Timesheets',
+    icon: Clock,
+    isActive: (pathname) => pathname === '/admin/timesheet' || pathname.startsWith('/admin/timesheet/'),
   },
   {
     href: '/admin/settings',
