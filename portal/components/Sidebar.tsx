@@ -22,6 +22,12 @@ const EMPLOYEE_NAV: NavItem[] = [
     icon: LayoutDashboard,
     isActive: (pathname) => pathname === '/dashboard',
   },
+  {
+    href: '/dashboard/leave',
+    label: 'Leave',
+    icon: CalendarDays,
+    isActive: (pathname) => pathname.startsWith('/dashboard/leave'),
+  },
 ]
 
 const ADMIN_NAV: NavItem[] = [
