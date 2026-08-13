@@ -17,6 +17,7 @@ import {
   LogOut,
   Menu,
   X,
+  Wallet,
 } from 'lucide-react'
 import { signOutAction } from '@/app/actions'
 import { NotificationBell } from '@/components/NotificationBell'
@@ -85,6 +86,12 @@ const ADMIN_NAV: NavItem[] = [
     label: 'Timesheets',
     icon: Clock,
     isActive: (pathname) => pathname === '/admin/timesheet' || pathname.startsWith('/admin/timesheet/'),
+  },
+  {
+    href: '/admin/salary-deduction',
+    label: 'Salary Deduction',
+    icon: Wallet,
+    isActive: (pathname) => pathname.startsWith('/admin/salary-deduction'),
   },
   {
     href: '/admin/settings',
