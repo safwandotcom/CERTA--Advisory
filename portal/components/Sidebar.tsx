@@ -4,7 +4,19 @@ import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Users, Building2, FileBarChart, FolderKanban, CalendarDays, Settings, LogOut, Menu, X } from 'lucide-react'
+import {
+  LayoutDashboard,
+  Users,
+  Building2,
+  FileBarChart,
+  FolderKanban,
+  CalendarDays,
+  ClipboardCheck,
+  Settings,
+  LogOut,
+  Menu,
+  X,
+} from 'lucide-react'
 import { signOutAction } from '@/app/actions'
 import { NotificationBell } from '@/components/NotificationBell'
 
@@ -54,6 +66,12 @@ const ADMIN_NAV: NavItem[] = [
     label: 'Leave Types',
     icon: CalendarDays,
     isActive: (pathname) => pathname.startsWith('/admin/leave-types'),
+  },
+  {
+    href: '/admin/leave',
+    label: 'Review Leave',
+    icon: ClipboardCheck,
+    isActive: (pathname) => pathname === '/admin/leave' || pathname.startsWith('/admin/leave/'),
   },
   {
     href: '/admin/settings',

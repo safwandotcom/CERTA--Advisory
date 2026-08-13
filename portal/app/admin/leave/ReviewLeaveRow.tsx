@@ -1,0 +1,60 @@
+'use client'
+
+import { useActionState } from 'react'
+import { AlertCircle, CheckCircle2 } from 'lucide-react'
+import { reviewLeaveRequestAction, type LeaveReviewActionState } from './actions'
+import { input, buttonPrimary, buttonCoral, errorText, successText } from '@/lib/ui'
+
+const initialState: LeaveReviewActionState = {}
+
+// One useActionState instance per row — mirrors CancelRequestButton in
+// app/dashboard/leave/LeaveRequestForm.tsx. A single form posts either
+// decision via the clicked submit button's name/value pair.
+export function ReviewLeaveRow({ requestId }: { requestId: string }) {
+  const [state, formAction, pending] = useActionState(reviewLeaveRequestAction, initialState)
+
+  return (
+    <form action={formAction} className="flex flex-col gap-2">
+      <input type="hidden" name="requestId" value={requestId} />
+      <textarea
+        name="reviewNote"
+        rows={1}
+        placeholder="Optional note"
+        aria-label="Review note"
+        className={`${input} py-2 text-[0.8125rem]`}
+      />
+      <div className="flex flex-wrap items-center gap-2">
+        <button
+          type="submit"
+          name="decision"
+          value="approved"
+          disabled={pending}
+          className={`${buttonPrimary} py-2`}
+        >
+          Approve
+        </button>
+        <button
+          type="submit"
+          name="decision"
+          value="rejected"
+          disabled={pending}
+          className={`${buttonCoral} py-2`}
+        >
+          Reject
+        </button>
+      </div>
+      {state.error && (
+        <p role="alert" className={`${errorText} text-[0.75rem]`}>
+          <AlertCircle size={14} strokeWidth={2} className="shrink-0" />
+          {state.error}
+        </p>
+      )}
+      {state.success && (
+        <p className={`${successText} text-[0.75rem]`}>
+          <CheckCircle2 size={14} strokeWidth={2} className="shrink-0" />
+          {state.success}
+        </p>
+      )}
+    </form>
+  )
+}

@@ -104,3 +104,41 @@ export async function cancelLeaveRequest(
   if (!data || data.length === 0) return { error: 'Only your own pending requests can be cancelled' }
   return {}
 }
+
+export async function listPendingLeaveRequests(supabase: SupabaseClient): Promise<
+  (LeaveRequest & { employee_name: string; leave_type_name: string })[]
+> {
+  const { data } = await supabase
+    .from('leave_requests')
+    .select(
+      'id, employee_id, leave_type_id, start_date, end_date, start_day_period, end_day_period, reason, status, reviewed_by, reviewed_at, review_note, created_at, employees(name), leave_types(name)'
+    )
+    .eq('status', 'pending')
+    .order('created_at', { ascending: true })
+  return (data ?? []).map((row: Record<string, unknown>) => ({
+    ...row,
+    employee_name: (row.employees as { name: string })?.name ?? '',
+    leave_type_name: (row.leave_types as { name: string })?.name ?? '',
+  })) as (LeaveRequest & { employee_name: string; leave_type_name: string })[]
+}
+
+export async function reviewLeaveRequest(
+  adminClient: SupabaseClient,
+  requestId: string,
+  reviewerId: string,
+  decision: 'approved' | 'rejected',
+  reviewNote: string
+): Promise<{ error?: string; employeeId?: string }> {
+  const { data, error } = await adminClient
+    .from('leave_requests')
+    .update({ status: decision, reviewed_by: reviewerId, reviewed_at: new Date().toISOString(), review_note: reviewNote || null })
+    .eq('id', requestId)
+    .eq('status', 'pending')
+    .select('id, employee_id')
+  if (error) {
+    // Overlap trigger raises a plain exception; surface its message as-is.
+    return { error: error.message }
+  }
+  if (!data || data.length === 0) return { error: 'Request is no longer pending' }
+  return { employeeId: data[0].employee_id }
+}
