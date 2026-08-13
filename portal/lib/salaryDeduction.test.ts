@@ -52,19 +52,96 @@ describe('computeSalaryDeductionSummary', () => {
     })
 
     // Unexplained absence: working days minus attended minus leave-covered.
-    // Working days in Sept 2026 (excluding the 09-07/08, 09-14/15/16, 09-21 leave days and weekends/holiday):
-    // 09-22, 09-23, 09-24, 09-25, 09-28, 09-29, 09-30 have no attendance and no leave → unexplained, EXCEPT
-    // this test only asserts the totals below, not the exact date list (covered by computeUnexplainedAbsenceDates's own unit tests in lib/attendance.test.ts).
+    // Working days in Sept 2026 (excluding weekends and the 09-09 holiday):
+    // 01,02,03,04,07,08,10,11,14,15,16,17,18,21,22,23,24,25,28,29,30 (21 days).
+    // Remove attended (01-04) and leave-covered (07,08,14,15,16,21):
+    // remaining = 10,11,17,18,22,23,24,25,28,29,30 → 11 unexplained-absence dates.
+    // (Hand-derived against the actual Sept 2026 calendar; the exact date
+    // list is otherwise covered by computeUnexplainedAbsenceDates's own unit
+    // tests in lib/attendance.test.ts — this comment exists only to justify
+    // the hard-coded 11 below.)
 
     expect(result.workingDaysInMonth).toBe(21)
     expect(result.perDayRate).toBe(1000)
     expect(result.deductibleDays.overQuotaPaidLeave).toBe(2)
     expect(result.deductibleDays.unpaidLeave).toBe(1)
-    expect(result.deductibleDays.unexplainedAbsence).toBeGreaterThan(0)
-    const expectedTotalDeductibleDays =
-      result.deductibleDays.overQuotaPaidLeave + result.deductibleDays.unpaidLeave + result.deductibleDays.unexplainedAbsence
-    expect(result.totalDeductibleDays).toBe(expectedTotalDeductibleDays)
-    expect(result.deductionAmount).toBe(expectedTotalDeductibleDays * 1000)
+    expect(result.deductibleDays.unexplainedAbsence).toBe(11)
+    expect(result.totalDeductibleDays).toBe(14)
+    expect(result.deductionAmount).toBe(14000)
+  })
+
+  // Critical #1 fix verification: two approved requests of the SAME paid
+  // leave type in one call must not double-count over-quota days. This test
+  // constructs `remainingBalanceBeforeThisRequest` the way a correct caller
+  // (Task 9, not yet built) must: chronological-prior only.
+  it('does not double-count over-quota days across two same-type paid leave requests', () => {
+    // Allocated 5 days of 'sick' leave for the year. Request A (earlier,
+    // 2026-09-01..09-03, 3 days) is entirely within the original quota of 5,
+    // so its remaining-before is 5 and it is 0 over-quota. Request B (later,
+    // 2026-09-14..09-16, 3 days) sees remaining-before = 5 - 3 (consumed by
+    // A) = 2, so 1 of its 3 days is over-quota. True combined over-quota:
+    // 6 total days - 5 allocated = 1, matching A's 0 + B's 1.
+    const result = computeSalaryDeductionSummary({
+      year: 2026,
+      month: 9,
+      weeklyOffDays: [0, 6],
+      holidayDates: new Set(),
+      monthlySalary: 21000,
+      attendedDates: new Set(),
+      approvedLeaveRequests: [
+        {
+          leaveTypeId: 'sick', isPaid: true, startDate: '2026-09-01', endDate: '2026-09-03',
+          startDayPeriod: 'full', endDayPeriod: 'full', totalDays: 3, remainingBalanceBeforeThisRequest: 5,
+        },
+        {
+          leaveTypeId: 'sick', isPaid: true, startDate: '2026-09-14', endDate: '2026-09-16',
+          startDayPeriod: 'full', endDayPeriod: 'full', totalDays: 3, remainingBalanceBeforeThisRequest: 2,
+        },
+      ],
+    })
+    expect(result.deductibleDays.overQuotaPaidLeave).toBe(1)
+  })
+
+  // Critical #2 fix verification: leave that spans a weekend must only be
+  // charged for the working days within it, not the full calendar span.
+  it('charges unpaid leave spanning a weekend only for working days, not the full calendar span', () => {
+    // 2026-09-04 is a Friday, 2026-09-07 is the following Monday — a 4
+    // calendar-day span that includes the weekend (09-05 Sat, 09-06 Sun).
+    // Only the Friday and Monday are working days, so only 2 days should be
+    // charged, not 4.
+    const result = computeSalaryDeductionSummary({
+      year: 2026,
+      month: 9,
+      weeklyOffDays: [0, 6],
+      holidayDates: new Set(),
+      monthlySalary: 21000,
+      attendedDates: new Set(),
+      approvedLeaveRequests: [
+        {
+          leaveTypeId: 'unpaid', isPaid: false, startDate: '2026-09-04', endDate: '2026-09-07',
+          startDayPeriod: 'full', endDayPeriod: 'full', totalDays: 4, remainingBalanceBeforeThisRequest: 0,
+        },
+      ],
+    })
+    expect(result.deductibleDays.unpaidLeave).toBe(2)
+  })
+
+  // Important #3 fix verification: a month with zero working days (e.g.
+  // every weekday configured as an off-day) must not produce Infinity/NaN
+  // from dividing the salary by zero working days.
+  it('returns a null perDayRate and deductionAmount when the month has zero working days', () => {
+    const result = computeSalaryDeductionSummary({
+      year: 2026,
+      month: 9,
+      weeklyOffDays: [0, 1, 2, 3, 4, 5, 6], // every day of the week is an off-day
+      holidayDates: new Set(),
+      monthlySalary: 21000,
+      attendedDates: new Set(),
+      approvedLeaveRequests: [],
+    })
+    expect(result.workingDaysInMonth).toBe(0)
+    expect(result.perDayRate).toBeNull()
+    expect(result.deductionAmount).toBeNull()
   })
 
   it('shows "salary not set" instead of a number when monthlySalary is null', () => {
