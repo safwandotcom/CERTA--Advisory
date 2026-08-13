@@ -5,8 +5,10 @@ import { PageHeader } from '@/components/PageHeader'
 import { card, statusPillClass } from '@/lib/ui'
 import { listTasksForEmployee } from '@/lib/tasks'
 import { listProjectMembers } from '@/lib/projects'
+import { getTodayAttendance } from '@/lib/attendance'
 import MyTasksView from './MyTasksView'
 import CreateTaskForm from './CreateTaskForm'
+import ClockControl from './attendance/ClockControl'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -21,6 +23,7 @@ export default async function DashboardPage() {
     .single()
 
   const tasks = await listTasksForEmployee(supabase, employee!.id)
+  const todayAttendance = await getTodayAttendance(supabase, employee!.id)
 
   // Project memberships determine both which projects this employee can
   // create a task in (tasks_project_member_insert RLS mirrors this) and
@@ -87,7 +90,11 @@ export default async function DashboardPage() {
     <>
       <PageHeader title={`Welcome, ${employee?.name?.split(' ')[0] ?? ''}`} subtitle="Your profile and documents" />
 
-      <section className={card}>
+      <div className="mt-6">
+        <ClockControl today={todayAttendance} />
+      </div>
+
+      <section className={`${card} mt-6`}>
         <h2 className="font-display text-base font-semibold text-ink">{employee?.name}</h2>
         <dl className="mt-5 grid grid-cols-1 gap-x-8 gap-y-4 sm:grid-cols-2">
           {fields.map((field) => (
