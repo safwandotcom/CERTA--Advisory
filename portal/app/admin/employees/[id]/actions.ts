@@ -7,6 +7,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { requireAdmin, NOT_AUTHORIZED } from '@/lib/auth'
 import { markOnboardingComplete, requestOnboardingCorrection } from '@/lib/onboarding'
 import { notifyEmployees } from '@/lib/notifications'
+import { setMonthlySalary } from '@/lib/employeeSalary'
 
 export type ActionState = { error?: string; success?: string }
 
@@ -241,4 +242,28 @@ export async function requestOnboardingCorrectionAction(
 
   revalidatePath(`/admin/employees/${employeeRowId}`)
   return { success: 'Correction requested' }
+}
+
+export async function updateMonthlySalaryAction(
+  _prevState: ActionState,
+  formData: FormData
+): Promise<ActionState> {
+  try {
+    await requireAdmin()
+  } catch {
+    return { error: NOT_AUTHORIZED }
+  }
+
+  const employeeId = String(formData.get('employeeId') ?? '')
+  const amount = Number(formData.get('monthlySalary') ?? '')
+  if (!employeeId || Number.isNaN(amount) || amount < 0) {
+    return { error: 'Enter a valid salary amount' }
+  }
+
+  const supabase = await createClient()
+  const { error } = await setMonthlySalary(supabase, employeeId, amount)
+  if (error) return { error }
+
+  revalidatePath(`/admin/employees/${employeeId}`)
+  return { success: 'Salary updated' }
 }

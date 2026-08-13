@@ -11,6 +11,7 @@ import {
   archiveEmployeeAction,
   markOnboardingCompleteAction,
   requestOnboardingCorrectionAction,
+  updateMonthlySalaryAction,
   type ActionState,
 } from './actions'
 import { PageHeader } from '@/components/PageHeader'
@@ -36,6 +37,7 @@ type Employee = {
   join_date: string | null
   status: 'active' | 'inactive'
   role: 'superadmin' | 'admin' | 'manager' | 'employee'
+  monthly_salary: number | null
 }
 
 type Document = { id: string; label: string; file_path: string }
@@ -150,6 +152,7 @@ export default function EditEmployeeClient({ id }: { id: string }) {
     requestOnboardingCorrectionAction.bind(null, id),
     initialState
   )
+  const [salaryState, salaryAction] = useActionState(updateMonthlySalaryAction, initialState)
 
   if (!loaded || !employee) {
     return (
@@ -401,6 +404,37 @@ export default function EditEmployeeClient({ id }: { id: string }) {
               )}
             </>
           )}
+        </div>
+
+        <div className={`${card} max-w-2xl`}>
+          <h2 className="font-display text-base font-semibold text-ink">Monthly Salary</h2>
+          <p className="mt-1 text-[0.8125rem] text-ink-muted">
+            Used to calculate leave-related salary deductions. Not visible to the employee.
+          </p>
+
+          <form action={salaryAction} className="mt-4 flex flex-col gap-4 sm:max-w-xs">
+            <input type="hidden" name="employeeId" value={id} />
+            <div>
+              <label htmlFor="monthlySalary" className={labelClass}>
+                Monthly salary
+              </label>
+              <input
+                id="monthlySalary"
+                name="monthlySalary"
+                type="number"
+                min="0"
+                step="0.01"
+                defaultValue={employee.monthly_salary ?? ''}
+                className={input}
+              />
+            </div>
+
+            <FormMessage state={salaryState} />
+
+            <button type="submit" className={`${buttonPrimary} w-fit`}>
+              Save salary
+            </button>
+          </form>
         </div>
 
         <div className={`${card} max-w-2xl`}>
