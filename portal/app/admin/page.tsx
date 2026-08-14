@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { PageHeader } from '@/components/PageHeader'
 import { card, buttonCoral, buttonGhost, statusPillClass, rolePillClass } from '@/lib/ui'
 import { ArchiveEmployeeButton } from './ArchiveEmployeeButton'
+import { RemoveEmployeeButton } from './RemoveEmployeeButton'
 
 export default async function AdminDashboardPage({
   searchParams,
@@ -117,6 +118,13 @@ export default async function AdminDashboardPage({
                         authUserId={emp.auth_user_id}
                         employeeId={emp.employee_id}
                         role={emp.role}
+                        name={emp.name}
+                      />
+                    )}
+                    {showArchived && emp.role !== 'superadmin' && (
+                      <RemoveEmployeeButton
+                        authUserId={emp.auth_user_id}
+                        employeeId={emp.employee_id}
                         name={emp.name}
                       />
                     )}
