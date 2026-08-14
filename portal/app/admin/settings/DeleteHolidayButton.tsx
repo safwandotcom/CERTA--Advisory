@@ -2,7 +2,7 @@
 
 import { useActionState } from 'react'
 import { deleteHolidayAction, type SettingsActionState } from './actions'
-import { errorText } from '@/lib/ui'
+import { errorText, buttonCoral } from '@/lib/ui'
 
 const initialState: SettingsActionState = {}
 
@@ -18,10 +18,7 @@ export function DeleteHolidayButton({ holidayId, holidayName }: { holidayId: str
       }}
     >
       <input type="hidden" name="id" value={holidayId} />
-      <button
-        type="submit"
-        className="text-[0.8125rem] font-semibold text-ink-muted hover:text-signal-coral-deep"
-      >
+      <button type="submit" className={`${buttonCoral} px-4 py-2 text-[0.75rem]`}>
         Delete
       </button>
       {state.error && <span className={`${errorText} text-[0.75rem]`}>{state.error}</span>}

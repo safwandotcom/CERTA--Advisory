@@ -26,11 +26,7 @@ export function ArchiveEmployeeButton({
 
   return (
     <>
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="text-[0.8125rem] font-semibold text-ink-muted hover:text-signal-coral-deep"
-      >
+      <button type="button" onClick={() => setOpen(true)} className={`${buttonGhost} px-4 py-2 text-[0.75rem]`}>
         Archive
       </button>
 

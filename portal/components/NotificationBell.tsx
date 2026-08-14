@@ -69,7 +69,13 @@ export function NotificationBell({ initialUnreadCount }: { initialUnreadCount: n
       </button>
 
       {open && (
-        <div className="absolute right-0 z-50 mt-2 w-80 rounded-[10px] border border-border bg-white shadow-[0_8px_20px_rgba(35,31,32,0.12)]">
+        // This bell sits near the LEFT edge of the sidebar, not a right-aligned
+        // header — anchoring the dropdown's right edge to the button (as a
+        // right-aligned header pattern would) makes a 320px-wide menu grow
+        // leftward off the edge of the screen. Anchoring the left edge instead
+        // lets it grow rightward into visible space; the max-width plus
+        // viewport-relative clamp keeps it on-screen on narrow viewports too.
+        <div className="absolute left-0 z-50 mt-2 w-80 max-w-[calc(100vw-2rem)] rounded-[10px] border border-border bg-white shadow-[0_8px_20px_rgba(35,31,32,0.12)]">
           <div className="flex items-center justify-between border-b border-border px-4 py-3">
             <span className="text-[0.8125rem] font-semibold text-ink">Notifications</span>
             <button
