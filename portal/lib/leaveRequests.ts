@@ -108,13 +108,21 @@ export async function cancelLeaveRequest(
 export async function listPendingLeaveRequests(supabase: SupabaseClient): Promise<
   (LeaveRequest & { employee_name: string; leave_type_name: string })[]
 > {
-  const { data } = await supabase
+  // leave_requests has TWO foreign keys to employees (employee_id and
+  // reviewed_by), so a bare `employees(name)` embed is ambiguous to
+  // PostgREST (error PGRST201) -- it must be qualified with the specific
+  // FK. This was silently broken (swallowed to []) from Task 5's original
+  // ship until caught by live testing in Task 11's final-review pass: the
+  // admin "Review Leave" page always showed "No pending leave requests"
+  // regardless of actual data.
+  const { data, error } = await supabase
     .from('leave_requests')
     .select(
-      'id, employee_id, leave_type_id, start_date, end_date, start_day_period, end_day_period, reason, status, reviewed_by, reviewed_at, review_note, created_at, employees(name), leave_types(name)'
+      'id, employee_id, leave_type_id, start_date, end_date, start_day_period, end_day_period, reason, status, reviewed_by, reviewed_at, review_note, created_at, employees!leave_requests_employee_id_fkey(name), leave_types(name)'
     )
     .eq('status', 'pending')
     .order('created_at', { ascending: true })
+  if (error) console.error('listPendingLeaveRequests query failed:', error.message)
   return (data ?? []).map((row: Record<string, unknown>) => ({
     ...row,
     employee_name: (row.employees as { name: string })?.name ?? '',
@@ -125,13 +133,17 @@ export async function listPendingLeaveRequests(supabase: SupabaseClient): Promis
 export async function listApprovedLeaveRequests(supabase: SupabaseClient): Promise<
   (LeaveRequest & { employee_name: string; leave_type_name: string })[]
 > {
-  const { data } = await supabase
+  // See listPendingLeaveRequests' comment above: employees(name) is
+  // ambiguous (leave_requests has two FKs to employees) and must be
+  // qualified.
+  const { data, error } = await supabase
     .from('leave_requests')
     .select(
-      'id, employee_id, leave_type_id, start_date, end_date, start_day_period, end_day_period, reason, status, reviewed_by, reviewed_at, review_note, created_at, employees(name), leave_types(name)'
+      'id, employee_id, leave_type_id, start_date, end_date, start_day_period, end_day_period, reason, status, reviewed_by, reviewed_at, review_note, created_at, employees!leave_requests_employee_id_fkey(name), leave_types(name)'
     )
     .eq('status', 'approved')
     .order('start_date', { ascending: true })
+  if (error) console.error('listApprovedLeaveRequests query failed:', error.message)
   return (data ?? []).map((row: Record<string, unknown>) => ({
     ...row,
     employee_name: (row.employees as { name: string })?.name ?? '',
