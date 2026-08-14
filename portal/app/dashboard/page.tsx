@@ -22,17 +22,19 @@ export default async function DashboardPage() {
     .eq('auth_user_id', user!.id)
     .single()
 
-  const tasks = await listTasksForEmployee(supabase, employee!.id)
-  const todayAttendance = await getTodayAttendance(supabase, employee!.id)
-
-  // Project memberships determine both which projects this employee can
-  // create a task in (tasks_project_member_insert RLS mirrors this) and
-  // who the assignee options are for each — fetched up front here so
-  // CreateTaskForm can switch projects client-side without a round-trip.
-  const { data: memberships } = await supabase
-    .from('project_members')
-    .select('projects(id, name, status)')
-    .eq('employee_id', employee!.id)
+  // These four reads only depend on employee.id, not on each other — firing
+  // them together instead of one at a time turns four sequential round
+  // trips into one, which is most of what made this page feel slow to load.
+  const [tasks, todayAttendance, { data: memberships }, { data: documents }] = await Promise.all([
+    listTasksForEmployee(supabase, employee!.id),
+    getTodayAttendance(supabase, employee!.id),
+    // Project memberships determine both which projects this employee can
+    // create a task in (tasks_project_member_insert RLS mirrors this) and
+    // who the assignee options are for each — fetched up front here so
+    // CreateTaskForm can switch projects client-side without a round-trip.
+    supabase.from('project_members').select('projects(id, name, status)').eq('employee_id', employee!.id),
+    supabase.from('employee_documents').select('*').eq('employee_id', employee!.id),
+  ])
 
   const myProjects = (memberships ?? [])
     .map((row) => (row as unknown as { projects: { id: string; name: string; status: string } | null }).projects)
@@ -53,14 +55,12 @@ export default async function DashboardPage() {
   // tasks_project_member_insert on the actual write.
   const adminClient = createAdminClient()
   const membersByProject: { [projectId: string]: { id: string; employee_id: string; name: string }[] } = {}
-  for (const project of myProjects) {
-    membersByProject[project.id] = await listProjectMembers(adminClient, project.id)
-  }
-
-  const { data: documents } = await supabase
-    .from('employee_documents')
-    .select('*')
-    .eq('employee_id', employee!.id)
+  const memberLists = await Promise.all(
+    myProjects.map((project) => listProjectMembers(adminClient, project.id))
+  )
+  myProjects.forEach((project, i) => {
+    membersByProject[project.id] = memberLists[i]
+  })
 
   const { data: signedUrls } = documents?.length
     ? await supabase.storage

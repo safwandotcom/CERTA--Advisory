@@ -3,7 +3,17 @@
 import { Suspense, useEffect, useRef, useState } from 'react'
 import { usePathname, useSearchParams } from 'next/navigation'
 
-const MIN_DISPLAY_MS = 450
+// Don't show a spinner at all for a navigation that resolves quickly — most
+// of them, once the app's server-side round trips are reasonably fast. This
+// is the standard "delay before show" pattern: a full-screen loading state
+// that appears for every click, even instant ones, reads as slow regardless
+// of how fast the underlying fetch actually is. Only navigations that are
+// still pending after this delay get a spinner at all.
+const SHOW_DELAY_MS = 150
+// Once the overlay is actually showing, hold it just long enough to avoid a
+// single-frame flicker on a navigation that finishes right as the delay
+// above elapses — not a deliberate "moment", just anti-flicker insurance.
+const MIN_DISPLAY_MS = 150
 // Safety-net ceiling: normal navigations always hide via the pathname/
 // searchParams effect below, well under this. But a pushState/replaceState
 // call that doesn't actually change pathname or searchParams (e.g. a
@@ -37,10 +47,23 @@ function OverlayMarkup({ hidden }: { hidden: boolean }) {
 function RouteTransitionWatcher() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
+  // Initial page load: nothing has painted yet (the browser's own blank/white
+  // tab is already showing), so there's no flash to prevent — show the
+  // overlay from first render rather than delaying it.
   const [visible, setVisible] = useState(true)
-  const shownAtRef = useRef(performance.now())
+  // performance.now() is impure to call during render (React flags it); read
+  // it inside effects instead, never as a useState/useRef initializer.
+  const shownAtRef = useRef(0)
   const skipNextRouteChangeRef = useRef(true)
+  const showTimerRef = useRef<number | undefined>(undefined)
   const forceHideTimerRef = useRef<number | undefined>(undefined)
+
+  function clearShowTimer() {
+    if (showTimerRef.current !== undefined) {
+      window.clearTimeout(showTimerRef.current)
+      showTimerRef.current = undefined
+    }
+  }
 
   function clearForceHideTimer() {
     if (forceHideTimerRef.current !== undefined) {
@@ -50,8 +73,9 @@ function RouteTransitionWatcher() {
   }
 
   // Initial page load: hide once the document has fully loaded, with a
-  // minimum display floor so the overlay registers as a moment, not a flash.
+  // small minimum-display floor so a same-frame show/hide never flickers.
   useEffect(() => {
+    shownAtRef.current = performance.now()
     let timer: number | undefined
     function armHide() {
       const elapsed = performance.now() - shownAtRef.current
@@ -75,20 +99,21 @@ function RouteTransitionWatcher() {
   // navigation regardless of which component triggered it.
   useEffect(() => {
     function startNavigation() {
-      shownAtRef.current = performance.now()
-      // Next.js 16's router itself calls history.pushState/replaceState from
-      // inside a useInsertionEffect-timed phase of its own client-side
-      // transition machinery. React forbids scheduling updates synchronously
-      // during that phase ("useInsertionEffect must not schedule updates") —
-      // doing it anyway doesn't just warn, it corrupts the scheduler badly
-      // enough to hang the tab. Deferring the state update to a microtask
-      // moves it outside that call stack while still running before the
-      // next paint.
-      queueMicrotask(() => setVisible(true))
+      // Don't show anything yet — only arm a delayed reveal. If the route
+      // change effect below fires before this timer does (the common case
+      // once the backend is reasonably fast), the timer is cancelled and no
+      // spinner ever appears for this navigation.
+      clearShowTimer()
+      showTimerRef.current = window.setTimeout(() => {
+        shownAtRef.current = performance.now()
+        setVisible(true)
+        showTimerRef.current = undefined
+      }, SHOW_DELAY_MS)
 
       // Safety net (see MAX_VISIBLE_MS above): a genuine new navigation
       // resets the ceiling rather than stacking a second pending force-hide
-      // on top of an earlier one.
+      // on top of an earlier one. Measured from navigation start, not from
+      // whenever (or whether) the overlay actually becomes visible.
       clearForceHideTimer()
       forceHideTimerRef.current = window.setTimeout(() => {
         setVisible(false)
@@ -110,12 +135,15 @@ function RouteTransitionWatcher() {
       window.history.pushState = originalPush
       window.history.replaceState = originalReplace
       window.removeEventListener('popstate', startNavigation)
+      clearShowTimer()
       clearForceHideTimer()
     }
   }, [])
 
-  // Client-side navigation complete: the rendered route changed, so hide the
-  // overlay (same minimum-display floor as the initial load).
+  // Client-side navigation complete: the rendered route changed. Cancel any
+  // still-pending delayed reveal (the fast-navigation case: nothing was ever
+  // shown, so there's nothing to hide) and, if the overlay did make it on
+  // screen, hide it — respecting the same small minimum-display floor.
   useEffect(() => {
     if (skipNextRouteChangeRef.current) {
       // The initial mount also fires this effect once; the window-load
@@ -123,16 +151,11 @@ function RouteTransitionWatcher() {
       skipNextRouteChangeRef.current = false
       return
     }
+    clearShowTimer()
+    clearForceHideTimer()
     const elapsed = performance.now() - shownAtRef.current
-    const timer = window.setTimeout(() => {
-      setVisible(false)
-      // The route actually changed, so the safety-net ceiling for this
-      // navigation is no longer needed — clear it rather than let it fire
-      // a redundant force-hide later.
-      clearForceHideTimer()
-    }, Math.max(0, MIN_DISPLAY_MS - elapsed))
+    const timer = window.setTimeout(() => setVisible(false), Math.max(0, MIN_DISPLAY_MS - elapsed))
     return () => window.clearTimeout(timer)
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- pathname/searchParams are the navigation signal, not data this effect reads
   }, [pathname, searchParams])
 
   return <OverlayMarkup hidden={!visible} />

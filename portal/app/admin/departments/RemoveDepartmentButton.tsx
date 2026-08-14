@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { deleteDepartmentAction } from './actions'
-import { errorText } from '@/lib/ui'
+import { errorText, buttonCoral } from '@/lib/ui'
 
 export function RemoveDepartmentButton({
   departmentId,
@@ -27,7 +27,7 @@ export function RemoveDepartmentButton({
             if (result.error) setError(result.error)
           })
         }}
-        className="text-[0.8125rem] font-semibold text-ink-muted hover:text-signal-coral-deep disabled:opacity-60"
+        className={`${buttonCoral} px-4 py-2 text-[0.75rem]`}
       >
         Remove
       </button>

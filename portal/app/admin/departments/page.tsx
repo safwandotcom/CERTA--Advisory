@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { listDepartments } from '@/lib/departments'
 import { PageHeader } from '@/components/PageHeader'
-import { card, input, buttonPrimary } from '@/lib/ui'
+import { card, input, buttonPrimary, buttonGhost } from '@/lib/ui'
 import { createDepartmentAction, archiveDepartmentAction } from './actions'
 import { EditDepartmentForm } from './EditDepartmentForm'
 import { RemoveDepartmentButton } from './RemoveDepartmentButton'
@@ -49,13 +49,10 @@ export default async function DepartmentsPage() {
                   {dept.archived ? 'Archived' : 'Active'}
                 </td>
                 <td className="px-6 py-3.5">
-                  <div className="flex items-start justify-end gap-4">
+                  <div className="flex items-start justify-end gap-3">
                     {!dept.archived && (
                       <form action={archiveDepartmentAction.bind(null, dept.id)}>
-                        <button
-                          type="submit"
-                          className="text-[0.8125rem] font-semibold text-ink-muted hover:text-signal-coral-deep"
-                        >
+                        <button type="submit" className={`${buttonGhost} px-4 py-2 text-[0.75rem]`}>
                           Archive
                         </button>
                       </form>
