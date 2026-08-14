@@ -25,7 +25,10 @@ test('admin edits an employee and resets their password', async ({ page }) => {
   await page.getByText(employeeId).click()
 
   await page.getByLabel('Position').fill('Senior Accountant')
-  await page.getByRole('button', { name: /save/i }).click()
+  // Exact match: Task 7 (Attendance & Leave phase) added a second "Save
+  // salary" button to this same page, making the old /save/i regex
+  // ambiguous.
+  await page.getByRole('button', { name: 'Save changes' }).click()
   await expect(page.getByLabel('Position')).toHaveValue('Senior Accountant')
 
   await page.getByLabel('New password').fill('brand-new-password-456')
