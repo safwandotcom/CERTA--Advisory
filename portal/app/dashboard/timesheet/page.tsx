@@ -32,7 +32,7 @@ function monthParam(year: number, monthIndex: number): string {
 
 function formatTime(iso: string | null): string {
   if (!iso) return '—'
-  return new Date(iso).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+  return new Date(iso).toLocaleTimeString('en-US', { timeZone: 'Asia/Dhaka', hour: '2-digit', minute: '2-digit' })
 }
 
 function formatHoursWorked(clockInAt: string, clockOutAt: string | null): string {

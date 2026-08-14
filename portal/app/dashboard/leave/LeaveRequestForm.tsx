@@ -62,7 +62,15 @@ export default function LeaveRequestForm({
   }, [startDate, endDate, startDayPeriod, endDayPeriod, isSingleDay])
 
   const balance = leaveTypeId ? balances[leaveTypeId] : undefined
-  const exceedsBalance = previewDays !== null && balance !== undefined && previewDays > balance.remaining
+  const selectedLeaveType = leaveTypes.find((lt) => lt.id === leaveTypeId)
+  // Unpaid leave always has 0 allocation/0 remaining by definition — it has
+  // no quota to exceed, so the warning would fire on every single Unpaid
+  // request and is meaningless for that type.
+  const exceedsBalance =
+    previewDays !== null &&
+    balance !== undefined &&
+    previewDays > balance.remaining &&
+    selectedLeaveType?.is_paid !== false
 
   return (
     <form action={formAction} className="mt-4 flex flex-col gap-5">

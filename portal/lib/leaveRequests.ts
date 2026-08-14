@@ -122,6 +122,44 @@ export async function listPendingLeaveRequests(supabase: SupabaseClient): Promis
   })) as (LeaveRequest & { employee_name: string; leave_type_name: string })[]
 }
 
+export async function listApprovedLeaveRequests(supabase: SupabaseClient): Promise<
+  (LeaveRequest & { employee_name: string; leave_type_name: string })[]
+> {
+  const { data } = await supabase
+    .from('leave_requests')
+    .select(
+      'id, employee_id, leave_type_id, start_date, end_date, start_day_period, end_day_period, reason, status, reviewed_by, reviewed_at, review_note, created_at, employees(name), leave_types(name)'
+    )
+    .eq('status', 'approved')
+    .order('start_date', { ascending: true })
+  return (data ?? []).map((row: Record<string, unknown>) => ({
+    ...row,
+    employee_name: (row.employees as { name: string })?.name ?? '',
+    leave_type_name: (row.leave_types as { name: string })?.name ?? '',
+  })) as (LeaveRequest & { employee_name: string; leave_type_name: string })[]
+}
+
+// Admin-only: cancel an already-approved leave request (spec §Leave item 4).
+// Unlike reviewLeaveRequest (pending -> approved/rejected), this transitions
+// approved -> cancelled; the `.eq('status', 'approved')` guard mirrors
+// reviewLeaveRequest's not-found handling so a request that's already been
+// changed out from under the admin (e.g. concurrently cancelled) reports a
+// clear error instead of silently no-op'ing.
+export async function adminCancelApprovedLeaveRequest(
+  adminClient: SupabaseClient,
+  requestId: string
+): Promise<{ error?: string; employeeId?: string }> {
+  const { data, error } = await adminClient
+    .from('leave_requests')
+    .update({ status: 'cancelled' })
+    .eq('id', requestId)
+    .eq('status', 'approved')
+    .select('id, employee_id')
+  if (error) return { error: error.message }
+  if (!data || data.length === 0) return { error: 'Request is no longer approved' }
+  return { employeeId: data[0].employee_id }
+}
+
 export async function reviewLeaveRequest(
   adminClient: SupabaseClient,
   requestId: string,

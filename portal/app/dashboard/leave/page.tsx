@@ -8,6 +8,7 @@ import {
   computeLeaveBalance,
   type LeaveRequestStatus,
 } from '@/lib/leaveRequests'
+import { toDateKey } from '@/lib/companySettings'
 import LeaveRequestForm, { CancelRequestButton } from './LeaveRequestForm'
 
 function leaveStatusPillClass(status: LeaveRequestStatus): string {
@@ -39,7 +40,10 @@ export default async function LeavePage() {
     .eq('auth_user_id', user!.id)
     .single()
 
-  const currentYear = new Date().getFullYear()
+  // Dhaka-local year (toDateKey), matching this codebase's established
+  // "today" convention (migration 0019's RLS comparison, Fix 1) rather than
+  // the host process's own local timezone.
+  const currentYear = Number(toDateKey(new Date()).slice(0, 4))
 
   const [leaveTypes, allocations, requests] = await Promise.all([
     listLeaveTypes(supabase),
@@ -50,16 +54,30 @@ export default async function LeavePage() {
   const allocationByLeaveTypeId = new Map(allocations.map((a) => [a.leave_type_id, a.allocated_days]))
   const leaveTypeById = new Map(leaveTypes.map((lt) => [lt.id, lt]))
 
+  // Leave quota is a calendar-year concept (allocations are stored one row
+  // per employee/leave-type/year, same as lib/salaryDeductionData.ts's
+  // fetchYearLeaveData) — netting the balance against every request in the
+  // employee's entire history, not just this year's, would let prior-year
+  // leave permanently consume this year's balance. The unfiltered `requests`
+  // is kept as-is for the "Your requests" history list below, which is
+  // meant to show everything, not just this year.
+  const yearRequests = requests.filter((r) => r.start_date.slice(0, 4) === String(currentYear))
+
   const balances: Record<string, { allocated: number; used: number; remaining: number }> = {}
   for (const lt of leaveTypes) {
-    const requestsForType = requests
+    const requestsForType = yearRequests
       .filter((r) => r.leave_type_id === lt.id)
       .map((r) => ({
         totalDays: computeDayPeriodDays(r.start_date, r.end_date, r.start_day_period, r.end_day_period),
         status: r.status,
       }))
     balances[lt.id] = computeLeaveBalance({
-      allocatedDays: allocationByLeaveTypeId.get(lt.id) ?? 0,
+      // Fall back to the leave type's default_annual_quota when the
+      // employee has no per-employee allocation row for this year — this
+      // is the computed fallback the admin UI (app/admin/leave-types)
+      // promises ("shown to employees; per-employee allocations override
+      // it"), not a stored copy in leave_allocations.
+      allocatedDays: allocationByLeaveTypeId.get(lt.id) ?? lt.default_annual_quota ?? 0,
       requests: requestsForType,
     })
   }

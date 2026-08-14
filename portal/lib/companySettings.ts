@@ -19,14 +19,25 @@ export function parseWeeklyOffDays(value: string): number[] {
     .map((part) => WEEKDAY_ABBREVIATIONS[part])
 }
 
-// Formats a Date as a local (not UTC) YYYY-MM-DD string — Postgres `date`
-// columns and this app's date-range math are both calendar-day-oriented,
-// so using toISOString() (UTC) here would shift dates near midnight.
+// Formats a Date as a YYYY-MM-DD string in Asia/Dhaka, independent of the
+// host process's timezone — Postgres `date` columns and this app's
+// date-range math are both calendar-day-oriented, so using toISOString()
+// (UTC) here would shift dates near midnight. Using the host's local
+// timezone (via getFullYear()/getMonth()/getDate()) would agree with this
+// only on a host whose TZ happens to already be Asia/Dhaka; on a UTC host
+// (Vercel, most containers/CI) that would disagree with migration 0019's
+// `(now() at time zone 'Asia/Dhaka')::date` RLS comparison for roughly six
+// hours every day. The `en-CA` locale formats as YYYY-MM-DD directly
+// (verified experimentally against this project's Node/ICU version).
+const DHAKA_DATE_KEY_FORMATTER = new Intl.DateTimeFormat('en-CA', {
+  timeZone: 'Asia/Dhaka',
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+})
+
 export function toDateKey(date: Date): string {
-  const y = date.getFullYear()
-  const m = String(date.getMonth() + 1).padStart(2, '0')
-  const d = String(date.getDate()).padStart(2, '0')
-  return `${y}-${m}-${d}`
+  return DHAKA_DATE_KEY_FORMATTER.format(date)
 }
 
 export function isWorkingDay(date: Date, weeklyOffDays: number[], holidayDates: Set<string>): boolean {

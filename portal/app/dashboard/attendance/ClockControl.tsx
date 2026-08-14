@@ -17,8 +17,11 @@ function ErrorMessage({ state }: { state: AttendanceActionState }) {
   )
 }
 
+// Explicit locale + Asia/Dhaka timeZone: this renders during SSR too, so
+// leaving these unset would run in the server's locale/TZ (mismatching the
+// client on hydration) and would show UTC-host times with no Dhaka context.
 function formatTime(iso: string): string {
-  return new Date(iso).toLocaleTimeString()
+  return new Date(iso).toLocaleTimeString('en-US', { timeZone: 'Asia/Dhaka', hour: '2-digit', minute: '2-digit' })
 }
 
 export default function ClockControl({

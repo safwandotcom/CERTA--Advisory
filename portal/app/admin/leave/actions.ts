@@ -3,10 +3,11 @@
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requireAdmin, NOT_AUTHORIZED } from '@/lib/auth'
-import { reviewLeaveRequest } from '@/lib/leaveRequests'
+import { reviewLeaveRequest, adminCancelApprovedLeaveRequest } from '@/lib/leaveRequests'
 import { notifyEmployees } from '@/lib/notifications'
 
 export type LeaveReviewActionState = { error?: string; success?: string }
+export type LeaveCancelActionState = { error?: string; success?: string }
 
 export async function reviewLeaveRequestAction(
   _prevState: LeaveReviewActionState,
@@ -41,4 +42,31 @@ export async function reviewLeaveRequestAction(
 
   revalidatePath('/admin/leave')
   return { success: `Request ${decision}` }
+}
+
+export async function adminCancelApprovedLeaveRequestAction(
+  _prevState: LeaveCancelActionState,
+  formData: FormData
+): Promise<LeaveCancelActionState> {
+  try {
+    await requireAdmin()
+  } catch {
+    return { error: NOT_AUTHORIZED }
+  }
+
+  const requestId = String(formData.get('requestId') ?? '')
+
+  const adminClient = createAdminClient()
+  const { error, employeeId } = await adminCancelApprovedLeaveRequest(adminClient, requestId)
+  if (error) return { error }
+
+  if (employeeId) {
+    await notifyEmployees(adminClient, [employeeId], {
+      title: 'Your approved leave was cancelled',
+      link: '/dashboard/leave',
+    })
+  }
+
+  revalidatePath('/admin/leave')
+  return { success: 'Leave cancelled' }
 }

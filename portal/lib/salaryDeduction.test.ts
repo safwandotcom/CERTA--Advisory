@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { computeWorkingDaysInMonth, computeSalaryDeductionSummary } from './salaryDeduction'
+import { toDateKey } from './companySettings'
 
 describe('computeWorkingDaysInMonth', () => {
   it('excludes weekends and holidays from August 2026', () => {
@@ -157,6 +158,66 @@ describe('computeSalaryDeductionSummary', () => {
     expect(result.perDayRate).toBeNull()
     expect(result.deductionAmount).toBeNull()
     expect(result.salaryNotSet).toBe(true)
+  })
+
+  // Important #3 fix verification: viewing the CURRENT, in-progress month
+  // must not flag working days later in the month (which haven't happened
+  // yet) as unexplained absence — only days up to and including today
+  // (Dhaka-local, matching toDateKey) are checked. Derives "today" the same
+  // way the implementation does (via toDateKey), so this test is valid on
+  // any run date and under any host TZ (including the TZ=UTC verification
+  // run), not just the day it was written.
+  it('clamps unexplained-absence checks to today when viewing the current, in-progress month', () => {
+    const todayKey = toDateKey(new Date())
+    const year = Number(todayKey.slice(0, 4))
+    const month = Number(todayKey.slice(5, 7))
+    const dayOfMonth = Number(todayKey.slice(8, 10))
+    const daysInMonth = new Date(year, month, 0).getDate()
+
+    const result = computeSalaryDeductionSummary({
+      year,
+      month,
+      weeklyOffDays: [], // no weekly off-days, so every calendar day is a working day
+      holidayDates: new Set(),
+      monthlySalary: null,
+      attendedDates: new Set(),
+      approvedLeaveRequests: [],
+    })
+
+    // workingDaysInMonth (the whole-month rate basis) is NOT clamped.
+    expect(result.workingDaysInMonth).toBe(daysInMonth)
+    // But unexplained-absence checking IS clamped to today: only days
+    // 1..dayOfMonth are unattended-and-uncovered-and-in-the-past(-or-today),
+    // so the count must equal dayOfMonth, not the full daysInMonth (unless
+    // today happens to be the last day of the month).
+    expect(result.deductibleDays.unexplainedAbsence).toBe(dayOfMonth)
+  })
+
+  // Past-month sanity check: the clamp must NOT apply outside the current
+  // calendar month — every working day of a past month has already
+  // happened, so the full month is checked, same as before this fix.
+  it('does not clamp unexplained-absence checks for a past month', () => {
+    // 2026-09 is guaranteed to be a past month relative to any date this
+    // suite could plausibly run on for the foreseeable future... but to
+    // stay robust indefinitely, use whichever of "last January" or a fixed
+    // far-past month is actually in the past relative to real "today".
+    const todayKey = toDateKey(new Date())
+    const year = Number(todayKey.slice(0, 4)) - 1
+    const month = 6
+    const daysInMonth = new Date(year, month, 0).getDate()
+
+    const result = computeSalaryDeductionSummary({
+      year,
+      month,
+      weeklyOffDays: [],
+      holidayDates: new Set(),
+      monthlySalary: null,
+      attendedDates: new Set(),
+      approvedLeaveRequests: [],
+    })
+
+    expect(result.workingDaysInMonth).toBe(daysInMonth)
+    expect(result.deductibleDays.unexplainedAbsence).toBe(daysInMonth)
   })
 
   it('respects half-day modifiers in deductible-day counts', () => {

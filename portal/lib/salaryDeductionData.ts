@@ -29,7 +29,7 @@ async function fetchYearLeaveData(
   employeeId: string,
   year: number
 ): Promise<{ requests: YearScopedLeaveRequest[]; allocationByType: Map<string, number> }> {
-  const [{ data: requests }, { data: allocations }] = await Promise.all([
+  const [{ data: requests }, { data: allocations }, { data: leaveTypes }] = await Promise.all([
     supabase
       .from('leave_requests')
       .select('id, leave_type_id, start_date, end_date, start_day_period, end_day_period, status')
@@ -42,10 +42,21 @@ async function fetchYearLeaveData(
       .select('leave_type_id, allocated_days')
       .eq('employee_id', employeeId)
       .eq('year', year),
+    // Needed for the same default_annual_quota fallback as
+    // app/dashboard/leave/page.tsx: an employee with no per-employee
+    // allocation row for this year/type still has a computed balance based
+    // on the leave type's default, not 0.
+    supabase.from('leave_types').select('id, default_annual_quota'),
   ])
+  const defaultQuotaByType = new Map((leaveTypes ?? []).map((lt) => [lt.id, lt.default_annual_quota as number | null]))
+  const allocatedByType = new Map((allocations ?? []).map((a) => [a.leave_type_id, a.allocated_days]))
+  const allocationByType = new Map<string, number>()
+  for (const typeId of new Set([...defaultQuotaByType.keys(), ...allocatedByType.keys()])) {
+    allocationByType.set(typeId, allocatedByType.get(typeId) ?? defaultQuotaByType.get(typeId) ?? 0)
+  }
   return {
     requests: (requests ?? []) as YearScopedLeaveRequest[],
-    allocationByType: new Map((allocations ?? []).map((a) => [a.leave_type_id, a.allocated_days])),
+    allocationByType,
   }
 }
 

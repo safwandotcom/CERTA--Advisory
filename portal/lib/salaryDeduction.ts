@@ -132,8 +132,21 @@ export function computeSalaryDeductionSummary(input: {
     overQuotaPaidLeave += overQuotaChargeableDays
   }
 
+  // When viewing the CURRENT, in-progress calendar month, only check
+  // working days up to and including today (Dhaka-local, matching
+  // toDateKey) for unexplained absence — days later in the month haven't
+  // happened yet and can't be "explained" by attendance or leave, which
+  // would otherwise inflate the deduction estimate mid-month. A past month
+  // is unaffected: every working day in it has already happened, so the
+  // full list is checked as before. workingDaysInMonth/perDayRate (the
+  // whole-month rate basis) are deliberately NOT clamped — only which days
+  // get flagged as unexplained absence.
+  const today = toDateKey(new Date())
+  const isCurrentMonth = input.year === Number(today.slice(0, 4)) && input.month === Number(today.slice(5, 7))
+  const workingDaysToCheckForAbsence = isCurrentMonth ? workingDays.filter((d) => d <= today) : workingDays
+
   const unexplainedAbsenceDates = computeUnexplainedAbsenceDates({
-    workingDays,
+    workingDays: workingDaysToCheckForAbsence,
     attendedDates: input.attendedDates,
     leaveCoveredDates,
   })
