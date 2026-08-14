@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { Plus, ChevronRight, Users, UserCheck, ShieldCheck } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { PageHeader } from '@/components/PageHeader'
-import { card, buttonCoral, statusPillClass, rolePillClass } from '@/lib/ui'
+import { card, buttonCoral, buttonGhost, statusPillClass, rolePillClass } from '@/lib/ui'
 import { ArchiveEmployeeButton } from './ArchiveEmployeeButton'
 
 export default async function AdminDashboardPage({
@@ -67,7 +67,7 @@ export default async function AdminDashboardPage({
       <div className="mb-3 mt-6 flex justify-end">
         <Link
           href={showArchived ? '/admin' : '/admin?archived=1'}
-          className="text-[0.8125rem] font-semibold text-ink-muted hover:text-ink"
+          className={`${buttonGhost} px-4 py-2 text-[0.75rem]`}
         >
           {showArchived ? '← Back to active employees' : 'Show archived employees'}
         </Link>
