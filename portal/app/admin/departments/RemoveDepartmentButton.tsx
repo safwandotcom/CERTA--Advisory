@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { Loader2 } from 'lucide-react'
 import { deleteDepartmentAction } from './actions'
 import { errorText, buttonCoral } from '@/lib/ui'
 
@@ -29,7 +30,14 @@ export function RemoveDepartmentButton({
         }}
         className={`${buttonCoral} px-4 py-2 text-[0.75rem]`}
       >
-        Remove
+        {isPending ? (
+          <>
+            <Loader2 size={14} strokeWidth={2} className="animate-spin" />
+            Removing…
+          </>
+        ) : (
+          'Remove'
+        )}
       </button>
       {error && <p className={`${errorText} max-w-[220px] text-right text-[0.75rem]`}>{error}</p>}
     </div>

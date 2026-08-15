@@ -5,6 +5,7 @@ import { AlertCircle } from 'lucide-react'
 import { deleteEmployeeAction } from '@/app/admin/employees/[id]/actions'
 import type { ActionState } from '@/app/admin/employees/[id]/actions'
 import { input, label as labelClass, buttonCoral, buttonGhost, errorText } from '@/lib/ui'
+import { SubmitButton } from '@/components/SubmitButton'
 
 const initialState: ActionState = {}
 
@@ -69,9 +70,9 @@ export function RemoveEmployeeButton({
                 >
                   Cancel
                 </button>
-                <button type="submit" className={buttonCoral} disabled={pending}>
-                  {pending ? 'Deleting…' : 'Permanently delete'}
-                </button>
+                <SubmitButton pendingText="Deleting…" className={buttonCoral}>
+                  Permanently delete
+                </SubmitButton>
               </div>
             </form>
           </div>

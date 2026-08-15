@@ -5,6 +5,7 @@ import { card, input, buttonPrimary, buttonGhost } from '@/lib/ui'
 import { createDepartmentAction, archiveDepartmentAction } from './actions'
 import { EditDepartmentForm } from './EditDepartmentForm'
 import { RemoveDepartmentButton } from './RemoveDepartmentButton'
+import { SubmitButton } from '@/components/SubmitButton'
 
 export default async function DepartmentsPage() {
   const supabase = await createClient()
@@ -21,9 +22,9 @@ export default async function DepartmentsPage() {
           </label>
           <input id="name" name="name" required className={input} />
         </div>
-        <button type="submit" className={buttonPrimary}>
+        <SubmitButton pendingText="Adding…" className={buttonPrimary}>
           Add
-        </button>
+        </SubmitButton>
       </form>
 
       <section className={`${card} mt-6 p-0`}>
@@ -52,9 +53,9 @@ export default async function DepartmentsPage() {
                   <div className="flex items-start justify-end gap-3">
                     {!dept.archived && (
                       <form action={archiveDepartmentAction.bind(null, dept.id)}>
-                        <button type="submit" className={`${buttonGhost} px-4 py-2 text-[0.75rem]`}>
+                        <SubmitButton pendingText="Archiving…" className={`${buttonGhost} px-4 py-2 text-[0.75rem]`}>
                           Archive
-                        </button>
+                        </SubmitButton>
                       </form>
                     )}
                     <RemoveDepartmentButton departmentId={dept.id} departmentName={dept.name} />

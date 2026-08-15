@@ -4,6 +4,7 @@ import { useActionState } from 'react'
 import { AlertCircle, CheckCircle2 } from 'lucide-react'
 import { updateWeeklyOffDaysAction, type SettingsActionState } from './actions'
 import { card, input, label as labelClass, buttonPrimary, errorText, successText } from '@/lib/ui'
+import { SubmitButton } from '@/components/SubmitButton'
 
 const initialState: SettingsActionState = {}
 
@@ -38,9 +39,9 @@ export function WeeklyOffDaysForm({ currentValue }: { currentValue: string }) {
       )}
 
       <div className="mt-6">
-        <button type="submit" className={buttonPrimary}>
+        <SubmitButton pendingText="Saving…" className={buttonPrimary}>
           Save
-        </button>
+        </SubmitButton>
       </div>
     </form>
   )

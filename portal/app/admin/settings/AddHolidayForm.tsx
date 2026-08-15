@@ -4,6 +4,7 @@ import { useActionState } from 'react'
 import { AlertCircle, CheckCircle2 } from 'lucide-react'
 import { addHolidayAction, type SettingsActionState } from './actions'
 import { input, label as labelClass, buttonPrimary, errorText, successText } from '@/lib/ui'
+import { SubmitButton } from '@/components/SubmitButton'
 
 const initialState: SettingsActionState = {}
 
@@ -24,9 +25,9 @@ export function AddHolidayForm() {
         </label>
         <input id="name" name="name" required className={input} />
       </div>
-      <button type="submit" className={buttonPrimary}>
+      <SubmitButton pendingText="Adding…" className={buttonPrimary}>
         Add holiday
-      </button>
+      </SubmitButton>
 
       {state.error && (
         <p role="alert" className={`${errorText} w-full`}>

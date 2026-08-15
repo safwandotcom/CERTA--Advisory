@@ -1,7 +1,7 @@
 'use client'
 
-import { useActionState } from 'react'
-import { AlertCircle, CheckCircle2 } from 'lucide-react'
+import { useActionState, useState } from 'react'
+import { AlertCircle, CheckCircle2, Loader2 } from 'lucide-react'
 import { reviewLeaveRequestAction, type LeaveReviewActionState } from './actions'
 import { input, buttonPrimary, buttonCoral, errorText, successText } from '@/lib/ui'
 
@@ -12,6 +12,7 @@ const initialState: LeaveReviewActionState = {}
 // decision via the clicked submit button's name/value pair.
 export function ReviewLeaveRow({ requestId }: { requestId: string }) {
   const [state, formAction, pending] = useActionState(reviewLeaveRequestAction, initialState)
+  const [pendingDecision, setPendingDecision] = useState<'approved' | 'rejected' | null>(null)
 
   return (
     <form action={formAction} className="flex flex-col gap-2">
@@ -29,18 +30,34 @@ export function ReviewLeaveRow({ requestId }: { requestId: string }) {
           name="decision"
           value="approved"
           disabled={pending}
+          onClick={() => setPendingDecision('approved')}
           className={`${buttonPrimary} py-2`}
         >
-          Approve
+          {pending && pendingDecision === 'approved' ? (
+            <>
+              <Loader2 size={15} strokeWidth={2} className="animate-spin" />
+              Approving…
+            </>
+          ) : (
+            'Approve'
+          )}
         </button>
         <button
           type="submit"
           name="decision"
           value="rejected"
           disabled={pending}
+          onClick={() => setPendingDecision('rejected')}
           className={`${buttonCoral} py-2`}
         >
-          Reject
+          {pending && pendingDecision === 'rejected' ? (
+            <>
+              <Loader2 size={15} strokeWidth={2} className="animate-spin" />
+              Rejecting…
+            </>
+          ) : (
+            'Reject'
+          )}
         </button>
       </div>
       {state.error && (

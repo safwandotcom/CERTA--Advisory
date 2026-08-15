@@ -4,6 +4,7 @@ import { card, input, label as labelClass, buttonPrimary } from '@/lib/ui'
 import { listLeaveTypes, listAllocationsForEmployee } from '@/lib/leaveTypes'
 import { QuotaForm } from './QuotaForm'
 import { AllocationForm } from './AllocationForm'
+import { SubmitButton } from '@/components/SubmitButton'
 
 function leavePillClass(isPaid: boolean): string {
   return isPaid
@@ -111,9 +112,9 @@ export default async function AdminLeaveTypesPage({
               className={`${input} w-28`}
             />
           </div>
-          <button type="submit" className={buttonPrimary}>
+          <SubmitButton pendingText="Loading…" className={buttonPrimary}>
             Load
-          </button>
+          </SubmitButton>
         </form>
 
         {employeeId && (

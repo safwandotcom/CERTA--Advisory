@@ -6,6 +6,7 @@ import { submitLeaveRequestAction, cancelLeaveRequestAction, type LeaveActionSta
 import { computeDayPeriodDays, type DayPeriod } from '@/lib/leaveRequests'
 import type { LeaveType } from '@/lib/leaveTypes'
 import { input, label as labelClass, buttonPrimary, buttonGhost, errorText, successText } from '@/lib/ui'
+import { SubmitButton } from '@/components/SubmitButton'
 
 const initialState: LeaveActionState = {}
 
@@ -18,9 +19,9 @@ export function CancelRequestButton({ requestId }: { requestId: string }) {
   return (
     <form action={formAction} className="flex flex-col items-end gap-1.5">
       <input type="hidden" name="requestId" value={requestId} />
-      <button type="submit" className={buttonGhost}>
+      <SubmitButton pendingText="Cancelling…" className={buttonGhost}>
         Cancel
-      </button>
+      </SubmitButton>
       {state.error && (
         <p role="alert" className={`${errorText} text-right`}>
           <AlertCircle size={14} strokeWidth={2} className="shrink-0" />
@@ -230,9 +231,9 @@ export default function LeaveRequestForm({
       )}
 
       <div>
-        <button type="submit" className={buttonPrimary}>
+        <SubmitButton pendingText="Submitting…" className={buttonPrimary}>
           Submit request
-        </button>
+        </SubmitButton>
       </div>
     </form>
   )

@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { Bell } from 'lucide-react'
+import { Bell, Loader2 } from 'lucide-react'
 import {
   listNotificationsAction,
   markNotificationReadAction,
@@ -15,7 +15,7 @@ export function NotificationBell({ initialUnreadCount }: { initialUnreadCount: n
   const [open, setOpen] = useState(false)
   const [unreadCount, setUnreadCount] = useState(initialUnreadCount)
   const [notifications, setNotifications] = useState<Notification[] | null>(null)
-  const [, startTransition] = useTransition()
+  const [isPending, startTransition] = useTransition()
 
   async function toggleOpen() {
     if (!open && notifications === null) {
@@ -81,8 +81,10 @@ export function NotificationBell({ initialUnreadCount }: { initialUnreadCount: n
             <button
               type="button"
               onClick={handleMarkAllRead}
-              className="text-[0.75rem] font-semibold text-certa-green-deep hover:underline"
+              disabled={isPending}
+              className="flex items-center gap-1.5 text-[0.75rem] font-semibold text-certa-green-deep hover:underline disabled:opacity-60 disabled:pointer-events-none"
             >
+              {isPending && <Loader2 size={12} strokeWidth={2} className="animate-spin" />}
               Mark all read
             </button>
           </div>

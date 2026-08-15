@@ -15,6 +15,7 @@ import {
   type ActionState,
 } from './actions'
 import { PageHeader } from '@/components/PageHeader'
+import { SubmitButton } from '@/components/SubmitButton'
 import type { Department } from '@/lib/departments'
 import {
   card,
@@ -260,9 +261,9 @@ export default function EditEmployeeClient({ id }: { id: string }) {
 
           <FormMessage state={updateState} />
 
-          <button type="submit" className={`${buttonPrimary} mt-6`}>
+          <SubmitButton pendingText="Saving…" className={`${buttonPrimary} mt-6`}>
             Save changes
-          </button>
+          </SubmitButton>
         </form>
 
         <div className={`${card} max-w-2xl`}>
@@ -305,10 +306,10 @@ export default function EditEmployeeClient({ id }: { id: string }) {
 
             <FormMessage state={uploadState} />
 
-            <button type="submit" className={`${buttonPrimary} w-fit`}>
+            <SubmitButton pendingText="Uploading…" className={`${buttonPrimary} w-fit`}>
               <Upload size={16} strokeWidth={2} />
               Upload
-            </button>
+            </SubmitButton>
           </form>
         </div>
 
@@ -379,9 +380,9 @@ export default function EditEmployeeClient({ id }: { id: string }) {
                 <div className="mt-6 flex flex-col gap-4 border-t border-border pt-5 sm:max-w-sm">
                   <form action={completeAction}>
                     <FormMessage state={completeState} />
-                    <button type="submit" className={`${buttonPrimary} mt-2`}>
+                    <SubmitButton pendingText="Marking complete…" className={`${buttonPrimary} mt-2`}>
                       Mark complete
-                    </button>
+                    </SubmitButton>
                   </form>
 
                   <form action={correctionAction} className="flex flex-col gap-3">
@@ -390,9 +391,9 @@ export default function EditEmployeeClient({ id }: { id: string }) {
                     </label>
                     <textarea id="correctionNote" name="correctionNote" required rows={2} className={input} />
                     <FormMessage state={correctionState} />
-                    <button type="submit" className={`${buttonCoral} w-fit`}>
+                    <SubmitButton pendingText="Sending…" className={`${buttonCoral} w-fit`}>
                       Send back for correction
-                    </button>
+                    </SubmitButton>
                   </form>
                 </div>
               )}
@@ -431,9 +432,9 @@ export default function EditEmployeeClient({ id }: { id: string }) {
 
             <FormMessage state={salaryState} />
 
-            <button type="submit" className={`${buttonPrimary} w-fit`}>
+            <SubmitButton pendingText="Saving…" className={`${buttonPrimary} w-fit`}>
               Save salary
-            </button>
+            </SubmitButton>
           </form>
         </div>
 
@@ -453,10 +454,10 @@ export default function EditEmployeeClient({ id }: { id: string }) {
 
             <FormMessage state={resetState} />
 
-            <button type="submit" className={`${buttonCoral} w-fit`}>
+            <SubmitButton pendingText="Resetting…" className={`${buttonCoral} w-fit`}>
               <KeyRound size={16} strokeWidth={2} />
               Reset password
-            </button>
+            </SubmitButton>
           </form>
         </div>
 
@@ -485,9 +486,9 @@ export default function EditEmployeeClient({ id }: { id: string }) {
 
               <FormMessage state={archiveState} />
 
-              <button type="submit" className={`${buttonCoral} w-fit`}>
+              <SubmitButton pendingText="Archiving…" className={`${buttonCoral} w-fit`}>
                 Archive employee
-              </button>
+              </SubmitButton>
             </form>
           </div>
         )}

@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState, useRef } from 'react'
+import { useActionState, useRef, useState } from 'react'
 import { AlertCircle, CheckCircle2, Loader2 } from 'lucide-react'
 import {
   saveOrSubmitOnboardingAction,
@@ -94,7 +94,8 @@ export default function OnboardingForm({
   documentUrls: { nationalId: string | null; offerLetter: string | null; photo: string | null }
   correctionNote: string | null
 }) {
-  const [state, formAction] = useActionState(saveOrSubmitOnboardingAction, initialState)
+  const [state, formAction, isPending] = useActionState(saveOrSubmitOnboardingAction, initialState)
+  const [pendingIntent, setPendingIntent] = useState<'save' | 'submit' | null>(null)
 
   return (
     <div className="flex flex-col gap-6">
@@ -200,18 +201,48 @@ export default function OnboardingForm({
       <div className={card}>
         <FormMessage state={state} />
         <div className={`flex flex-wrap gap-3${state.error || state.success ? ' mt-4' : ''}`}>
+          {/* These live outside the Personal details <form> (see comment
+              above), so useFormStatus can't see them -- it only tracks
+              descendants of the form it's called inside. useActionState's
+              own isPending covers both buttons equally since they share one
+              action; pendingIntent (set on click) distinguishes which one to
+              show a spinner on. */}
           <button
             type="submit"
             form={PERSONAL_DETAILS_FORM_ID}
             name="intent"
             value="save"
             formNoValidate
+            disabled={isPending}
+            onClick={() => setPendingIntent('save')}
             className={buttonGhost}
           >
-            Save progress
+            {isPending && pendingIntent === 'save' ? (
+              <>
+                <Loader2 size={15} strokeWidth={2} className="animate-spin" />
+                Saving…
+              </>
+            ) : (
+              'Save progress'
+            )}
           </button>
-          <button type="submit" form={PERSONAL_DETAILS_FORM_ID} name="intent" value="submit" className={buttonPrimary}>
-            Submit for review
+          <button
+            type="submit"
+            form={PERSONAL_DETAILS_FORM_ID}
+            name="intent"
+            value="submit"
+            disabled={isPending}
+            onClick={() => setPendingIntent('submit')}
+            className={buttonPrimary}
+          >
+            {isPending && pendingIntent === 'submit' ? (
+              <>
+                <Loader2 size={15} strokeWidth={2} className="animate-spin" />
+                Submitting…
+              </>
+            ) : (
+              'Submit for review'
+            )}
           </button>
         </div>
       </div>

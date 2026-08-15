@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { PageHeader } from '@/components/PageHeader'
 import { card, input, label as labelClass, buttonPrimary } from '@/lib/ui'
 import { buildSalaryDeductionSummary } from '@/lib/salaryDeductionData'
+import { SubmitButton } from '@/components/SubmitButton'
 
 // Rounds to 2 decimal places — used for both money amounts (currency
 // precision) and day counts (fine enough for half-day, and even the
@@ -128,9 +129,9 @@ export default async function AdminSalaryDeductionPage({
               ))}
             </select>
           </div>
-          <button type="submit" className={buttonPrimary}>
+          <SubmitButton pendingText="Loading…" className={buttonPrimary}>
             Load
-          </button>
+          </SubmitButton>
         </form>
       </div>
 

@@ -21,6 +21,7 @@ import {
 } from 'lucide-react'
 import { signOutAction } from '@/app/actions'
 import { NotificationBell } from '@/components/NotificationBell'
+import { SubmitButton } from '@/components/SubmitButton'
 
 type NavItem = {
   href: string
@@ -180,13 +181,13 @@ function SidebarContent({
           </div>
         </div>
         <form action={signOutAction} className="mt-1">
-          <button
-            type="submit"
-            className="flex w-full items-center gap-3 rounded-md px-2 py-2 text-sm font-medium text-ink-muted transition-colors hover:bg-white hover:text-signal-coral-deep"
+          <SubmitButton
+            pendingText="Signing out…"
+            className="flex w-full items-center gap-3 rounded-md px-2 py-2 text-sm font-medium text-ink-muted transition-colors hover:bg-white hover:text-signal-coral-deep disabled:opacity-60 disabled:pointer-events-none"
           >
             <LogOut size={17} strokeWidth={2} />
             Sign out
-          </button>
+          </SubmitButton>
         </form>
       </div>
     </>

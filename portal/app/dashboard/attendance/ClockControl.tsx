@@ -4,6 +4,7 @@ import { useActionState } from 'react'
 import { AlertCircle, Clock } from 'lucide-react'
 import { clockInAction, clockOutAction, type AttendanceActionState } from './actions'
 import { buttonPrimary, buttonCoral, card, errorText } from '@/lib/ui'
+import { SubmitButton } from '@/components/SubmitButton'
 
 const initialState: AttendanceActionState = {}
 
@@ -42,9 +43,9 @@ export default function ClockControl({
       {today === null && (
         <div className="mt-4">
           <form action={clockInFormAction}>
-            <button type="submit" className={buttonPrimary}>
+            <SubmitButton pendingText="Clocking in…" className={buttonPrimary}>
               Clock In
-            </button>
+            </SubmitButton>
           </form>
           <ErrorMessage state={clockInState} />
         </div>
@@ -56,9 +57,9 @@ export default function ClockControl({
             Clocked in at <span className="font-semibold">{formatTime(today.clock_in_at)}</span>
           </p>
           <form action={clockOutFormAction} className="mt-3">
-            <button type="submit" className={buttonCoral}>
+            <SubmitButton pendingText="Clocking out…" className={buttonCoral}>
               Clock Out
-            </button>
+            </SubmitButton>
           </form>
           <ErrorMessage state={clockOutState} />
         </div>

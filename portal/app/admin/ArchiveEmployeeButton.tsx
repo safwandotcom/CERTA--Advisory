@@ -4,6 +4,7 @@ import { useActionState, useState } from 'react'
 import { AlertCircle } from 'lucide-react'
 import { archiveEmployeeAction, type ActionState } from '@/app/admin/employees/[id]/actions'
 import { input, label as labelClass, buttonCoral, buttonGhost, errorText } from '@/lib/ui'
+import { SubmitButton } from '@/components/SubmitButton'
 
 const initialState: ActionState = {}
 
@@ -70,9 +71,9 @@ export function ArchiveEmployeeButton({
                 >
                   Cancel
                 </button>
-                <button type="submit" className={buttonCoral} disabled={pending}>
-                  {pending ? 'Archiving…' : 'Archive'}
-                </button>
+                <SubmitButton pendingText="Archiving…" className={buttonCoral}>
+                  Archive
+                </SubmitButton>
               </div>
             </form>
           </div>

@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { PageHeader } from '@/components/PageHeader'
 import { card, input, label as labelClass, buttonPrimary } from '@/lib/ui'
+import { SubmitButton } from '@/components/SubmitButton'
 import { listAttendanceInRange, type AttendanceRecord } from '@/lib/attendance'
 import {
   getCompanySetting,
@@ -215,9 +216,9 @@ export default async function AdminTimesheetPage({
             </select>
           </div>
           <input type="hidden" name="month" value={monthParam(year, monthIndex)} />
-          <button type="submit" className={buttonPrimary}>
+          <SubmitButton pendingText="Loading…" className={buttonPrimary}>
             Load
-          </button>
+          </SubmitButton>
         </form>
       </div>
 

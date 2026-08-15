@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
 import { signOutAction } from '@/app/actions'
+import { SubmitButton } from '@/components/SubmitButton'
 
 export default async function OnboardingLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -23,9 +24,12 @@ export default async function OnboardingLayout({ children }: { children: React.R
           className="h-7 w-auto"
         />
         <form action={signOutAction}>
-          <button type="submit" className="text-[0.8125rem] font-semibold text-ink-muted hover:text-ink">
+          <SubmitButton
+            pendingText="Signing out…"
+            className="text-[0.8125rem] font-semibold text-ink-muted hover:text-ink disabled:opacity-60 disabled:pointer-events-none"
+          >
             Sign out
-          </button>
+          </SubmitButton>
         </form>
       </header>
       <main className="mx-auto max-w-3xl px-5 py-10 sm:px-10">{children}</main>

@@ -3,6 +3,7 @@
 import { useActionState } from 'react'
 import { updateDepartmentNameAction, type DepartmentActionState } from './actions'
 import { input, errorText } from '@/lib/ui'
+import { SubmitButton } from '@/components/SubmitButton'
 
 const initialState: DepartmentActionState = {}
 
@@ -26,12 +27,12 @@ export function EditDepartmentForm({
         required
         className={`${input} px-3 py-1.5 text-[0.875rem]`}
       />
-      <button
-        type="submit"
-        className="shrink-0 text-[0.8125rem] font-semibold text-certa-green-deep hover:underline"
+      <SubmitButton
+        pendingText="Saving…"
+        className="shrink-0 text-[0.8125rem] font-semibold text-certa-green-deep hover:underline disabled:opacity-60 disabled:pointer-events-none"
       >
         Save
-      </button>
+      </SubmitButton>
       {state.error && <span className={`${errorText} text-[0.75rem]`}>{state.error}</span>}
     </form>
   )
