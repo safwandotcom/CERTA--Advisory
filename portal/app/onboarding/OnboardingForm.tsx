@@ -1,7 +1,7 @@
 'use client'
 
-import { useActionState } from 'react'
-import { AlertCircle, CheckCircle2, Upload } from 'lucide-react'
+import { useActionState, useRef } from 'react'
+import { AlertCircle, CheckCircle2, Loader2 } from 'lucide-react'
 import {
   saveOrSubmitOnboardingAction,
   uploadOnboardingDocumentAction,
@@ -9,6 +9,8 @@ import {
 } from './actions'
 import { card, input, label as labelClass, buttonPrimary, buttonGhost, errorText, successText } from '@/lib/ui'
 import type { EmployeeOnboarding } from '@/lib/onboarding'
+
+const PERSONAL_DETAILS_FORM_ID = 'onboarding-personal-details-form'
 
 const initialState: OnboardingActionState = {}
 
@@ -43,7 +45,8 @@ function DocumentUpload({
   title: string
   currentUrl: string | null
 }) {
-  const [state, action] = useActionState(uploadOnboardingDocumentAction.bind(null, slot), initialState)
+  const [state, action, isPending] = useActionState(uploadOnboardingDocumentAction.bind(null, slot), initialState)
+  const formRef = useRef<HTMLFormElement>(null)
 
   return (
     <div className="rounded-[10px] border border-border p-4">
@@ -58,18 +61,24 @@ function DocumentUpload({
           View current file
         </a>
       )}
-      <form action={action} className="mt-3 flex flex-wrap items-center gap-3">
+      <form ref={formRef} action={action} className="mt-3 flex flex-wrap items-center gap-3">
+        {/* Submits itself the moment a file is chosen -- no separate Upload
+            button to click per document, which was confusing candidates. */}
         <input
           name="file"
           type="file"
           accept=".pdf,.jpg,.jpeg,.png"
           required
-          className={`${input} max-w-xs file:mr-3 file:rounded-[6px] file:border-0 file:bg-white file:px-3 file:py-1.5 file:text-[0.8125rem] file:font-semibold file:text-ink`}
+          disabled={isPending}
+          onChange={() => formRef.current?.requestSubmit()}
+          className={`${input} max-w-xs file:mr-3 file:rounded-[6px] file:border-0 file:bg-white file:px-3 file:py-1.5 file:text-[0.8125rem] file:font-semibold file:text-ink disabled:opacity-60`}
         />
-        <button type="submit" className={buttonGhost}>
-          <Upload size={15} strokeWidth={2} />
-          Upload
-        </button>
+        {isPending && (
+          <span className="flex items-center gap-1.5 text-[0.8125rem] font-semibold text-ink-muted">
+            <Loader2 size={15} strokeWidth={2} className="animate-spin" />
+            Uploading…
+          </span>
+        )}
       </form>
       <FormMessage state={state} />
     </div>
@@ -98,7 +107,7 @@ export default function OnboardingForm({
         </div>
       )}
 
-      <form action={formAction} className={card}>
+      <form id={PERSONAL_DETAILS_FORM_ID} action={formAction} className={card}>
         <h2 className="font-display text-base font-semibold text-ink">Personal details</h2>
         <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2">
           <div>
@@ -175,17 +184,6 @@ export default function OnboardingForm({
             <input id="branchCode" name="branchCode" required defaultValue={onboarding?.branch_code ?? ''} className={input} />
           </div>
         </div>
-
-        <FormMessage state={state} />
-
-        <div className="mt-6 flex flex-wrap gap-3">
-          <button type="submit" name="intent" value="save" formNoValidate className={buttonGhost}>
-            Save progress
-          </button>
-          <button type="submit" name="intent" value="submit" className={buttonPrimary}>
-            Submit for review
-          </button>
-        </div>
       </form>
 
       <div className={`${card} flex flex-col gap-4`}>
@@ -193,6 +191,29 @@ export default function OnboardingForm({
         <DocumentUpload slot="national_id" title="National ID copy" currentUrl={documentUrls.nationalId} />
         <DocumentUpload slot="offer_letter" title="Signed offer letter" currentUrl={documentUrls.offerLetter} />
         <DocumentUpload slot="photo" title="Passport-size photo" currentUrl={documentUrls.photo} />
+      </div>
+
+      {/* Save progress / Submit for review live here, after Documents, so
+          the page reads in the order candidates actually need to complete
+          it -- but both buttons still submit the Personal details form
+          above via the `form` attribute, not a form of their own. */}
+      <div className={card}>
+        <FormMessage state={state} />
+        <div className={`flex flex-wrap gap-3${state.error || state.success ? ' mt-4' : ''}`}>
+          <button
+            type="submit"
+            form={PERSONAL_DETAILS_FORM_ID}
+            name="intent"
+            value="save"
+            formNoValidate
+            className={buttonGhost}
+          >
+            Save progress
+          </button>
+          <button type="submit" form={PERSONAL_DETAILS_FORM_ID} name="intent" value="submit" className={buttonPrimary}>
+            Submit for review
+          </button>
+        </div>
       </div>
     </div>
   )
