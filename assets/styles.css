@@ -468,7 +468,7 @@ html.js [data-reveal].is-visible { opacity: 1; transform: none; }
   color: var(--ink-muted);
   margin-bottom: var(--space-sm);
 }
-.world-clock__pair { display: flex; gap: var(--space-md); flex-wrap: wrap; }
+.world-clock__row { display: flex; gap: var(--space-md); flex-wrap: wrap; }
 .world-clock__card {
   display: flex;
   align-items: center;
@@ -511,7 +511,7 @@ html.js [data-reveal].is-visible { opacity: 1; transform: none; }
 }
 
 @media (max-width: 560px) {
-  .world-clock__pair { flex-direction: column; }
+  .world-clock__row { flex-direction: column; }
 }
 
 .hero__mark {
