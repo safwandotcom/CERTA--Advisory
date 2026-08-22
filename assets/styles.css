@@ -876,12 +876,6 @@ html.js [data-reveal].is-visible { opacity: 1; transform: none; }
 .faq-item:hover { background: var(--surface-tint); }
 
 /* ---------- Careers ---------- */
-.careers-grid {
-  display: grid;
-  grid-template-columns: 1.1fr 0.9fr;
-  gap: var(--space-xl);
-  align-items: start;
-}
 .careers-jobs { display: flex; flex-direction: column; margin-top: var(--space-md); border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; }
 .careers-job {
   display: flex;
@@ -906,13 +900,6 @@ html.js [data-reveal].is-visible { opacity: 1; transform: none; }
 }
 .careers-job__cta span { display: inline-block; transition: transform 150ms var(--ease-standard); }
 .careers-job:hover .careers-job__cta span { transform: translate(2px, -2px); }
-.careers-note {
-  background: var(--surface-tint);
-  border-radius: var(--radius-lg);
-  padding: var(--space-lg);
-}
-.careers-note h3 { font-size: 1.0625rem; font-weight: 600; margin-bottom: 8px; }
-.careers-note p { color: var(--ink-muted); font-size: 0.9375rem; margin-bottom: var(--space-md); }
 
 /* ---------- CTA band ---------- */
 .cta-band {
@@ -993,7 +980,6 @@ html.js [data-reveal].is-visible { opacity: 1; transform: none; }
   .why-us__visual { order: -1; max-width: 260px; margin: 0 auto var(--space-md); }
   .why-us__head { margin-bottom: var(--space-xl); }
   .security-grid { grid-template-columns: 1fr; gap: var(--space-md); }
-  .careers-grid { grid-template-columns: 1fr; }
   .cta-band { grid-template-columns: 1fr; text-align: left; }
   .footer__top { grid-template-columns: 1fr 1fr; }
 
