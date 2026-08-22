@@ -822,17 +822,6 @@ html.js [data-reveal].is-visible { opacity: 1; transform: none; }
   border-top: 1px solid rgba(255, 255, 255, 0.15);
   padding-top: var(--space-lg);
 }
-.client-profile__tag {
-  display: inline-block;
-  background: rgba(255, 255, 255, 0.1);
-  color: var(--white);
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  padding: 5px 12px;
-  border-radius: var(--radius-sm);
-  margin-bottom: var(--space-sm);
-}
 .client-profile h3 { color: var(--white); font-size: 1.0625rem; font-weight: 600; margin-bottom: 8px; }
 .client-profile p { color: rgba(255, 255, 255, 0.68); font-size: 0.9375rem; }
 
@@ -844,12 +833,13 @@ html.js [data-reveal].is-visible { opacity: 1; transform: none; }
   line-height: 1.15;
   letter-spacing: -0.01em;
 }
+.faq-head p { color: var(--ink-muted); margin-top: var(--space-sm); max-width: 56ch; }
 .faq-list { border-top: 1px solid var(--border); }
-.faq-item { border-bottom: 1px solid var(--border); padding: var(--space-md) 0; }
+.faq-item { border-bottom: 1px solid var(--border); padding: var(--space-lg) 0; }
 .faq-item summary {
   font-family: var(--font-display);
   font-weight: 600;
-  font-size: 1.0625rem;
+  font-size: 1.1875rem;
   cursor: pointer;
   list-style: none;
   display: flex;
@@ -874,7 +864,7 @@ html.js [data-reveal].is-visible { opacity: 1; transform: none; }
 .comparison-table tbody tr { transition: background 200ms var(--ease-standard); }
 .comparison-table tbody tr:hover { background: var(--certa-green-tint); }
 .faq-item { transition: background 200ms var(--ease-standard); }
-.faq-item:hover { background: var(--surface-tint); }
+.faq-item:hover { background: var(--certa-green-tint); }
 
 /* ---------- Careers ---------- */
 .careers-jobs { display: flex; flex-direction: column; margin-top: var(--space-md); border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; }
