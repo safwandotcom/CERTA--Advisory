@@ -885,6 +885,7 @@ html.js [data-reveal].is-visible { opacity: 1; transform: none; }
 .careers-jobs { display: flex; flex-direction: column; margin-top: var(--space-md); border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; }
 .careers-job {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-sm);
@@ -895,7 +896,7 @@ html.js [data-reveal].is-visible { opacity: 1; transform: none; }
   transition: background 200ms var(--ease-standard);
 }
 .careers-job:last-child { border-bottom: none; }
-.careers-job:hover { background: var(--surface-tint); }
+.careers-job:hover { background: var(--certa-green-tint); }
 .careers-job:focus-visible { outline: 2px solid var(--certa-green); outline-offset: -2px; }
 .careers-job__title { font-weight: 600; }
 .careers-job__cta {
