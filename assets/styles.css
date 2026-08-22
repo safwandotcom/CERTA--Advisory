@@ -1048,3 +1048,47 @@ html.js [data-reveal].is-visible { opacity: 1; transform: none; }
 .sa-emgs__inner { text-align: center; max-width: 720px; margin: 0 auto; }
 .sa-emgs__logo { margin-bottom: var(--space-md); }
 .sa-emgs__inner h2 { font-size: clamp(1.75rem, 2.6vw, 2.5rem); font-weight: 600; letter-spacing: -0.01em; margin-bottom: var(--space-sm); }
+
+.sa-rail {
+  display: flex;
+  gap: var(--space-md);
+  overflow-x: auto;
+  padding: var(--space-md) 4px var(--space-lg);
+  margin-bottom: var(--space-lg);
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+}
+.sa-rail__avatar { flex: none; display: flex; flex-direction: column; align-items: center; gap: 8px; text-decoration: none; color: var(--ink); scroll-snap-align: start; }
+.sa-rail__mark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: var(--white);
+  padding: 0;
+  transition: border-color 200ms var(--ease-standard);
+}
+.sa-rail__avatar:hover .sa-rail__mark,
+.sa-rail__avatar:focus-visible .sa-rail__mark { border-color: var(--certa-green); }
+.sa-rail__name { font-size: 0.75rem; font-weight: 600; max-width: 64px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.sa-uni-group { margin-top: var(--space-xl); }
+.sa-uni-group:first-of-type { margin-top: 0; }
+.sa-uni-group__label { font-size: 1.0625rem; font-weight: 600; margin-bottom: var(--space-md); }
+.sa-uni-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--space-md); }
+.sa-uni-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  scroll-margin-top: 100px;
+  transition: box-shadow 300ms var(--ease-standard), border-color 300ms var(--ease-standard);
+}
+.sa-uni-card__logo { margin-bottom: var(--space-sm); }
+.sa-uni-card h4 { font-size: 1.0625rem; font-weight: 600; }
+.sa-uni-card__location { font-size: 0.8125rem; color: var(--ink-muted); margin-top: 2px; margin-bottom: var(--space-sm); }
+.sa-uni-card p:last-child { color: var(--ink-muted); font-size: 0.9375rem; }
+.sa-uni-card--highlight { border-color: var(--certa-green); box-shadow: 0 0 0 3px var(--certa-green-tint); }
