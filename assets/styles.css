@@ -1029,3 +1029,17 @@ html.js [data-reveal].is-visible { opacity: 1; transform: none; }
   .security-card__mark svg * { transition: none; stroke-dashoffset: 0; }
   .cta-mark .certa-mark__ring, .cta-mark .certa-mark__dash { transition: none; stroke-dashoffset: 0; opacity: 1; }
 }
+
+/* ---------- Study Abroad ---------- */
+.sa-hero { padding-top: var(--space-xl); text-align: center; }
+.sa-hero__inner { max-width: 640px; margin: 0 auto; }
+.sa-hero__inner h1 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(2.25rem, 4vw, 3.25rem);
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+  color: var(--ink);
+}
+.sa-hero__inner .lede { margin-top: var(--space-md); color: var(--ink-muted); font-size: 1.125rem; }
+.sa-hero__inner .btn { margin-top: var(--space-lg); }
