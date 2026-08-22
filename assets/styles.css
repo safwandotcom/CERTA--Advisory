@@ -1043,3 +1043,5 @@ html.js [data-reveal].is-visible { opacity: 1; transform: none; }
 }
 .sa-hero__inner .lede { margin-top: var(--space-md); color: var(--ink-muted); font-size: 1.125rem; }
 .sa-hero__inner .btn { margin-top: var(--space-lg); }
+.sa-teaser__btn { display: inline-flex; align-items: center; gap: 10px; margin-top: var(--space-lg); }
+.sa-teaser__flag { width: 22px; height: auto; border-radius: 3px; flex: none; }
