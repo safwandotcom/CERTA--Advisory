@@ -658,7 +658,7 @@ html.js [data-reveal].is-visible { opacity: 1; transform: none; }
 .process-step h3 { font-size: 1.0625rem; font-weight: 600; margin-bottom: 8px; }
 .process-step p { color: var(--ink-muted); font-size: 0.9375rem; }
 
-/* ---------- Outsourcing vs in-house comparison ---------- */
+/* ---------- In-house vs CERTA& comparison ---------- */
 .comparison-table-wrap { overflow-x: auto; }
 .comparison-table {
   width: 100%;
