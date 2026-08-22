@@ -1092,3 +1092,7 @@ html.js [data-reveal].is-visible { opacity: 1; transform: none; }
 .sa-uni-card__location { font-size: 0.8125rem; color: var(--ink-muted); margin-top: 2px; margin-bottom: var(--space-sm); }
 .sa-uni-card p:last-child { color: var(--ink-muted); font-size: 0.9375rem; }
 .sa-uni-card--highlight { border-color: var(--certa-green); box-shadow: 0 0 0 3px var(--certa-green-tint); }
+.sa-rail__mark img { width: 32px; height: 32px; object-fit: contain; border-radius: 50%; }
+img.sa-uni-card__logo, img.sa-emgs__logo { object-fit: contain; }
+img.sa-uni-card__logo { width: 48px; height: 48px; }
+img.sa-emgs__logo { max-width: 160px; max-height: 48px; }
