@@ -55,7 +55,7 @@ Out of scope: a CMS or data-driven university list (14 static entries is small e
 **Content:**
 ```
 H2: Study in Malaysia.
-Subhead: A second service from CERTA& Advisory — university placement, EMGS visa processing, and on-the-ground support for students heading to Malaysia.
+Subhead: A second service from CERTA& Advisory: university placement, EMGS visa processing, and on-the-ground support for students heading to Malaysia.
 ```
 
 **CTA:** a button styled like the site's existing `.btn` variants, reading **"Study in Malaysia"** with an inline SVG Malaysia flag icon before the text (14×14 or 16×16, simple two-color rectangle-based flag — not the 🇲🇾 emoji character, matching the site's zero-emoji, hand-drawn-SVG-only icon convention established across every other icon on the site). Links to `study-abroad.html` (same-tab, standard internal navigation — no `target="_blank"`, since it's a page on the same site, not an external link).
