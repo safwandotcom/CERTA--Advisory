@@ -898,11 +898,14 @@ html.js [data-reveal].is-visible { opacity: 1; transform: none; }
 .careers-job:hover { background: var(--certa-green-tint); }
 .careers-job:focus-visible { outline: 2px solid var(--certa-green); outline-offset: -2px; }
 .careers-job__title { font-weight: 600; }
+.careers-job__meta { font-size: 0.8125rem; color: var(--ink-muted); }
 .careers-job__cta {
   font-size: 0.8125rem;
   font-weight: 600;
   color: var(--certa-green-deep);
 }
+.careers-job__cta span { display: inline-block; transition: transform 150ms var(--ease-standard); }
+.careers-job:hover .careers-job__cta span { transform: translate(2px, -2px); }
 .careers-note {
   background: var(--surface-tint);
   border-radius: var(--radius-lg);
