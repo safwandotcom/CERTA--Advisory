@@ -354,3 +354,19 @@ if (magneticCta && canHover && !reducedMotion) {
 
   window.addEventListener('mousemove', handleMagneticMove, { passive: true });
 }
+
+// ---------- Study Abroad: rail avatar -> card scroll + highlight ----------
+const saRailLinks = document.querySelectorAll('.sa-rail__avatar');
+if (saRailLinks.length) {
+  saRailLinks.forEach((link) => {
+    link.addEventListener('click', (e) => {
+      const targetId = link.getAttribute('href').slice(1);
+      const target = document.getElementById(targetId);
+      if (!target) return;
+      e.preventDefault();
+      target.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'center' });
+      target.classList.add('sa-uni-card--highlight');
+      window.setTimeout(() => target.classList.remove('sa-uni-card--highlight'), 1600);
+    });
+  });
+}
