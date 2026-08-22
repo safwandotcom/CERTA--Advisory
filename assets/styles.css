@@ -882,7 +882,29 @@ html.js [data-reveal].is-visible { opacity: 1; transform: none; }
   gap: var(--space-xl);
   align-items: start;
 }
-.careers-roles { display: flex; gap: 10px; flex-wrap: wrap; margin-top: var(--space-md); }
+.careers-jobs { display: flex; flex-direction: column; margin-top: var(--space-md); border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; }
+.careers-job {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  padding: var(--space-sm);
+  color: var(--ink);
+  text-decoration: none;
+  border-bottom: 1px solid var(--border);
+  transition: background 200ms var(--ease-standard);
+}
+.careers-job:last-child { border-bottom: none; }
+.careers-job:hover { background: var(--surface-tint); }
+.careers-job:focus-visible { outline: 2px solid var(--certa-green); outline-offset: -2px; }
+.careers-job__title { font-weight: 600; }
+.careers-job__cta {
+  flex: none;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--certa-green-deep);
+  white-space: nowrap;
+}
 .careers-note {
   background: var(--surface-tint);
   border-radius: var(--radius-lg);
