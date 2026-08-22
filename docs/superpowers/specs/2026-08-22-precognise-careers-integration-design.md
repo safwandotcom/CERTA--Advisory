@@ -3,100 +3,73 @@
 **Date:** 2026-08-22
 **Status:** Approved for planning
 
+**Revision note:** an earlier version of this spec proposed a new public list endpoint on PreCognise plus a client-side fetch from the CERTA site. The user asked to exclude the PreCognise repo from this change entirely. This version replaces that design — see "Why this changed" below.
+
 ## Context
 
-CERTA& Advisory's Careers section (`index.html#careers`) is currently a static block: hardcoded role-name chips and a generic "send your CV" note — no real job listings. Separately, the user has a recruiter account on **PreCognise** (`https://precognise.co`), their own recruiting platform (source at `E:\PreCognize\frontend`, Next.js + Prisma + Supabase), and already posts CERTA& Advisory roles through it. Three are live today:
+CERTA& Advisory's Careers section (`index.html#careers`) is currently a static block: hardcoded role-name chips and a generic "send your CV" note — no real job listings. Separately, the user has a recruiter account on **PreCognise** (`https://precognise.co`), their own recruiting platform, and already posts CERTA& Advisory roles through it. Three are live today:
 
 - `https://www.precognise.co/j/6tt8u7ag`
 - `https://www.precognise.co/j/wejpef2s`
 - `https://www.precognise.co/j/k4tjg37j`
 
-Goal: show these (and future) postings on the CERTA& Advisory Careers section automatically — no manual copy-paste — while reusing PreCognise's existing public job page and apply flow rather than rebuilding one on the CERTA site.
+Each of these is already a fully working public page on PreCognise — full job description and a working "Apply" flow — with no CERTA-side changes needed to use it.
 
-**How PreCognise already works (confirmed by reading the source):**
+Goal: show these (and future) postings on the CERTA& Advisory Careers section, linking out to PreCognise to view/apply, **without touching the PreCognise repo**.
 
-- Jobs posted through the recruiter flow (`POST /api/recruiter/jobs`, which is what the user's recruiter account already uses) are stored as a `JobPosting` row with `source: RECRUITER`, an auto-generated unique `publicSlug`, and `visibleToCandidates: true` by default.
-- Those rows are already servable with no authentication at `GET /api/public/jobs/[slug]` and viewable end-to-end (description + apply form) at `precognise.co/j/[slug]`. This apply flow needs no changes.
-- Jobs posted through the separate institution/org flow (`POST /api/institution/[id]/jobs`) do **not** get a `publicSlug` and are invisible to the public endpoint — that flow is not used here.
-- There is currently no endpoint that lists *multiple* public jobs (only single-job-by-slug). One needs to be added.
-- `JobPosting.company` is free text; there is no stable per-employer identifier on recruiter-authored rows.
+## Why this changed
 
-**Explicit decision (from brainstorming):** filter the new list endpoint by an exact (case-insensitive) match on `company = "CERTA& Advisory"` rather than adding a schema field for a stable org identifier. Zero schema migration, ships fastest; the tradeoff — a typo in the `company` field when posting a job silently drops it from the CERTA site — is accepted as low-risk given the user posts these roles personally in small numbers.
+The first version of this spec needed a PreCognise-side change for two reasons: (1) there's no existing endpoint that lists "all jobs for CERTA& Advisory" (only a single-job-by-slug lookup), and (2) a browser fetch from `certaadvisory.com` to `precognise.co` is blocked by CORS unless PreCognise's API explicitly allows it — true even for the *existing* single-job endpoint, since it currently returns no CORS headers.
 
-**Explicit decision (from brainstorming):** client-side fetch, not a scheduled sync job. The CERTA site's Careers section JS calls the new PreCognise endpoint directly in the visitor's browser on page load. This keeps the CERTA site fully static (no build step, no CI job, no git-write credentials for a bot) and shows new postings within seconds of being created on PreCognise. Accepted tradeoff: if `precognise.co` is briefly unreachable, the section falls back to static copy instead of showing listings — acceptable for a small careers section, not worth the added infrastructure of baking a static snapshot into the repo on a cron.
+With PreCognise off-limits, both of those move to the CERTA side:
+
+- **No list endpoint anywhere** → the CERTA repo has to know which job slugs are its own. There's no way around this without asking PreCognise for a list, so it becomes a small hand-maintained list of `{title, slug}` pairs in the CERTA repo, updated when a role is posted or closed on PreCognise. This is a real, accepted manual step — far lighter than today's problem (copy-pasting full listings), but not fully automatic.
+- **No CORS-safe fetch to PreCognise** → rather than add a proxy/serverless function to work around it (which would add a backend to what's currently a pure static site), the user chose the simpler path: **no fetch at all.** Each job title on CERTA links straight out to its existing `precognise.co/j/{slug}` page, which already shows the full description and handles applying. CERTA never needs to know or display the description itself.
+
+Net effect: this is now a **CERTA-repo-only, fully static change** — no API, no fetch, no CORS, no new infrastructure anywhere, and zero changes to PreCognise.
 
 ## Scope
 
-Two repos, one new contract between them:
+`E:\CERTA ADVISORY\index.html` (and `assets/styles.css` for supporting styles) only. No changes to `assets/script.js` (no fetch logic needed), no changes to the PreCognise repo, no changes to the CERTA `portal/` subapp.
 
-- **PreCognise** (`E:\PreCognize\frontend`): one new API route, no schema change, no changes to the existing apply flow.
-- **CERTA& Advisory** (`E:\CERTA ADVISORY\index.html`, `assets/script.js`, `assets/styles.css`): replace the static role-chip content in `#careers` with live-fetched listings; keep the existing "don't see your role — send your CV" block as-is beneath it.
+## Design: static job-link list
 
-Out of scope: any change to how jobs are posted on PreCognise, the `/j/[slug]` apply page/flow, the CERTA `portal/` subapp, or any new build step for the CERTA site.
+**Markup (`index.html#careers`):** replace the current `.careers-roles` chip row with a small static list of real openings, hand-authored directly in the HTML — one row per live PreCognise posting:
 
-## 1. PreCognise: new public list endpoint
-
-**New route:** `src/app/api/public/jobs/route.ts` — `GET` only, no authentication (mirrors the existing no-auth pattern of `GET /api/public/jobs/[slug]`).
-
-**Query:** `?company=<string>` — required. Example: `/api/public/jobs?company=CERTA%26%20Advisory`.
-
-**Filter (Prisma):**
-```
-where: {
-  source: "RECRUITER",
-  isActive: true,
-  visibleToCandidates: true,
-  company: { equals: company, mode: "insensitive" },
-}
-orderBy: { firstSeenAt: "desc" }
+```html
+<div class="careers-jobs" data-reveal>
+  <a class="careers-job" href="https://precognise.co/j/6tt8u7ag" target="_blank" rel="noopener">
+    <span class="careers-job__title">{{ role title }}</span>
+    <span class="careers-job__cta">View &amp; apply on PreCognise ↗</span>
+  </a>
+  <!-- one .careers-job per open role -->
+</div>
 ```
 
-**Response shape:** an array of the same `PublicJobView` shape the single-slug endpoint already builds and returns today (`id`, `slug`, `title`, `company`, `location`, `remote`, `compensation`, `description`, `responsibilities`, `workEnvironment`, `keySkills`, `aspirations`, `postedAt`) — reused as-is so the full job detail is available in the list response and the CERTA site never needs a second round-trip to show a description.
+Each `<a>` points directly at the role's existing `precognise.co/j/{slug}` page (`target="_blank" rel="noopener"`, matching the site's existing external-link convention). The heading/intro paragraph above this block, and the "Don't see your role listed? Send your CV" note below it, stay exactly as they are today.
 
-```json
-{ "jobs": [ { "id": "...", "slug": "6tt8u7ag", "title": "...", "company": "CERTA& Advisory", "location": "...", "remote": false, "compensation": null, "description": "...", "postedAt": "2026-08-20T..." } ] }
-```
+**Styling (`assets/styles.css`):** new `.careers-jobs` / `.careers-job` / `.careers-job__title` / `.careers-job__cta` rules, matching the visual language already established for this section (`credential-chip`, `careers-note`) — no new color tokens or components, per `DESIGN.md`'s established system. Each row reads as a clickable card/link (hover state matching the site's existing link/button hover conventions).
 
-**CORS:** respond with `Access-Control-Allow-Origin: *` on this route. The data is already fully public with no auth gating the existing `/j/[slug]` pages, so there's no confidentiality reason to restrict the origin — restricting it would only add a maintenance point (keeping an allow-list in sync with CERTA's domain/subdomains) for no security benefit.
-
-**Not recorded as a `public_job.viewed` event** (unlike the single-slug endpoint) — this is a list fetch, not a candidate viewing one specific posting; the existing per-job view event still fires normally when someone actually opens `/j/[slug]`.
-
-## 2. CERTA& Advisory: live Careers listings
-
-**Markup (`index.html#careers`):** replace the current `.careers-roles` chip row with a new container, e.g. `<div id="careers-jobs" class="careers-jobs" data-reveal>`, left empty in the HTML — populated by JS. The heading/intro paragraph above it, and the "Don't see your role listed? Send your CV" block below it, stay exactly as they are today.
-
-**Behavior (`assets/script.js`):**
-1. On page load, `fetch('https://precognise.co/api/public/jobs?company=CERTA%26%20Advisory')`.
-2. On success with ≥1 job: render one row per job — job title as a clickable button, plus location/remote badge if present. A short "Apply through PreCognise" note sits above the list once, not per row.
-3. Clicking a title expands that row inline (accordion — one open at a time) to show the full description text, followed by an **"Apply via PreCognise ↗"** link (`target="_blank" rel="noopener"`) pointing at `https://precognise.co/j/{slug}`. No apply form is built on the CERTA site.
-4. On fetch failure, non-OK response, or an empty `jobs` array: leave `#careers-jobs` empty/hidden and show nothing extra — the existing "We hire on a rolling basis, send your CV" block already covers this case, so no separate error message is needed.
-5. No polling/auto-refresh — a fresh page load is the refresh mechanism, matching a marketing site's normal caching expectations.
-
-**Styling (`assets/styles.css`):** new `.careers-jobs`, `.careers-job`, `.careers-job__title`, `.careers-job__body` rules matching the existing card/chip visual language already defined for this section (`credential-chip`, `careers-note`) — no new color tokens or components, per `DESIGN.md`'s established system.
+**Maintenance step (manual, by design):** when the user posts a new CERTA& Advisory role on PreCognise or closes an existing one, they add/remove one `.careers-job` block in `index.html` (title text + `precognise.co/j/{slug}` URL) and push — Vercel auto-deploys on push to `main`, per the site's existing deploy model. No slug list file, no build step, no JSON — the HTML itself is the list, kept as small and inspectable as the rest of the page.
 
 ## Data flow
 
 ```
 Visitor loads certaadvisory.com
-  → browser JS: GET precognise.co/api/public/jobs?company=CERTA%26%20Advisory
-  → PreCognise queries JobPosting (source=RECRUITER, isActive, visibleToCandidates, company match)
-  → JSON array of jobs back to the browser
-  → CERTA renders title list
-  → visitor clicks a title → expands description (already in the payload, no extra request)
-  → visitor clicks "Apply via PreCognise" → opens precognise.co/j/{slug} in a new tab
-  → existing PreCognise apply flow handles the rest (unchanged)
+  → sees static job title list already baked into the page (no fetch)
+  → clicks a title → opens precognise.co/j/{slug} in a new tab
+  → existing PreCognise public job page shows the full description
+  → visitor applies there via PreCognise's existing apply flow (unchanged)
 ```
 
 ## Error handling
 
-Read-only in both directions — the CERTA site never writes anything to PreCognise, and no PII crosses the boundary (job postings are already public marketing content). The only failure mode is "listings don't show," which degrades to the pre-existing static fallback copy. A CORS misconfiguration or PreCognise outage both surface the same way: a console error on CERTA's side and the static fallback rendering, never a broken/empty box.
+None needed beyond what already exists: this is static HTML linking to pages PreCognise already serves reliably today. The only failure mode is a stale entry (a role closed on PreCognise but not yet removed from `index.html`) — visiting it shows PreCognise's own "posting closed" state, which is an acceptable, self-explanatory result rather than something CERTA needs to detect or guard against.
 
 ## Testing
 
-Manual, since both sides are small and this has no automated test suite today:
-
-1. Load the CERTA site and confirm all 3 live postings render, in the right order (newest first).
-2. Click each title, confirm the full description expands correctly and only one row is open at a time.
-3. Click "Apply via PreCognise" on each and confirm it opens the correct `precognise.co/j/{slug}` page.
-4. Temporarily post a job on PreCognise under a different company name and confirm it does **not** appear in the CERTA list (filter correctness).
-5. Temporarily point the fetch URL at an unreachable address and confirm the section falls back to the existing static copy instead of erroring visibly.
+Manual:
+1. Load the CERTA site and confirm all 3 current postings render as rows with correct titles.
+2. Click each row and confirm it opens the correct `precognise.co/j/{slug}` page in a new tab.
+3. Confirm the existing "Don't see your role listed? Send your CV" block still renders correctly beneath the new list.
+4. Confirm the section's responsive layout (mobile stacking) matches the rest of the page's card patterns.
