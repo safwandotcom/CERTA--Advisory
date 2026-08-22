@@ -490,6 +490,7 @@ html.js [data-reveal].is-visible { opacity: 1; transform: none; }
   transition: transform 200ms var(--ease-standard);
 }
 .world-clock__hand--minute { stroke: var(--signal-coral); stroke-width: 3; }
+.world-clock__hand--second { stroke: var(--signal-coral); stroke-width: 1.25; opacity: 0.8; }
 .world-clock__pivot { fill: var(--ink); }
 .world-clock__info { display: flex; flex-direction: column; gap: 2px; }
 .world-clock__city { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.04em; color: var(--ink-muted); }

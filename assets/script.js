@@ -206,7 +206,7 @@ if (!reducedMotion && motionEls.length) {
   startLoop();
 }
 
-// ---------- World clock (UK / BD live time) ----------
+// ---------- World clock (London / New York / Toronto / Paris / Dhaka live time) ----------
 const worldClockCards = document.querySelectorAll('.world-clock__card');
 if (worldClockCards.length) {
   const clockFormatters = new Map();
@@ -242,8 +242,10 @@ if (worldClockCards.length) {
 
       const hourHand = card.querySelector('.world-clock__hand--hour');
       const minuteHand = card.querySelector('.world-clock__hand--minute');
+      const secondHand = card.querySelector('.world-clock__hand--second');
       hourHand.style.transform = `rotate(${((hour % 12) + minute / 60) * 30}deg)`;
       minuteHand.style.transform = `rotate(${(minute + second / 60) * 6}deg)`;
+      secondHand.style.transform = `rotate(${second * 6}deg)`;
 
       card.querySelector('[data-time]').textContent =
         `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
