@@ -914,6 +914,19 @@ html.js [data-reveal].is-visible { opacity: 1; transform: none; }
 .cta-band h2 { color: var(--white); font-size: clamp(1.75rem, 2.6vw, 2.5rem); }
 .cta-band p { color: rgba(255,255,255,0.75); margin-top: var(--space-sm); max-width: 50ch; }
 .cta-band__actions { display: flex; gap: var(--space-sm); flex-wrap: wrap; justify-content: flex-start; }
+.cta-band__contact { flex-basis: 100%; display: flex; align-items: center; gap: var(--space-md); flex-wrap: wrap; margin-top: var(--space-xs); }
+.cta-band__phone, .cta-band__whatsapp {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(255,255,255,0.85);
+  text-decoration: none;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  transition: color 200ms var(--ease-standard);
+}
+.cta-band__phone:hover, .cta-band__whatsapp:hover { color: var(--white); }
+.cta-band__phone svg, .cta-band__whatsapp svg { width: 18px; height: 18px; flex: none; }
 .cta-mark { width: 32px; height: 32px; margin-top: var(--space-sm); }
 .cta-mark .certa-mark__ring {
   stroke-dasharray: 1;
