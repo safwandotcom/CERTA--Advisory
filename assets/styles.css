@@ -885,10 +885,9 @@ html.js [data-reveal].is-visible { opacity: 1; transform: none; }
 .careers-jobs { display: flex; flex-direction: column; margin-top: var(--space-md); border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; }
 .careers-job {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-sm);
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
   padding: var(--space-sm);
   color: var(--ink);
   text-decoration: none;
@@ -900,11 +899,9 @@ html.js [data-reveal].is-visible { opacity: 1; transform: none; }
 .careers-job:focus-visible { outline: 2px solid var(--certa-green); outline-offset: -2px; }
 .careers-job__title { font-weight: 600; }
 .careers-job__cta {
-  flex: none;
   font-size: 0.8125rem;
   font-weight: 600;
   color: var(--certa-green-deep);
-  white-space: nowrap;
 }
 .careers-note {
   background: var(--surface-tint);
