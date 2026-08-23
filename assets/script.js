@@ -312,15 +312,17 @@ if (!reducedMotion && 'IntersectionObserver' in window && countEls.length) {
 // ---------- Hero CTA cursor-proximity pull ----------
 // Mouse-only enhancement (no listener attached at all on touch/reduced-motion), and capped
 // to a few pixels so it reads as engineered precision, not a playful "magnetic button."
-const magneticCta = document.querySelector('.magnetic-cta');
+// Supports any number of .magnetic-cta elements on a page (each tracked independently),
+// coalesced into a single mousemove listener + rAF cadence rather than one per element.
+const magneticCtas = Array.from(document.querySelectorAll('.magnetic-cta'));
 const canHover = window.matchMedia('(hover: hover)').matches;
-if (magneticCta && canHover && !reducedMotion) {
-  const radius = 60; // px — activation radius around the button's center
+if (magneticCtas.length && canHover && !reducedMotion) {
+  const radius = 60; // px — activation radius around each button's center
   const maxPull = 8; // px — cap on the visual pull
 
   // Coalesce work into the rAF cadence: mousemove only records the latest
-  // pointer position (cheap); the actual getBoundingClientRect() measurement
-  // and style write happen at most once per frame, avoiding a forced layout
+  // pointer position (cheap); the actual getBoundingClientRect() measurements
+  // and style writes happen at most once per frame, avoiding a forced layout
   // read on every one of the (potentially hundreds of) mousemove events.
   let lastX = 0;
   let lastY = 0;
@@ -328,19 +330,21 @@ if (magneticCta && canHover && !reducedMotion) {
 
   function applyMagneticPull() {
     magneticPending = false;
-    const rect = magneticCta.getBoundingClientRect();
-    const cx = rect.left + rect.width / 2;
-    const cy = rect.top + rect.height / 2;
-    const dx = lastX - cx;
-    const dy = lastY - cy;
-    const dist = Math.hypot(dx, dy);
-    if (dist < radius) {
-      const pull = (1 - dist / radius) * maxPull;
-      const angle = Math.atan2(dy, dx);
-      magneticCta.style.transform = `translate(${(Math.cos(angle) * pull).toFixed(1)}px, ${(Math.sin(angle) * pull).toFixed(1)}px)`;
-    } else {
-      magneticCta.style.transform = '';
-    }
+    magneticCtas.forEach((el) => {
+      const rect = el.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      const dx = lastX - cx;
+      const dy = lastY - cy;
+      const dist = Math.hypot(dx, dy);
+      if (dist < radius) {
+        const pull = (1 - dist / radius) * maxPull;
+        const angle = Math.atan2(dy, dx);
+        el.style.transform = `translate(${(Math.cos(angle) * pull).toFixed(1)}px, ${(Math.sin(angle) * pull).toFixed(1)}px)`;
+      } else {
+        el.style.transform = '';
+      }
+    });
   }
 
   function handleMagneticMove(e) {

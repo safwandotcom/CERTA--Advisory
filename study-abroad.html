@@ -82,11 +82,46 @@
 <main id="top">
 
   <section class="section sa-hero">
+    <div class="sa-hero__decor" aria-hidden="true">
+      <span class="sa-hero__glow"></span>
+      <span class="sa-hero__ring sa-hero__ring--one" data-parallax data-speed="0.08" data-float data-float-amp="14" data-float-period="8"></span>
+      <span class="sa-hero__ring sa-hero__ring--two" data-parallax data-speed="-0.1" data-float data-float-amp="10" data-float-period="6.5" data-float-phase="1.5"></span>
+      <svg class="sa-hero__icon sa-hero__icon--plane" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-parallax data-speed="0.14" data-float data-float-amp="16" data-float-period="5.5" data-float-rotate="8"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg>
+      <svg class="sa-hero__icon sa-hero__icon--cap" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-parallax data-speed="-0.12" data-float data-float-amp="12" data-float-period="7" data-float-phase="2"><path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/></svg>
+      <svg class="sa-hero__icon sa-hero__icon--shield" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-parallax data-speed="0.1" data-float data-float-amp="10" data-float-period="6" data-float-phase="0.7"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
+    </div>
     <div class="container">
       <div class="sa-hero__inner" data-reveal>
         <h1>Study in Malaysia.</h1>
         <p class="lede">A second service from CERTA&amp; Advisory: university placement, EMGS visa processing, and on-the-ground support for students heading to Malaysia.</p>
-        <a class="btn btn-coral" href="https://wa.me/8801973800538" target="_blank" rel="noopener">Talk to a counsellor</a>
+        <span class="magnetic-cta"><a class="btn btn-coral" href="https://wa.me/8801973800538" target="_blank" rel="noopener">Talk to a counsellor</a></span>
+      </div>
+    </div>
+  </section>
+
+  <section class="section stats-band" id="sa-stats" aria-label="Study Abroad by the numbers">
+    <div class="container">
+      <div class="stats-band__row" data-reveal>
+        <div class="stat-item">
+          <span class="stat-item__value" data-count-to="24" data-count-suffix="+">24+</span>
+          <span class="stat-item__label">partner universities</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-item__value" data-count-to="8">8</span>
+          <span class="stat-item__label">services, shortlist to touchdown</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-item__value" data-count-to="1">1</span>
+          <span class="stat-item__label">EMGS-registered visa process</span>
+        </div>
+        <div class="stat-item stat-item--final">
+          <span class="stat-item__value">Free</span>
+          <span class="stat-item__label">to you: we're paid by partner universities</span>
+          <svg class="stat-item__flourish" viewBox="0 0 100 100" aria-hidden="true">
+            <path class="certa-mark__ring" pathLength="1" d="M 81.93 66.62 A 36 36 0 1 1 81.93 33.38" fill="none" stroke="var(--certa-green)" stroke-width="12" stroke-linecap="round"/>
+            <rect class="certa-mark__dash" x="80" y="44" width="17" height="12" rx="6" fill="var(--signal-coral)"/>
+          </svg>
+        </div>
       </div>
     </div>
   </section>
@@ -100,49 +135,49 @@
 
       <div class="sa-services-grid">
         <div class="sa-service-card" data-reveal style="--reveal-delay:0">
-          <span class="sa-service-card__num">01</span>
+          <div class="sa-service-card__icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg></div>
           <h3>Expert Guidance</h3>
           <p>University and course selection, plus one-to-one admission counselling through every decision.</p>
         </div>
 
         <div class="sa-service-card" data-reveal style="--reveal-delay:40">
-          <span class="sa-service-card__num">02</span>
+          <div class="sa-service-card__icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg></div>
           <h3>Test Prep Support</h3>
           <p>IELTS, PTE and SAT preparation guidance to meet your target university's entry requirements.</p>
         </div>
 
         <div class="sa-service-card" data-reveal style="--reveal-delay:80">
-          <span class="sa-service-card__num">03</span>
+          <div class="sa-service-card__icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15.477 12.89 1.515 8.526a.5.5 0 0 1-.81.47l-3.58-2.687a1 1 0 0 0-1.197 0l-3.586 2.686a.5.5 0 0 1-.81-.469l1.514-8.526"/><circle cx="12" cy="8" r="6"/></svg></div>
           <h3>Scholarship Support</h3>
           <p>Matching you against university scholarships and financial aid you actually qualify for.</p>
         </div>
 
         <div class="sa-service-card" data-reveal style="--reveal-delay:120">
-          <span class="sa-service-card__num">04</span>
+          <div class="sa-service-card__icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg></div>
           <h3>Visa Support</h3>
           <p>Preparing and submitting the paperwork your application and EMGS visa require.</p>
         </div>
 
         <div class="sa-service-card" data-reveal style="--reveal-delay:160">
-          <span class="sa-service-card__num">05</span>
+          <div class="sa-service-card__icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg></div>
           <h3>Flight &amp; Accommodation Support</h3>
           <p>Booking your flight and arranging on-campus or off-campus housing before you arrive.</p>
         </div>
 
         <div class="sa-service-card" data-reveal style="--reveal-delay:200">
-          <span class="sa-service-card__num">06</span>
+          <div class="sa-service-card__icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 4.24 4.24"/><path d="m14.83 9.17 4.24-4.24"/><path d="m14.83 14.83 4.24 4.24"/><path d="m9.17 14.83-4.24 4.24"/><circle cx="12" cy="12" r="4"/></svg></div>
           <h3>Post-Admission Support</h3>
           <p>Meeting you at the airport and staying available once you've settled in Malaysia.</p>
         </div>
 
         <div class="sa-service-card" data-reveal style="--reveal-delay:240">
-          <span class="sa-service-card__num">07</span>
+          <div class="sa-service-card__icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg></div>
           <h3>Insurance Guidance</h3>
           <p>Arranging the health and travel insurance EMGS requires as part of your student visa.</p>
         </div>
 
         <div class="sa-service-card" data-reveal style="--reveal-delay:280">
-          <span class="sa-service-card__num">08</span>
+          <div class="sa-service-card__icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h14a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v4"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="m3 15 2 2 4-4"/></svg></div>
           <h3>Document Attestation &amp; Legalisation</h3>
           <p>Notarising and legalising transcripts and certificates for visa and university submission.</p>
         </div>
@@ -154,6 +189,7 @@
     <div class="container container--narrow">
       <div class="sa-emgs__inner" data-reveal>
         <img class="sa-emgs__logo" src="assets/study-abroad/logos/emgs.jpg" alt="EMGS (Education Malaysia Global Services) logo" width="225" height="196" loading="lazy">
+        <span class="sa-emgs__badge" data-float data-float-amp="6" data-float-period="5"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>EMGS Registered</span>
         <h2>Your visa, handled by people who do this daily.</h2>
         <p class="prose">EMGS (Education Malaysia Global Services) is the Malaysian government body responsible for processing international student visas and passes. We handle your EMGS visa and pass processing on your behalf, so the paperwork isn't something you have to navigate alone.</p>
       </div>
@@ -391,7 +427,7 @@
           </svg>
         </div>
         <div class="cta-band__actions">
-          <a class="btn btn-coral" href="https://wa.me/8801973800538" target="_blank" rel="noopener">Talk to a counsellor</a>
+          <span class="magnetic-cta"><a class="btn btn-coral" href="https://wa.me/8801973800538" target="_blank" rel="noopener">Talk to a counsellor</a></span>
           <a class="btn btn-ghost-onlight" href="index.html#contact">Back to CERTA&amp; Advisory</a>
         </div>
       </div>
