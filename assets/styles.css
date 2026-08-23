@@ -1347,8 +1347,8 @@ html.js [data-reveal].is-visible { opacity: 1; transform: none; }
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  background: var(--certa-green-tint);
-  color: var(--certa-green-deep);
+  background: rgba(237, 28, 37, 0.12);
+  color: var(--signal-coral-deep);
   font-weight: 600;
   font-size: 0.6875rem;
   padding: 4px 10px;
@@ -1357,7 +1357,7 @@ html.js [data-reveal].is-visible { opacity: 1; transform: none; }
 }
 .sa-uni-card__stat svg { width: 12px; height: 12px; stroke: currentColor; flex: none; }
 .sa-uni-card:hover .sa-uni-card__stat {
-  background: var(--certa-green-deep);
+  background: var(--signal-coral-deep);
   color: var(--white);
 }
 .sa-uni-card__stat:hover { transform: translateY(-2px); }
