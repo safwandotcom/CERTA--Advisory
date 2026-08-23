@@ -1063,29 +1063,28 @@ html.js [data-reveal].is-visible { opacity: 1; transform: none; }
 
 .sa-rail {
   display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: var(--space-md);
-  overflow-x: auto;
   padding: var(--space-md) 4px var(--space-lg);
   margin-bottom: var(--space-lg);
-  scroll-snap-type: x proximity;
-  -webkit-overflow-scrolling: touch;
 }
-.sa-rail__avatar { flex: none; display: flex; flex-direction: column; align-items: center; gap: 8px; text-decoration: none; color: var(--ink); scroll-snap-align: start; }
+.sa-rail__avatar { flex: none; display: flex; flex-direction: column; align-items: center; gap: 8px; text-decoration: none; color: var(--ink); }
 .sa-rail__mark {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 84px;
   height: 84px;
-  border-radius: 50%;
+  min-width: 84px;
+  padding: 0 14px;
+  border-radius: var(--radius-md);
   border: 2px solid var(--border);
   background: var(--white);
-  padding: 0;
   transition: border-color 200ms var(--ease-standard);
 }
 .sa-rail__avatar:hover .sa-rail__mark,
 .sa-rail__avatar:focus-visible .sa-rail__mark { border-color: var(--certa-green); }
-.sa-rail__name { font-size: 0.75rem; font-weight: 600; max-width: 84px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sa-rail__name { font-size: 0.75rem; font-weight: 600; max-width: 110px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .sa-uni-group { margin-top: var(--space-xl); }
 .sa-uni-group:first-of-type { margin-top: 0; }
@@ -1099,12 +1098,12 @@ html.js [data-reveal].is-visible { opacity: 1; transform: none; }
   scroll-margin-top: 100px;
   transition: box-shadow 300ms var(--ease-standard), border-color 300ms var(--ease-standard);
 }
-.sa-uni-card__logo { margin-bottom: var(--space-sm); }
+.sa-uni-card__logo { display: block; margin-bottom: var(--space-sm); }
 .sa-uni-card h4 { font-size: 1.0625rem; font-weight: 600; }
 .sa-uni-card__location { font-size: 0.8125rem; color: var(--ink-muted); margin-top: 2px; margin-bottom: var(--space-sm); }
 .sa-uni-card p:last-child { color: var(--ink-muted); font-size: 0.9375rem; }
 .sa-uni-card--highlight { border-color: var(--certa-green); box-shadow: 0 0 0 3px var(--certa-green-tint); }
-.sa-rail__mark img { max-width: 64px; max-height: 50px; width: auto; height: auto; object-fit: contain; border-radius: 50%; }
+.sa-rail__mark img { height: 56px; width: auto; max-width: 180px; object-fit: contain; }
 img.sa-uni-card__logo, img.sa-emgs__logo { object-fit: contain; }
-img.sa-uni-card__logo { width: 72px; height: 72px; }
+img.sa-uni-card__logo { height: 72px; width: auto; max-width: 100%; }
 img.sa-emgs__logo { max-width: 260px; max-height: 110px; }
