@@ -1322,7 +1322,19 @@ html.js [data-reveal].is-visible { opacity: 1; transform: none; }
 }
 .sa-uni-card__logo { display: block; margin: 0 auto var(--space-sm); }
 .sa-uni-card h4 { font-size: 1.0625rem; font-weight: 600; }
-.sa-uni-card__location { font-size: 0.8125rem; color: var(--ink-muted); margin-top: 2px; margin-bottom: var(--space-sm); }
+.sa-uni-card__location { font-size: 0.8125rem; color: var(--ink-muted); margin-top: 2px; }
+.sa-uni-card__stats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px 8px;
+  font-size: 0.75rem;
+  color: var(--ink-muted);
+  margin-top: 6px;
+  margin-bottom: var(--space-sm);
+}
+.sa-uni-card__stats strong { color: var(--ink); font-weight: 600; }
+.sa-uni-group__note { font-size: 0.8125rem; color: var(--ink-muted); margin-top: -8px; margin-bottom: var(--space-md); }
 .sa-uni-card p:last-child { color: var(--ink-muted); font-size: 0.9375rem; }
 .sa-uni-card--highlight { border-color: var(--certa-green); animation: sa-uni-pulse 1.4s var(--ease-standard); }
 @keyframes sa-uni-pulse {
