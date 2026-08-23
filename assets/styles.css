@@ -1258,6 +1258,13 @@ html.js [data-reveal].is-visible { opacity: 1; transform: none; }
   .sa-service-card:hover .sa-service-card__icon { transform: none; }
 }
 
+.sa-emgs__badges {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: var(--space-md);
+}
 .sa-emgs__badge {
   display: inline-flex;
   align-items: center;
@@ -1268,7 +1275,6 @@ html.js [data-reveal].is-visible { opacity: 1; transform: none; }
   font-size: 0.8125rem;
   padding: 8px 16px;
   border-radius: var(--radius-pill);
-  margin-bottom: var(--space-md);
 }
 .sa-emgs__badge svg { width: 16px; height: 16px; stroke: var(--certa-green-deep); flex: none; }
 .sa-emgs__inner { text-align: center; max-width: 720px; margin: 0 auto; }
@@ -1318,23 +1324,49 @@ html.js [data-reveal].is-visible { opacity: 1; transform: none; }
   padding: var(--space-md);
   text-align: center;
   scroll-margin-top: 100px;
-  transition: box-shadow 300ms var(--ease-standard), border-color 300ms var(--ease-standard);
+  transition: transform 250ms var(--ease-standard), box-shadow 300ms var(--ease-standard), border-color 300ms var(--ease-standard);
 }
-.sa-uni-card__logo { display: block; margin: 0 auto var(--space-sm); }
+.sa-uni-card:hover {
+  transform: translateY(-6px);
+  border-color: var(--certa-green);
+  box-shadow: var(--shadow-hover);
+}
+.sa-uni-card__logo { display: block; margin: 0 auto var(--space-sm); transition: transform 250ms var(--ease-standard); }
+.sa-uni-card:hover .sa-uni-card__logo { transform: scale(1.06); }
 .sa-uni-card h4 { font-size: 1.0625rem; font-weight: 600; }
 .sa-uni-card__location { font-size: 0.8125rem; color: var(--ink-muted); margin-top: 2px; }
 .sa-uni-card__stats {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 4px 8px;
-  font-size: 0.75rem;
-  color: var(--ink-muted);
-  margin-top: 6px;
+  gap: 6px;
+  margin-top: 8px;
   margin-bottom: var(--space-sm);
 }
-.sa-uni-card__stats strong { color: var(--ink); font-weight: 600; }
+.sa-uni-card__stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--certa-green-tint);
+  color: var(--certa-green-deep);
+  font-weight: 600;
+  font-size: 0.6875rem;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  transition: background 200ms var(--ease-standard), color 200ms var(--ease-standard), transform 200ms var(--ease-standard);
+}
+.sa-uni-card__stat svg { width: 12px; height: 12px; stroke: currentColor; flex: none; }
+.sa-uni-card:hover .sa-uni-card__stat {
+  background: var(--certa-green-deep);
+  color: var(--white);
+}
+.sa-uni-card__stat:hover { transform: translateY(-2px); }
 .sa-uni-group__note { font-size: 0.8125rem; color: var(--ink-muted); margin-top: -8px; margin-bottom: var(--space-md); }
+@media (prefers-reduced-motion: reduce) {
+  .sa-uni-card:hover,
+  .sa-uni-card:hover .sa-uni-card__logo,
+  .sa-uni-card__stat:hover { transform: none; }
+}
 .sa-uni-card p:last-child { color: var(--ink-muted); font-size: 0.9375rem; }
 .sa-uni-card--highlight { border-color: var(--certa-green); animation: sa-uni-pulse 1.4s var(--ease-standard); }
 @keyframes sa-uni-pulse {
