@@ -1075,8 +1075,8 @@ html.js [data-reveal].is-visible { opacity: 1; transform: none; }
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 56px;
-  height: 56px;
+  width: 84px;
+  height: 84px;
   border-radius: 50%;
   border: 2px solid var(--border);
   background: var(--white);
@@ -1104,7 +1104,7 @@ html.js [data-reveal].is-visible { opacity: 1; transform: none; }
 .sa-uni-card__location { font-size: 0.8125rem; color: var(--ink-muted); margin-top: 2px; margin-bottom: var(--space-sm); }
 .sa-uni-card p:last-child { color: var(--ink-muted); font-size: 0.9375rem; }
 .sa-uni-card--highlight { border-color: var(--certa-green); box-shadow: 0 0 0 3px var(--certa-green-tint); }
-.sa-rail__mark img { max-width: 44px; max-height: 34px; width: auto; height: auto; object-fit: contain; border-radius: 50%; }
+.sa-rail__mark img { max-width: 64px; max-height: 50px; width: auto; height: auto; object-fit: contain; border-radius: 50%; }
 img.sa-uni-card__logo, img.sa-emgs__logo { object-fit: contain; }
-img.sa-uni-card__logo { width: 48px; height: 48px; }
-img.sa-emgs__logo { max-width: 160px; max-height: 48px; }
+img.sa-uni-card__logo { width: 72px; height: 72px; }
+img.sa-emgs__logo { max-width: 260px; max-height: 110px; }
