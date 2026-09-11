@@ -1,7 +1,6 @@
 'use client'
 
-import { Suspense } from 'react'
-import { useActionState } from 'react'
+import { Suspense, useActionState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -22,7 +21,7 @@ function ResetSuccessNotice() {
   )
 }
 
-function LoginContent() {
+export default function LoginPage() {
   const [state, formAction, pending] = useActionState(loginAction, initialState)
 
   return (
@@ -101,8 +100,4 @@ function LoginContent() {
       </div>
     </main>
   )
-}
-
-export default function LoginPage() {
-  return <LoginContent />
 }

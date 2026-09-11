@@ -27,10 +27,15 @@ export async function requestPasswordRecoveryAction(
   try {
     const admin = createAdminClient()
 
+    // Escape ILIKE/PostgREST wildcards (%, _, *) in the user's input so this
+    // stays a literal case-insensitive match, not a wildcard pattern that
+    // could match an unrelated real account.
+    const escapedEmployeeId = employeeId.replace(/[%_*]/g, '\\$&')
+
     const { data: employee } = await admin
       .from('employees')
       .select('id, employee_id, personal_email, last_recovery_requested_at')
-      .ilike('employee_id', employeeId)
+      .ilike('employee_id', escapedEmployeeId)
       .eq('status', 'active')
       .maybeSingle()
 
@@ -67,16 +72,24 @@ export async function requestPasswordRecoveryAction(
 
     const resetLink = `${SITE_URL}/auth/confirm?token_hash=${linkData.properties.hashed_token}&type=recovery&next=/reset-password`
 
+    // Stamp the throttle right after a successful generateLink call (the
+    // sensitive, rate-limit-bypassing operation) rather than after the email
+    // send -- otherwise an unconfigured/failing email provider means the
+    // throttle never engages and generateLink can be called without limit.
+    const { error: throttleError } = await admin
+      .from('employees')
+      .update({ last_recovery_requested_at: new Date().toISOString() })
+      .eq('id', employee.id)
+
+    if (throttleError) {
+      console.error('Failed to stamp last_recovery_requested_at:', throttleError.message)
+    }
+
     const { error: emailError } = await sendRecoveryEmail(recoveryEmail, resetLink)
     if (emailError) {
       console.error('sendRecoveryEmail failed:', emailError)
       return { success: GENERIC_MESSAGE }
     }
-
-    await admin
-      .from('employees')
-      .update({ last_recovery_requested_at: new Date().toISOString() })
-      .eq('id', employee.id)
   } catch (err) {
     console.error('requestPasswordRecoveryAction failed:', err)
   }

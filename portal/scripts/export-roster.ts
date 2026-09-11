@@ -38,7 +38,7 @@ async function main() {
   const { data: employees, error } = await admin
     .from('employees')
     .select(
-      'id, employee_id, name, role, status, contact_info, personal_email, position, department_id, join_date, created_at, auth_user_id, departments(name)'
+      'id, employee_id, name, role, status, contact_info, personal_email, position, join_date, created_at, auth_user_id, departments(name)'
     )
     .order('role', { ascending: true })
     .order('employee_id', { ascending: true })
@@ -53,7 +53,13 @@ async function main() {
   }
   const emailByAuthId = new Map((usersList?.users ?? []).map((u) => [u.id, u.email ?? '']))
 
-  const { data: onboardingRows } = await admin.from('employee_onboarding').select('employee_id, personal_email')
+  const { data: onboardingRows, error: onboardingError } = await admin
+    .from('employee_onboarding')
+    .select('employee_id, personal_email')
+  if (onboardingError) {
+    throw new Error(`Failed to fetch onboarding records: ${onboardingError.message}`)
+  }
+
   const onboardingEmailByEmployeeRowId = new Map(
     (onboardingRows ?? []).map((o) => [o.employee_id, o.personal_email as string | null])
   )

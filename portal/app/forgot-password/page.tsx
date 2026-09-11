@@ -1,13 +1,25 @@
 'use client'
 
-import { useActionState } from 'react'
+import { Suspense, useActionState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowLeft } from 'lucide-react'
 import { requestPasswordRecoveryAction, type ForgotPasswordState } from './actions'
-import { input, label as labelClass, buttonPrimary, successText } from '@/lib/ui'
+import { input, label as labelClass, buttonPrimary, successText, errorText } from '@/lib/ui'
 
 const initialState: ForgotPasswordState = {}
+
+function ExpiredLinkNotice() {
+  const searchParams = useSearchParams()
+  const expired = searchParams.get('error') === 'expired'
+
+  if (!expired) return null
+
+  return (
+    <p className={`${errorText} mt-4`}>That link expired — request a new one below.</p>
+  )
+}
 
 export default function ForgotPasswordPage() {
   const [state, formAction, pending] = useActionState(requestPasswordRecoveryAction, initialState)
@@ -31,8 +43,12 @@ export default function ForgotPasswordPage() {
           Enter your Employee ID and we&apos;ll email a reset link to the recovery address on file for it.
         </p>
 
+        <Suspense fallback={null}>
+          <ExpiredLinkNotice />
+        </Suspense>
+
         {state.success ? (
-          <p className={`${successText} mt-8`}>{state.success}</p>
+          <p role="status" className={`${successText} mt-8`}>{state.success}</p>
         ) : (
           <form action={formAction} className="mt-8 flex flex-col gap-5">
             <div>
