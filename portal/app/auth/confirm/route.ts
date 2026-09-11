@@ -7,7 +7,7 @@ import { createClient } from '@/lib/supabase/server'
 // crafting their own /auth/confirm?...&next=https://evil.example link, so
 // an absolute/protocol-relative value must never be honored (open redirect).
 function safeNextPath(next: string | null): string {
-  if (!next || !next.startsWith('/') || next.startsWith('//')) {
+  if (!next || !next.startsWith('/') || next.startsWith('//') || next.includes('\\')) {
     return '/reset-password'
   }
   return next
