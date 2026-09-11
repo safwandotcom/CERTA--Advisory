@@ -38,6 +38,9 @@ dev-server-err.log
 # env files (can opt-in for committing if needed)
 .env*.local
 
+# local-only employee roster export (real names/roles/contact info — never commit)
+/internal/
+
 # vercel
 .vercel
 
