@@ -1,16 +1,20 @@
 'use client'
 
+import { Suspense } from 'react'
 import { useActionState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { AlertCircle } from 'lucide-react'
 import { loginAction, type LoginState } from './actions'
-import { input, label as labelClass, buttonPrimary, errorText } from '@/lib/ui'
+import { input, label as labelClass, buttonPrimary, errorText, successText } from '@/lib/ui'
 
 const initialState: LoginState = {}
 
-export default function LoginPage() {
+function LoginContent() {
   const [state, formAction, pending] = useActionState(loginAction, initialState)
+  const searchParams = useSearchParams()
+  const justReset = searchParams.get('reset') === 'success'
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-surface-tint px-4 py-12">
@@ -30,6 +34,10 @@ export default function LoginPage() {
         <p className="mt-1.5 text-[0.9375rem] text-ink-muted">
           Use the Employee ID and password issued to you by your administrator.
         </p>
+
+        {justReset && (
+          <p className={`${successText} mt-4`}>Password updated — sign in with your new password.</p>
+        )}
 
         <form action={formAction} className="mt-8 flex flex-col gap-5">
           <div>
@@ -83,5 +91,13 @@ export default function LoginPage() {
         </form>
       </div>
     </main>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center bg-surface-tint">Loading…</div>}>
+      <LoginContent />
+    </Suspense>
   )
 }
