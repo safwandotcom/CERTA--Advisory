@@ -40,6 +40,24 @@ It reads `SEED_ADMIN_EMPLOYEE_ID`, `SEED_ADMIN_PASSWORD`, and optionally
 `SEED_ADMIN_NAME` (defaults to "Admin") from `.env.local`. Every other account
 is created from the admin UI.
 
+## Self-service password reset
+
+Employees can reset their own password from `/forgot-password` without
+admin help, provided a recovery email is on file for their account (see
+`docs/superpowers/specs/2026-09-12-portal-forgot-password-design.md`).
+
+This requires a one-time Resend setup, done outside this repo:
+
+1. In the [Resend dashboard](https://resend.com/domains), add and verify
+   the `certaadvisory.com` sending domain (a few DNS records).
+2. Create an API key and set `RESEND_API_KEY` in Vercel's project env vars.
+3. Set `EMAIL_FROM` (e.g. `CERTA& Portal <no-reply@certaadvisory.com>`).
+
+Without this, `/forgot-password` still responds normally (the generic
+message never reveals delivery failures) but no email actually goes out —
+check server logs for `sendRecoveryEmail failed` if reports come in that
+reset emails aren't arriving.
+
 ## Tests
 
 ```bash
