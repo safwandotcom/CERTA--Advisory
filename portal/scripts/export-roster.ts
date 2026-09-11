@@ -10,13 +10,16 @@
 import { writeFileSync, mkdirSync } from 'node:fs'
 import path from 'node:path'
 import { createAdminClient } from '../lib/supabase/admin'
+import { resolveRecoveryEmail } from '../lib/passwordRecovery'
 
 type Row = {
+  id: string
   employee_id: string
   name: string
   role: string
   status: string
   contact_info: string | null
+  personal_email: string | null
   position: string | null
   join_date: string | null
   created_at: string
@@ -35,7 +38,7 @@ async function main() {
   const { data: employees, error } = await admin
     .from('employees')
     .select(
-      'employee_id, name, role, status, contact_info, position, join_date, created_at, auth_user_id, departments(name)'
+      'id, employee_id, name, role, status, contact_info, personal_email, position, department_id, join_date, created_at, auth_user_id, departments(name)'
     )
     .order('role', { ascending: true })
     .order('employee_id', { ascending: true })
@@ -50,6 +53,11 @@ async function main() {
   }
   const emailByAuthId = new Map((usersList?.users ?? []).map((u) => [u.id, u.email ?? '']))
 
+  const { data: onboardingRows } = await admin.from('employee_onboarding').select('employee_id, personal_email')
+  const onboardingEmailByEmployeeRowId = new Map(
+    (onboardingRows ?? []).map((o) => [o.employee_id, o.personal_email as string | null])
+  )
+
   const rows = (employees as Row[]).map((e) => ({
     employeeId: e.employee_id,
     name: e.name,
@@ -58,6 +66,11 @@ async function main() {
     authEmail: emailByAuthId.get(e.auth_user_id) ?? '',
     department: departmentName(e.departments),
     contactInfo: e.contact_info ?? '',
+    recoveryEmail:
+      resolveRecoveryEmail({
+        employeePersonalEmail: e.personal_email,
+        onboardingPersonalEmail: onboardingEmailByEmployeeRowId.get(e.id) ?? null,
+      }) ?? '',
     position: e.position ?? '',
     joinDate: e.join_date ?? '',
     createdAt: e.created_at,
@@ -70,6 +83,7 @@ async function main() {
     'Status',
     'Department',
     'Contact info',
+    'Recovery email',
     'Position',
     'Join date',
     'Auth email',
@@ -85,7 +99,7 @@ async function main() {
     `| ${header.join(' | ')} |`,
     `| ${header.map(() => '---').join(' | ')} |`,
     ...rows.map((r) =>
-      `| ${r.employeeId} | ${r.name} | ${r.role} | ${r.status} | ${r.department} | ${r.contactInfo} | ${r.position} | ${r.joinDate} | ${r.authEmail} | ${r.createdAt} |`
+      `| ${r.employeeId} | ${r.name} | ${r.role} | ${r.status} | ${r.department} | ${r.contactInfo} | ${r.recoveryEmail} | ${r.position} | ${r.joinDate} | ${r.authEmail} | ${r.createdAt} |`
     ),
     '',
     `Total: ${rows.length} accounts`,
