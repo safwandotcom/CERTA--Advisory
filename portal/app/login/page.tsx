@@ -11,10 +11,19 @@ import { input, label as labelClass, buttonPrimary, errorText, successText } fro
 
 const initialState: LoginState = {}
 
-function LoginContent() {
-  const [state, formAction, pending] = useActionState(loginAction, initialState)
+function ResetSuccessNotice() {
   const searchParams = useSearchParams()
   const justReset = searchParams.get('reset') === 'success'
+
+  if (!justReset) return null
+
+  return (
+    <p className={`${successText} mt-4`}>Password updated — sign in with your new password.</p>
+  )
+}
+
+function LoginContent() {
+  const [state, formAction, pending] = useActionState(loginAction, initialState)
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-surface-tint px-4 py-12">
@@ -35,9 +44,9 @@ function LoginContent() {
           Use the Employee ID and password issued to you by your administrator.
         </p>
 
-        {justReset && (
-          <p className={`${successText} mt-4`}>Password updated — sign in with your new password.</p>
-        )}
+        <Suspense fallback={null}>
+          <ResetSuccessNotice />
+        </Suspense>
 
         <form action={formAction} className="mt-8 flex flex-col gap-5">
           <div>
@@ -95,9 +104,5 @@ function LoginContent() {
 }
 
 export default function LoginPage() {
-  return (
-    <Suspense fallback={<div className="flex min-h-screen items-center justify-center bg-surface-tint">Loading…</div>}>
-      <LoginContent />
-    </Suspense>
-  )
+  return <LoginContent />
 }
