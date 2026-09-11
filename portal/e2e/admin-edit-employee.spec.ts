@@ -25,11 +25,13 @@ test('admin edits an employee and resets their password', async ({ page }) => {
   await page.getByText(employeeId).click()
 
   await page.getByLabel('Position').fill('Senior Accountant')
+  await page.getByLabel('Personal email (for password recovery)').fill('edit-target@example.com')
   // Exact match: Task 7 (Attendance & Leave phase) added a second "Save
   // salary" button to this same page, making the old /save/i regex
   // ambiguous.
   await page.getByRole('button', { name: 'Save changes' }).click()
   await expect(page.getByLabel('Position')).toHaveValue('Senior Accountant')
+  await expect(page.getByLabel('Personal email (for password recovery)')).toHaveValue('edit-target@example.com')
 
   await page.getByLabel('New password').fill('brand-new-password-456')
   await page.getByRole('button', { name: /reset password/i }).click()

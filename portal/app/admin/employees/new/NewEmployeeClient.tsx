@@ -94,6 +94,13 @@ export default function NewEmployeeClient({
           </div>
 
           <div>
+            <label htmlFor="personalEmail" className={labelClass}>
+              Personal email (for password recovery)
+            </label>
+            <input id="personalEmail" name="personalEmail" type="email" className={input} />
+          </div>
+
+          <div>
             <label htmlFor="joinDate" className={labelClass}>
               Join date
             </label>

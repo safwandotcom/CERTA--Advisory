@@ -45,6 +45,7 @@ export async function createEmployeeAction(
       role,
       departmentId,
       contactInfo: String(formData.get('contactInfo') ?? '') || undefined,
+      personalEmail: String(formData.get('personalEmail') ?? '') || undefined,
       joinDate: String(formData.get('joinDate') ?? '') || undefined,
     })
   } catch (err) {

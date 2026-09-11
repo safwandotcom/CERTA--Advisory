@@ -39,6 +39,7 @@ export async function updateEmployeeAction(
       position: String(formData.get('position') ?? '') || null,
       department_id: newDepartmentId,
       contact_info: String(formData.get('contactInfo') ?? '') || null,
+      personal_email: String(formData.get('personalEmail') ?? '') || null,
       join_date: String(formData.get('joinDate') ?? '') || null,
       status: formData.get('status') === 'inactive' ? 'inactive' : 'active',
     })

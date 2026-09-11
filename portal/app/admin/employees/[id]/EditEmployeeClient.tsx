@@ -35,6 +35,7 @@ type Employee = {
   position: string | null
   department_id: string | null
   contact_info: string | null
+  personal_email: string | null
   join_date: string | null
   status: 'active' | 'inactive'
   role: 'superadmin' | 'admin' | 'manager' | 'employee'
@@ -241,6 +242,19 @@ export default function EditEmployeeClient({ id }: { id: string }) {
                 id="contactInfo"
                 name="contactInfo"
                 defaultValue={employee.contact_info ?? ''}
+                className={input}
+              />
+            </div>
+
+            <div>
+              <label htmlFor="personalEmail" className={labelClass}>
+                Personal email (for password recovery)
+              </label>
+              <input
+                id="personalEmail"
+                name="personalEmail"
+                type="email"
+                defaultValue={employee.personal_email ?? ''}
                 className={input}
               />
             </div>
