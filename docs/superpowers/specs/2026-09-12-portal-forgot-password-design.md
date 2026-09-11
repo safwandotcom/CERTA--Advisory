@@ -3,6 +3,18 @@
 **Date:** 2026-09-12
 **Status:** Approved for planning
 
+**Revision note (2026-09-12):** the original version of this spec added a
+new `employees.personal_email` column as the sole source of the recovery
+address for every account. While writing the implementation plan we found
+`employee_onboarding.personal_email` — a `required` field every
+`employee`/`manager` already fills in during onboarding (`app/onboarding/OnboardingForm.tsx`).
+Only `admin`/`superadmin` accounts skip onboarding entirely (see
+`middleware.ts`'s onboarding-gate comment), so they're the only roles
+actually missing a personal email. This version replaces the single-source
+design with a two-source lookup — see "Personal email source" below — to
+avoid asking already-onboarded employees to re-enter an email they've
+already given us.
+
 ## Context
 
 The CERTA& Advisory portal (`portal/`, Next.js + Supabase Auth) has no self-service
@@ -41,15 +53,29 @@ projects.
 New migration (next number after `0020_tighten_rls_policies.sql`, so
 `0021_...`), adding two nullable columns to `employees`:
 
-- `personal_email text` — the real address recovery links get sent to.
-  Nullable: an employee with none set simply can't self-serve yet (falls back
-  to the existing admin-reset path).
+- `personal_email text` — admin-set recovery address, only actually needed
+  for `admin`/`superadmin` accounts (see "Personal email source" below).
+  Nullable: an admin/superadmin with none set simply can't self-serve yet
+  (falls back to the existing admin-reset path — circular only if *every*
+  admin account is both locked out and missing this field).
 - `last_recovery_requested_at timestamptz` — throttle marker, see Error
   handling.
 
 No format validation at the DB level (a `check` constraint on email shape is
 easy to get wrong and this is a low-stakes internal field); the admin-facing
 input uses `type="email"` for basic browser-level validation.
+
+### Personal email source
+
+Two sources, preferring the more specific one:
+
+1. `employees.personal_email` if set (new column, admin-editable — the only
+   option for `admin`/`superadmin`, who never have an onboarding row).
+2. Else `employee_onboarding.personal_email` for that employee (existing,
+   required field — already populated for every `employee`/`manager` who's
+   completed onboarding).
+3. Else: no recovery address on file, falls back to the generic
+   no-op response (see Error handling).
 
 ### Admin UI
 
@@ -58,9 +84,15 @@ existing "Contact info" field on both:
 - `app/admin/employees/[id]/EditEmployeeClient.tsx` + its `actions.ts` (edit)
 - `app/admin/employees/new/NewEmployeeClient.tsx` + its `actions.ts` (create)
 
-No new page. `scripts/export-roster.ts` gets `personal_email` added to its
-output columns so `npm run roster:export` doubles as a quick way to see who
-still needs one backfilled.
+Since `employee`/`manager` accounts already get their personal email from
+onboarding, this field is primarily for `admin`/`superadmin` rows — but it's
+left editable for any role as a manual override (e.g. an employee whose
+onboarding email bounces).
+
+No new page. `scripts/export-roster.ts` gets a `personal_email` column added
+to its output — resolved the same way (employees override, else onboarding)
+— so `npm run roster:export` doubles as a quick way to see who still needs
+one backfilled.
 
 ### Email delivery — Resend
 
@@ -80,9 +112,11 @@ Login page ("Forgot password?" link)
   → /forgot-password  (employee types Employee ID, submits)
   → forgotPasswordAction (server action):
       - look up employees row by employee_id
+      - resolve recovery address: employees.personal_email, else
+        employee_onboarding.personal_email for that employee, else none
       - ALWAYS returns the same generic message, regardless of outcome:
         "If that Employee ID has a recovery email on file, we've sent a reset link."
-      - if found, has personal_email, and not inside the 2-minute throttle:
+      - if a recovery address resolved and not inside the 2-minute throttle:
           - admin.auth.admin.generateLink({ type: 'recovery', email: <synthetic auth email> })
           - build our own link from the response's token_hash:
               https://portal.certaadvisory.com/auth/confirm?token_hash=...&type=recovery&next=/reset-password
@@ -128,7 +162,7 @@ Login page ("Forgot password?" link)
 | Case | Behavior |
 |---|---|
 | Employee ID doesn't exist | Generic success message, nothing sent |
-| Employee exists, no `personal_email` set | Generic success message, nothing sent |
+| Employee exists, no recovery address resolves (neither source set) | Generic success message, nothing sent |
 | Throttled (< 2 min since last send) | Generic success message, nothing sent |
 | Resend API call fails | Generic success message shown to user regardless (don't leak delivery failures); error logged server-side for follow-up |
 | Recovery link expired/already used | `/auth/confirm` redirects to `/forgot-password` with a visible "That link expired — request a new one" notice (this one *is* shown, since by this point the person has already proven Employee ID + email-inbox access) |
