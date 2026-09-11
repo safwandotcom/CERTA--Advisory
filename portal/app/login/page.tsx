@@ -1,6 +1,7 @@
 'use client'
 
 import { useActionState } from 'react'
+import Link from 'next/link'
 import Image from 'next/image'
 import { AlertCircle } from 'lucide-react'
 import { loginAction, type LoginState } from './actions'
@@ -58,6 +59,15 @@ export default function LoginPage() {
               autoComplete="current-password"
               className={input}
             />
+          </div>
+
+          <div className="-mt-2 text-right">
+            <Link
+              href="/forgot-password"
+              className="text-[0.8125rem] font-semibold text-certa-green-deep hover:underline"
+            >
+              Forgot password?
+            </Link>
           </div>
 
           {state.error && (
