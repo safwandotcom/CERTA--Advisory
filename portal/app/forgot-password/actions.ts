@@ -29,8 +29,11 @@ export async function requestPasswordRecoveryAction(
 
     // Escape ILIKE/PostgREST wildcards (%, _, *) in the user's input so this
     // stays a literal case-insensitive match, not a wildcard pattern that
-    // could match an unrelated real account.
-    const escapedEmployeeId = employeeId.replace(/[%_*]/g, '\\$&')
+    // could match an unrelated real account. Backslash must be escaped
+    // FIRST: escaping % _ * alone is bypassable by a user-supplied
+    // backslash immediately before one of them (e.g. "1\%") neutralizing
+    // the inserted escape and restoring an active wildcard.
+    const escapedEmployeeId = employeeId.replace(/\\/g, '\\\\').replace(/[%_*]/g, '\\$&')
 
     const { data: employee } = await admin
       .from('employees')

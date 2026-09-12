@@ -188,6 +188,26 @@ describe('requestPasswordRecoveryAction', () => {
     expect(updateMock).toHaveBeenCalled()
   })
 
+  it('escapes ILIKE wildcards, including a user-supplied backslash that would otherwise neutralize the escape', async () => {
+    // A naive escape (replace % _ * with \% \_ \*, without first escaping any
+    // backslash already in the input) is bypassable: input "1\%" would
+    // become "1\\%" -- Postgres reads the doubled backslash as one literal
+    // backslash, leaving the trailing % as an active wildcard again. The
+    // fix escapes backslash first, so "1\%" (3 raw chars: 1, \, %) must
+    // become the 5-char literal-escaped pattern 1 \ \ \ % -- which Postgres
+    // parses back down to the literal 3-char string "1\%", not a wildcard.
+    const { admin } = makeAdmin({ employee: { data: null, error: null } })
+    createAdminClientMock.mockReturnValue(admin)
+    const ilikeMock = admin.from('employees').ilike as ReturnType<typeof vi.fn>
+    ilikeMock.mockClear()
+
+    const rawInput = '1' + '\\' + '%' // "1\%" -- 3 characters: 1, \, %
+    await requestPasswordRecoveryAction({}, formDataFor(rawInput))
+
+    const expectedEscaped = '1' + '\\' + '\\' + '\\' + '%' // 5 characters: 1 \ \ \ %
+    expect(ilikeMock).toHaveBeenCalledWith('employee_id', expectedEscaped)
+  })
+
   it('sends the recovery email with the resolved address and reset link, and stamps the throttle, on full success', async () => {
     sendRecoveryEmailMock.mockResolvedValue({})
     const { admin, updateMock } = makeAdmin({
